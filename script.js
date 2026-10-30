@@ -264,6 +264,92 @@ function startFullTestTimer() {
 
 $("startFullTest").addEventListener("click", startFullTest);
 
+function renderFullTestQuestion() {
+  const item = fullTestQuestions[fullTestIndex];
+
+  $("quizTitle").textContent = "Full-Length MDCAT Test";
+  $("questionCount").textContent =
+    `Question ${fullTestIndex + 1} of ${fullTestQuestions.length}`;
+
+  $("questionText").textContent = item.q;
+  $("options").innerHTML = "";
+  $("feedback").textContent = "";
+
+  $("progressPercent").textContent =
+    `${Math.round((fullTestIndex + 1) / fullTestQuestions.length * 100)}%`;
+
+  $("progressBar").style.width =
+    `${(fullTestIndex + 1) / fullTestQuestions.length * 100}%`;
+
+  item.o.forEach((option, index) => {
+    const button = document.createElement("button");
+    button.className = "option";
+    button.type = "button";
+    button.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+
+    if (fullTestAnswers[fullTestIndex] === index) {
+      button.classList.add("selected");
+    }
+
+    button.addEventListener("click", () => {
+      fullTestAnswers[fullTestIndex] = index;
+      renderFullTestQuestion();
+    });
+
+    $("options").appendChild(button);
+  });
+
+  $("scoreText").textContent =
+    `Answered: ${Object.keys(fullTestAnswers).length}`;
+
+  $("nextQuestion").disabled = false;
+  $("nextQuestion").textContent =
+    fullTestIndex === fullTestQuestions.length - 1
+      ? "Submit Test"
+      : "Next Question";
+}
+
+function nextFullTestQuestion() {
+  if (fullTestIndex < fullTestQuestions.length - 1) {
+    fullTestIndex++;
+    renderFullTestQuestion();
+  } else {
+    submitFullTest();
+  }
+}
+
+function submitFullTest() {
+  clearInterval(fullTestTimer);
+
+  fullTestScore = fullTestQuestions.reduce((score, question, index) => {
+    return score + (fullTestAnswers[index] === question.a ? 1 : 0);
+  }, 0);
+
+  const total = fullTestQuestions.length;
+  const percentage = Math.round((fullTestScore / total) * 100);
+
+  isFullTest = false;
+  $("quizArea").classList.add("hidden");
+  $("quizResult").classList.remove("hidden");
+
+  $("quizResult").innerHTML = `
+    <h3>Full Test Completed!</h3>
+    <strong>${fullTestScore} / ${total}</strong>
+    <p>Percentage: ${percentage}%</p>
+    <p>Unanswered: ${total - Object.keys(fullTestAnswers).length}</p>
+    <button class="btn btn-primary" id="fullTestAgain">
+      Back to Quiz
+    </button>
+  `;
+
+  $("fullTestAgain").addEventListener("click", () => {
+    $("quizResult").classList.add("hidden");
+    $("fullTestSetup").classList.remove("hidden");
+    $("fullTestMessage").textContent = "";
+    resetQuiz();
+  });
+}
+
 /* UPDATES */
 /* FULL LENGTH TEST QUESTION SYSTEM */
 
