@@ -17,7 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 /* APNA ADMIN UID YAHAN PASTE KAREIN */
-const ADMIN_UID = "PASTE_YOUR_ADMIN_UID_HERE";
+const ADMIN_UID = JIiL8pKKWQbzNJuUR9mvrp0tGhr1;
 
 /* SAMPLE QUIZ QUESTIONS */
 const sampleQuizData = {
