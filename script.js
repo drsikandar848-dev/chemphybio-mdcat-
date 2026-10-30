@@ -211,6 +211,68 @@ async function loadQuestions() fullTestQuestionBank = structuredClone(onlineQues
 }
 
 /* UPDATES */
+/* FULL LENGTH TEST QUESTION SYSTEM */
+
+const testDistributions = {
+  100: {
+    Biology: 45,
+    Chemistry: 25,
+    Physics: 20,
+    English: 5,
+    "Logical Reasoning": 5
+  },
+  180: {
+    Biology: 81,
+    Chemistry: 45,
+    Physics: 36,
+    English: 9,
+    "Logical Reasoning": 9
+  }
+};
+
+function shuffleQuestions(array) {
+  const shuffled = [...array];
+
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  return shuffled;
+}
+
+function createFullTestQuestions(total) {
+  const distribution = testDistributions[total];
+
+  if (!distribution) return null;
+
+  const testQuestions = [];
+
+  for (const subject in distribution) {
+    const required = distribution[subject];
+    const available = fullTestQuestionBank[subject] || [];
+
+    if (available.length < required) {
+      return {
+        error: `${subject}: ${required} required, ${available.length} available.`
+      };
+    }
+
+    const selected = shuffleQuestions(available).slice(0, required);
+
+    selected.forEach(question => {
+      testQuestions.push({
+        ...question,
+        subject
+      });
+    });
+  }
+
+  return {
+    questions: shuffleQuestions(testQuestions)
+  };
+}
+
 function renderUpdates() {
   $("updatesList").innerHTML = "";
 
