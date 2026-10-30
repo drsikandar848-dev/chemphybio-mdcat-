@@ -8,3 +8,91 @@
 body.urdu{font-family:"Noto Nastaliq Urdu","DM Sans",sans-serif}body.urdu .hero h1,body.urdu h2,body.urdu h3,body.urdu p,body.urdu nav,body.urdu button,body.urdu label{line-height:1.9}body.urdu .hero h1{letter-spacing:0;font-size:clamp(34px,4.5vw,55px)}body.urdu .section-heading h2{letter-spacing:0}body.urdu .announcement-urdu{display:none}
 @media(max-width:850px){.site-header{padding:0 22px}nav{gap:15px}nav a{font-size:11px}.hero{padding:65px 6vw;grid-template-columns:1fr .8fr}.hero-art{transform:scale(.85)}.section,.quiz-section{padding:65px 6vw}.subject-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.announcement{font-size:10px}.announcement-urdu{display:none}.site-header{height:66px}.menu-toggle{display:block;margin-left:auto;margin-right:12px}nav{display:none;position:absolute;top:66px;left:0;right:0;background:#fff;padding:17px 24px 22px;box-shadow:0 15px 20px #142b4615;flex-direction:column;align-items:flex-start;gap:17px}nav.open{display:flex}nav a{font-size:13px}.language-btn{padding:8px 11px}.hero{display:block;padding:55px 25px 25px}.hero h1{font-size:43px;letter-spacing:-2px}.hero-content>p{font-size:14px}.hero-art{height:285px;margin-top:12px;transform:scale(.82)}.stats{padding:21px 10px}.stats strong{font-size:21px}.stats span{font-size:9px}.section,.quiz-section{padding:56px 22px}.section-heading{display:block}.section-heading h2{font-size:27px}.section-heading>p{margin-top:10px;line-height:1.6}.subject-grid{grid-template-columns:1fr;gap:11px}.subject-card{min-height:0;padding:19px}.subject-card p{min-height:0}.quiz-panel{padding:18px}.options{grid-template-columns:1fr}.quiz-controls{align-items:flex-start;flex-direction:column}.quiz-controls select{width:100%}.quiz-footer{gap:10px}.quiz-footer .btn{padding:11px 13px}.updates-list{grid-template-columns:1fr}.about-section{padding:38px 23px;align-items:flex-start}.about-mark{width:48px;height:48px;min-width:48px;font-size:25px}.about-section h2{font-size:20px}footer{flex-wrap:wrap}footer p{order:3;width:100%;margin:0}.update-card{padding:15px}}
+/* ADMIN PANEL */
+.admin-section {
+  background: #f7f9fc;
+}
+
+.admin-section .quiz-panel {
+  max-width: 900px;
+}
+
+#adminLoginForm,
+#mcqForm {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+#adminLoginForm label,
+#mcqForm label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+#adminLoginForm input,
+#mcqForm input,
+#mcqForm select,
+#mcqForm textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dce5f0;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+#adminLoginForm input:focus,
+#mcqForm input:focus,
+#mcqForm select:focus,
+#mcqForm textarea:focus {
+  outline: 2px solid #2864d733;
+  border-color: var(--blue);
+}
+
+#mcqForm textarea {
+  min-height: 85px;
+  resize: vertical;
+}
+
+#adminDashboard h3 {
+  color: var(--navy);
+  margin-top: 24px;
+}
+
+#adminMcqList {
+  display: grid;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.admin-mcq-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+
+.admin-mcq-card p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.admin-mcq-card button {
+  margin: 5px 6px 0 0;
+}
+
+#adminMessage,
+#adminStatus {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media(max-width:640px) {
+  .admin-section .quiz-panel {
+    padding: 18px;
+  }
+}
