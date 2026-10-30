@@ -29,6 +29,80 @@
     <button class="language-btn" id="languageToggle" type="button">اردو</button>
   </header>
 
+<section class="section admin-section" id="adminPanel">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">ADMINISTRATION</span>
+      <h2>Admin Dashboard</h2>
+    </div>
+    <p>Manage your MDCAT learning content.</p>
+  </div>
+
+  <div class="quiz-panel">
+    <div id="adminLogin">
+      <h3>Admin Login</h3>
+      <form id="adminLoginForm">
+        <label for="adminEmail">Email</label>
+        <input id="adminEmail" type="email" required>
+        <label for="adminPassword">Password</label>
+        <input id="adminPassword" type="password" required>
+        <button class="btn btn-primary" type="submit">Login</button>
+        <p id="adminMessage" aria-live="polite"></p>
+      </form>
+    </div>
+
+    <div id="adminDashboard" class="hidden">
+      <h3>Manage MCQs</h3>
+      <button class="btn btn-outline" id="adminLogout" type="button">Logout</button>
+
+      <form id="mcqForm">
+        <input type="hidden" id="mcqId">
+        <label for="mcqSubject">Subject</label>
+        <select id="mcqSubject" required>
+          <option>Biology</option>
+          <option>Chemistry</option>
+          <option>Physics</option>
+          <option>English</option>
+          <option>Logical Reasoning</option>
+        </select>
+
+        <label for="mcqQuestion">Question</label>
+        <textarea id="mcqQuestion" required></textarea>
+
+        <label for="mcqOption0">Option A</label>
+        <input id="mcqOption0" required>
+
+        <label for="mcqOption1">Option B</label>
+        <input id="mcqOption1" required>
+
+        <label for="mcqOption2">Option C</label>
+        <input id="mcqOption2" required>
+
+        <label for="mcqOption3">Option D</label>
+        <input id="mcqOption3" required>
+
+        <label for="mcqAnswer">Correct Answer</label>
+        <select id="mcqAnswer" required>
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+          <option value="3">D</option>
+        </select>
+
+        <label for="mcqExplanation">Explanation</label>
+        <textarea id="mcqExplanation"></textarea>
+
+        <button class="btn btn-primary" type="submit" id="saveMcq">Save MCQ</button>
+        <button class="btn btn-outline" type="button" id="cancelEdit">Cancel</button>
+      </form>
+
+      <h3>Existing Questions</h3>
+      <div id="adminMcqList"></div>
+      <p id="adminStatus" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
   <main>
     <section class="hero" id="home">
       <div class="hero-content">
