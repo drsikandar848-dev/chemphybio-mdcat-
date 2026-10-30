@@ -63,6 +63,13 @@ let answered = false;
 let language = "en";
 let editingQuestionId = null;
 let fullTestQuestionBank = {};
+let isFullTest = false;
+let fullTestQuestions = [];
+let fullTestIndex = 0;
+let fullTestScore = 0;
+let fullTestAnswers = {};
+let fullTestTimeLeft = 0;
+let fullTestTimer = null;
 const $ = id => document.getElementById(id);
 const subjectSelect = $("subjectSelect");
 
