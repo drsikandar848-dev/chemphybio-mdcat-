@@ -62,7 +62,7 @@ let score = 0;
 let answered = false;
 let language = "en";
 let editingQuestionId = null;
-
+let fullTestQuestionBank = {};
 const $ = id => document.getElementById(id);
 const subjectSelect = $("subjectSelect");
 
