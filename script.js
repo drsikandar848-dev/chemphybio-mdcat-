@@ -217,6 +217,53 @@ async function loadQuestions() fullTestQuestionBank = structuredClone(onlineQues
   }
 }
 
+function startFullTest() {
+  const total = Number($("testModeSelect").value);
+  const result = createFullTestQuestions(total);
+
+  if (result.error) {
+    $("fullTestMessage").textContent =
+      "Not enough MCQs. " + result.error;
+    return;
+  }
+
+  fullTestQuestions = result.questions;
+  fullTestIndex = 0;
+  fullTestScore = 0;
+  fullTestAnswers = {};
+  fullTestTimeLeft = total * 60;
+  isFullTest = true;
+
+  $("fullTestMessage").textContent = "";
+  $("quizTitle").textContent = total + " MCQs Full Test";
+  $("fullTestSetup").classList.add("hidden");
+  $("quizResult").classList.add("hidden");
+  $("quizArea").classList.remove("hidden");
+
+  renderFullTestQuestion();
+  startFullTestTimer();
+}
+
+function startFullTestTimer() {
+  clearInterval(fullTestTimer);
+
+  fullTestTimer = setInterval(() => {
+    fullTestTimeLeft--;
+
+    const minutes = Math.floor(fullTestTimeLeft / 60);
+    const seconds = fullTestTimeLeft % 60;
+
+    $("fullTestMessage").textContent =
+      `Time left: ${minutes}:${String(seconds).padStart(2, "0")}`;
+
+    if (fullTestTimeLeft <= 0) {
+      submitFullTest();
+    }
+  }, 1000);
+}
+
+$("startFullTest").addEventListener("click", startFullTest);
+
 /* UPDATES */
 /* FULL LENGTH TEST QUESTION SYSTEM */
 
