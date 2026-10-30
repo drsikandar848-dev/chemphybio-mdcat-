@@ -177,7 +177,7 @@ document.querySelectorAll(".subject-quiz").forEach(button => {
 });
 
 /* LOAD QUESTIONS FROM FIRESTORE */
-async function loadQuestions() {
+async function loadQuestions() fullTestQuestionBank = structuredClone(onlineQuestions);{
   try {
     const snapshot = await getDocs(collection(db, "questions"));
     const onlineQuestions = {};
