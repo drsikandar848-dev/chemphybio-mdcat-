@@ -144,6 +144,18 @@
       <div class="quiz-panel">
         <div class="quiz-top"><div><span class="quiz-label">CHEMPHYBIO / PRACTICE</span><h3 id="quizTitle">Biology Quick Quiz</h3></div><span class="free-pill">FREE</span></div>
         <div class="quiz-controls"><label for="subjectSelect" data-en="Select subject" data-ur="مضمون منتخب کریں">Select subject</label><select id="subjectSelect"><option>Biology</option><option>Chemistry</option><option>Physics</option><option>English</option><option>Logical Reasoning</option></select></div>
+<div id="fullTestSetup" class="quiz-controls">
+  <label for="testModeSelect">Choose Full-Length Test</label>
+  <select id="testModeSelect">
+    <option value="100">100 MCQs — 100 Minutes</option>
+    <option value="180">180 MCQs — 180 Minutes</option>
+  </select>
+  <button class="btn btn-primary" id="startFullTest" type="button">
+    Start Full-Length Test
+  </button>
+  <p id="fullTestMessage" aria-live="polite"></p>
+</div>
+
         <div id="quizArea">
           <div class="quiz-progress-row"><span id="questionCount">Question 1 of 3</span><span id="progressPercent">33%</span></div>
           <div class="progress-track"><div id="progressBar"></div></div>
