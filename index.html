@@ -1,186 +1,478 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CHEMPHYBIO MDCAT — free MDCAT quizzes, chapter practice and verified updates.">
   <meta name="theme-color" content="#102b50">
+  <meta name="description" content="CHEMPHYBIO MDCAT — free MDCAT quizzes, chapter practice and updates.">
   <title>CHEMPHYBIO MDCAT | Free MDCAT Preparation</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="announcement"><span class="live-dot"></span> Free MDCAT practice for every student <span class="announcement-urdu" lang="ur">ہر طالب علم کے لیے مفت تیاری</span></div>
+
+  <!-- ANNOUNCEMENT -->
+  <div class="announcement">
+    <p>Free MDCAT practice for every student</p>
+    <p lang="ur">ہر طالب علم کے لیے مفت MDCAT تیاری</p>
+  </div>
+
+  <!-- HEADER -->
   <header class="site-header">
-    <a class="brand" href="#home" aria-label="CHEMPHYBIO MDCAT home">
-      <span class="brand-mark">C<span>+</span></span>
-      <span class="brand-copy"><strong>CHEMPHYBIO</strong><small>MDCAT PREPARATION</small></span>
-    </a>
-    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation">☰</button>
-    <nav id="mainNav">
-      <a href="#home" data-en="Home" data-ur="صفحۂ اول">Home</a>
-      <a href="#subjects" data-en="Subjects" data-ur="مضامین">Subjects</a>
-      <a href="#quiz" data-en="Free Quiz" data-ur="مفت کوئز">Free Quiz</a>
-      <a href="#updates" data-en="Updates" data-ur="تازہ خبریں">Updates</a>
-      <a href="#about" data-en="About" data-ur="تعارف">About</a>
-    </nav>
-    <button class="language-btn" id="languageToggle" type="button">اردو</button>
+    <div class="container nav-container">
+
+      <a href="#home" class="brand">
+        <span class="brand-mark">CB</span>
+        <span>
+          <strong>CHEMPHYBIO</strong>
+          <small>MDCAT PREPARATION</small>
+        </span>
+      </a>
+
+      <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu">
+        ☰
+      </button>
+
+      <nav id="navLinks" class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#practice">Practice</a>
+        <a href="#fullTest">Full Test</a>
+        <a href="#updates">Updates</a>
+        <a href="#about">About</a>
+        <button id="languageToggle" type="button">اردو / English</button>
+      </nav>
+
+    </div>
   </header>
 
-<section class="section admin-section" id="adminPanel">
-  <div class="section-heading">
-    <div>
-      <span class="section-kicker">ADMINISTRATION</span>
-      <h2>Admin Dashboard</h2>
-    </div>
-    <p>Manage your MDCAT learning content.</p>
-  </div>
-
-  <div class="quiz-panel">
-    <div id="adminLogin">
-      <h3>Admin Login</h3>
-      <form id="adminLoginForm">
-        <label for="adminEmail">Email</label>
-        <input id="adminEmail" type="email" required>
-        <label for="adminPassword">Password</label>
-        <input id="adminPassword" type="password" required>
-        <button class="btn btn-primary" type="submit">Login</button>
-        <p id="adminMessage" aria-live="polite"></p>
-      </form>
-    </div>
-
-    <div id="adminDashboard" class="hidden">
-      <h3>Manage MCQs</h3>
-      <button class="btn btn-outline" id="adminLogout" type="button">Logout</button>
-
-      <form id="mcqForm">
-        <input type="hidden" id="mcqId">
-        <label for="mcqSubject">Subject</label>
-        <select id="mcqSubject" required>
-          <option>Biology</option>
-          <option>Chemistry</option>
-          <option>Physics</option>
-          <option>English</option>
-          <option>Logical Reasoning</option>
-        </select>
-
-        <label for="mcqQuestion">Question</label>
-        <textarea id="mcqQuestion" required></textarea>
-
-        <label for="mcqOption0">Option A</label>
-        <input id="mcqOption0" required>
-
-        <label for="mcqOption1">Option B</label>
-        <input id="mcqOption1" required>
-
-        <label for="mcqOption2">Option C</label>
-        <input id="mcqOption2" required>
-
-        <label for="mcqOption3">Option D</label>
-        <input id="mcqOption3" required>
-
-        <label for="mcqAnswer">Correct Answer</label>
-        <select id="mcqAnswer" required>
-          <option value="0">A</option>
-          <option value="1">B</option>
-          <option value="2">C</option>
-          <option value="3">D</option>
-        </select>
-
-        <label for="mcqExplanation">Explanation</label>
-        <textarea id="mcqExplanation"></textarea>
-
-        <button class="btn btn-primary" type="submit" id="saveMcq">Save MCQ</button>
-        <button class="btn btn-outline" type="button" id="cancelEdit">Cancel</button>
-      </form>
-
-      <h3>Existing Questions</h3>
-      <div id="adminMcqList"></div>
-      <p id="adminStatus" aria-live="polite"></p>
-    </div>
-  </div>
-</section>
-
   <main>
-    <section class="hero" id="home">
-      <div class="hero-content">
-        <div class="eyebrow"><span></span><span data-en="YOUR MDCAT JOURNEY STARTS HERE" data-ur="آپ کے MDCAT سفر کا آغاز یہاں سے">YOUR MDCAT JOURNEY STARTS HERE</span></div>
-        <h1 data-en="Prepare smarter.<br><em>Achieve your dream.</em>" data-ur="بہتر تیاری کریں۔<br><em>اپنا خواب پورا کریں۔</em>">Prepare smarter.<br><em>Achieve your dream.</em></h1>
-        <p data-en="Free chapter-wise quizzes, practice questions and useful MDCAT updates — all in one place." data-ur="مفت باب وار کوئزز، پریکٹس سوالات اور اہم MDCAT اپڈیٹس — سب ایک جگہ۔">Free chapter-wise quizzes, practice questions and useful MDCAT updates — all in one place.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#quiz" data-en="Start free quiz →" data-ur="مفت کوئز شروع کریں ←">Start free quiz →</a>
-          <a class="btn btn-outline" href="#subjects" data-en="Explore subjects" data-ur="مضامین دیکھیں">Explore subjects</a>
+
+    <!-- HERO -->
+    <section id="home" class="hero-section">
+      <div class="container hero-content">
+
+        <div class="hero-text">
+          <span class="eyebrow">YOUR MDCAT LEARNING PARTNER</span>
+
+          <h1>Prepare smarter.<br>Achieve your medical dreams.</h1>
+
+          <p>
+            Practice Biology, Chemistry, Physics, English and Logical Reasoning
+            with free chapter-wise quizzes and tests.
+          </p>
+
+          <p lang="ur">
+            اپنے میڈیکل کے خواب کو حقیقت بنانے کے لیے آج ہی تیاری شروع کریں۔
+          </p>
+
+          <div class="hero-actions">
+            <a href="#subjects" class="btn btn-primary">Start Preparation</a>
+            <a href="#fullTest" class="btn btn-outline">Take Full Test</a>
+          </div>
         </div>
-        <div class="hero-note"><span>✓</span><span data-en="Free to use · Mobile friendly · Student focused" data-ur="مفت استعمال · موبائل کے لیے موزوں · طلبہ کے لیے">Free to use · Mobile friendly · Student focused</span></div>
-      </div>
-      <div class="hero-art" aria-label="Science learning illustration">
-        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-        <div class="science-card"><div class="science-icon">⚛</div><small>SCIENCE • LEARNING • SUCCESS</small><strong>YOUR FUTURE<br>IN MEDICINE</strong><div class="mini-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-        <span class="float-chip chip-bio">🧬 Biology</span><span class="float-chip chip-chem">⚗ Chemistry</span><span class="float-chip chip-physics">∑ Physics</span>
-      </div>
-    </section>
 
-    <section class="stats">
-      <div><strong>05</strong><span data-en="Study areas" data-ur="مطالعے کے شعبے">Study areas</span></div>
-      <div><strong>24/7</strong><span data-en="Learn anytime" data-ur="کسی بھی وقت سیکھیں">Learn anytime</span></div>
-      <div><strong>100%</strong><span data-en="Free access" data-ur="مفت رسائی">Free access</span></div>
-    </section>
-
-    <section class="section" id="subjects">
-      <div class="section-heading"><div><span class="section-kicker" data-en="WHAT YOU CAN STUDY" data-ur="آپ کیا پڑھ سکتے ہیں">WHAT YOU CAN STUDY</span><h2 data-en="Explore your subjects" data-ur="اپنے مضامین منتخب کریں">Explore your subjects</h2></div><p data-en="Build your concepts one chapter at a time." data-ur="ہر باب کے ساتھ اپنے تصورات مضبوط بنائیں۔">Build your concepts one chapter at a time.</p></div>
-      <div class="subject-grid">
-        <article class="subject-card bio"><div class="subject-icon">🧬</div><span class="subject-tag">01 / BIOLOGY</span><h3>Biology</h3><p data-en="Explore life, cells, genetics and the human body." data-ur="زندگی، خلیات، جینیات اور انسانی جسم کا مطالعہ۔">Explore life, cells, genetics and the human body.</p><button class="text-link subject-quiz" data-subject="Biology" data-en="Practice Biology →" data-ur="بائیولوجی پریکٹس کریں ←">Practice Biology →</button></article>
-        <article class="subject-card chem"><div class="subject-icon">⚗️</div><span class="subject-tag">02 / CHEMISTRY</span><h3>Chemistry</h3><p data-en="Understand atoms, reactions and chemical concepts." data-ur="ایٹم، کیمیائی تعاملات اور تصورات سمجھیں۔">Understand atoms, reactions and chemical concepts.</p><button class="text-link subject-quiz" data-subject="Chemistry" data-en="Practice Chemistry →" data-ur="کیمسٹری پریکٹس کریں ←">Practice Chemistry →</button></article>
-        <article class="subject-card physics"><div class="subject-icon">⚡</div><span class="subject-tag">03 / PHYSICS</span><h3>Physics</h3><p data-en="Practice motion, energy, waves and electricity." data-ur="حرکت، توانائی، لہروں اور بجلی کی پریکٹس۔">Practice motion, energy, waves and electricity.</p><button class="text-link subject-quiz" data-subject="Physics" data-en="Practice Physics →" data-ur="فزکس پریکٹس کریں ←">Practice Physics →</button></article>
-        <article class="subject-card english"><div class="subject-icon">Aa</div><span class="subject-tag">04 / ENGLISH</span><h3>English</h3><p data-en="Improve grammar, vocabulary and comprehension." data-ur="گرامر، الفاظ اور فہمِ عبارت بہتر بنائیں۔">Improve grammar, vocabulary and comprehension.</p><button class="text-link subject-quiz" data-subject="English" data-en="Practice English →" data-ur="انگلش پریکٹس کریں ←">Practice English →</button></article>
-        <article class="subject-card logic"><div class="subject-icon">🧠</div><span class="subject-tag">05 / LOGICAL REASONING</span><h3>Logical Reasoning</h3><p data-en="Strengthen patterns, analysis and reasoning skills." data-ur="پیٹرن، تجزیے اور استدلال کی صلاحیت بہتر بنائیں۔">Strengthen patterns, analysis and reasoning skills.</p><button class="text-link subject-quiz" data-subject="Logical Reasoning" data-en="Practice reasoning →" data-ur="استدلال کی پریکٹس کریں ←">Practice reasoning →</button></article>
-      </div>
-    </section>
-
-    <section class="quiz-section" id="quiz">
-      <div class="section-heading"><div><span class="section-kicker" data-en="TEST YOUR KNOWLEDGE" data-ur="اپنا علم آزمائیں">TEST YOUR KNOWLEDGE</span><h2 data-en="Free practice quiz" data-ur="مفت پریکٹس کوئز">Free practice quiz</h2></div><p data-en="Choose a subject and try a sample question set." data-ur="مضمون منتخب کریں اور نمونہ سوالات حل کریں۔">Choose a subject and try a sample question set.</p></div>
-      <div class="quiz-panel">
-        <div class="quiz-top"><div><span class="quiz-label">CHEMPHYBIO / PRACTICE</span><h3 id="quizTitle">Biology Quick Quiz</h3></div><span class="free-pill">FREE</span></div>
-        <div class="quiz-controls"><label for="subjectSelect" data-en="Select subject" data-ur="مضمون منتخب کریں">Select subject</label><select id="subjectSelect"><option>Biology</option><option>Chemistry</option><option>Physics</option><option>English</option><option>Logical Reasoning</option></select></div>
-<div id="fullTestSetup" class="quiz-controls">
-  <label for="testModeSelect">Choose Full-Length Test</label>
-  <select id="testModeSelect">
-    <option value="100">100 MCQs — 100 Minutes</option>
-    <option value="180">180 MCQs — 180 Minutes</option>
-  </select>
-  <button class="btn btn-primary" id="startFullTest" type="button">
-    Start Full-Length Test
-  </button>
-  <p id="fullTestMessage" aria-live="polite"></p>
-</div>
-
-        <div id="quizArea">
-          <div class="quiz-progress-row"><span id="questionCount">Question 1 of 3</span><span id="progressPercent">33%</span></div>
-          <div class="progress-track"><div id="progressBar"></div></div>
-          <h4 id="questionText">Loading question…</h4>
-          <div id="options" class="options"></div>
-          <div id="feedback" class="feedback" aria-live="polite"></div>
-          <div class="quiz-footer"><span id="scoreText">Score: 0</span><button class="btn btn-primary" id="nextQuestion" disabled>Next question →</button></div>
+        <div class="hero-card">
+          <div class="hero-card-icon">🎓</div>
+          <h2 id="welcomeMessage">Welcome to CHEMPHYBIO MDCAT</h2>
+          <p>Learn • Practice • Improve</p>
+          <strong>100% Free Learning</strong>
         </div>
-        <div id="quizResult" class="quiz-result hidden"></div>
-        <p class="disclaimer" data-en="Practice questions are for learning and are not official MDCAT questions." data-ur="یہ پریکٹس سوالات سیکھنے کے لیے ہیں، سرکاری MDCAT سوالات نہیں۔">Practice questions are for learning and are not official MDCAT questions.</p>
+
       </div>
     </section>
 
-    <section class="section updates-section" id="updates">
-      <div class="section-heading"><div><span class="section-kicker" data-en="STAY INFORMED" data-ur="باخبر رہیں">STAY INFORMED</span><h2 data-en="MDCAT updates & notices" data-ur="MDCAT اپڈیٹس اور اعلانات">MDCAT updates & notices</h2></div><p data-en="Important information in one place." data-ur="اہم معلومات ایک جگہ۔">Important information in one place.</p></div>
-      <div id="updatesList" class="updates-list"></div>
-      <div class="notice-box"><span>ℹ</span><p data-en="Always confirm dates, eligibility and policies through the relevant official admitting university or authority." data-ur="تاریخوں، اہلیت اور پالیسیوں کی تصدیق متعلقہ سرکاری یونیورسٹی یا ادارے سے ضرور کریں۔">Always confirm dates, eligibility and policies through the relevant official admitting university or authority.</p></div>
+    <!-- STATS -->
+    <section class="stats-section">
+      <div class="container stats-grid">
+        <div class="stat-card">
+          <strong>05</strong>
+          <span>Subjects</span>
+        </div>
+        <div class="stat-card">
+          <strong>24/7</strong>
+          <span>Practice Access</span>
+        </div>
+        <div class="stat-card">
+          <strong>FREE</strong>
+          <span>Learning Platform</span>
+        </div>
+      </div>
     </section>
 
-    <section class="about-section" id="about">
-      <div class="about-mark">C<span>+</span></div><div><span class="section-kicker" data-en="ABOUT THE PLATFORM" data-ur="پلیٹ فارم کے بارے میں">ABOUT THE PLATFORM</span><h2>CHEMPHYBIO MDCAT</h2><p data-en="An independent learning project created to make MDCAT practice more accessible. Learn at your own pace with free sample quizzes and useful study information." data-ur="ایک آزاد تعلیمی منصوبہ جو MDCAT پریکٹس کو آسان بنانے کے لیے بنایا گیا ہے۔ مفت نمونہ کوئزز اور مفید معلومات کے ساتھ اپنی رفتار سے سیکھیں۔">An independent learning project created to make MDCAT practice more accessible. Learn at your own pace with free sample quizzes and useful study information.</p></div>
+    <!-- SUBJECTS -->
+    <section id="subjects" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">LEARN BY SUBJECT</span>
+          <h2>Choose Your Subject</h2>
+          <p>Start practicing with subject-based MCQs.</p>
+        </div>
+
+        <div class="subject-grid">
+
+          <button class="subject-card" type="button" data-subject="Biology">
+            <span class="subject-icon">🧬</span>
+            <h3>Biology</h3>
+            <p>Cell Biology, Genetics and more</p>
+          </button>
+
+          <button class="subject-card" type="button" data-subject="Chemistry">
+            <span class="subject-icon">⚗️</span>
+            <h3>Chemistry</h3>
+            <p>Organic, Physical and Inorganic</p>
+          </button>
+
+          <button class="subject-card" type="button" data-subject="Physics">
+            <span class="subject-icon">⚛️</span>
+            <h3>Physics</h3>
+            <p>Mechanics, Waves and Electricity</p>
+          </button>
+
+          <button class="subject-card" type="button" data-subject="English">
+            <span class="subject-icon">📘</span>
+            <h3>English</h3>
+            <p>Grammar and Vocabulary</p>
+          </button>
+
+          <button class="subject-card" type="button" data-subject="Logical Reasoning">
+            <span class="subject-icon">🧠</span>
+            <h3>Logical Reasoning</h3>
+            <p>Patterns and Problem Solving</p>
+          </button>
+
+        </div>
+      </div>
     </section>
+
+    <!-- QUICK PRACTICE -->
+    <section id="practice" class="section practice-section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">DAILY PRACTICE</span>
+          <h2>Quick Quiz</h2>
+          <p>Test your knowledge and improve your preparation.</p>
+        </div>
+
+        <div class="practice-panel">
+          <label for="subjectSelect">Select a subject</label>
+
+          <select id="subjectSelect">
+            <option value="All">All Subjects</option>
+            <option value="Biology">Biology</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Physics">Physics</option>
+            <option value="English">English</option>
+            <option value="Logical Reasoning">Logical Reasoning</option>
+          </select>
+
+          <button type="button" class="btn btn-primary" id="quickQuizStart"
+            onclick="document.getElementById('subjectSelect').dispatchEvent(new Event('change'))">
+            Start Quick Quiz
+          </button>
+        </div>
+
+        <div id="quizArea" class="quiz-area" hidden></div>
+
+      </div>
+    </section>
+
+    <!-- FULL TEST -->
+    <section id="fullTest" class="section full-test-section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">EXAM SIMULATION</span>
+          <h2>Full-Length Practice Test</h2>
+          <p>Attempt a mixed-subject practice test.</p>
+        </div>
+
+        <div class="full-test-panel">
+
+          <label for="testQuestionCount">Number of questions</label>
+          <select id="testQuestionCount">
+            <option value="100">100 Questions</option>
+            <option value="180">180 Questions</option>
+          </select>
+
+          <button type="button" id="startFullTest" class="btn btn-primary">
+            Start Full Test
+          </button>
+
+          <p class="small-note">
+            Practice test questions depend on the questions available in the database.
+          </p>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- AGGREGATE CALCULATOR -->
+    <section id="aggregate" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">ADMISSION PLANNING</span>
+          <h2>MDCAT Aggregate Calculator</h2>
+          <p>Enter your marks to calculate an estimated aggregate.</p>
+        </div>
+
+        <div class="calculator-panel">
+
+          <div class="calculator-grid">
+            <div>
+              <label for="matricMarks">Matric obtained marks</label>
+              <input id="matricMarks" type="number" min="0" placeholder="Obtained marks">
+            </div>
+
+            <div>
+              <label for="matricTotal">Matric total marks</label>
+              <input id="matricTotal" type="number" min="1" placeholder="Total marks">
+            </div>
+
+            <div>
+              <label for="fscMarks">FSc obtained marks</label>
+              <input id="fscMarks" type="number" min="0" placeholder="Obtained marks">
+            </div>
+
+            <div>
+              <label for="fscTotal">FSc total marks</label>
+              <input id="fscTotal" type="number" min="1" placeholder="Total marks">
+            </div>
+
+            <div>
+              <label for="mdcatMarks">MDCAT obtained marks</label>
+              <input id="mdcatMarks" type="number" min="0" placeholder="Obtained marks">
+            </div>
+
+            <div>
+              <label for="mdcatTotal">MDCAT total marks</label>
+              <input id="mdcatTotal" type="number" min="1" placeholder="Total marks">
+            </div>
+          </div>
+
+          <button type="button" id="calculateAggregate" class="btn btn-primary">
+            Calculate Aggregate
+          </button>
+
+          <h3 id="aggregateResult" aria-live="polite"></h3>
+
+          <p class="small-note">
+            The calculator currently uses example weights. Confirm the official
+            admission formula before relying on the result.
+          </p>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- POSTER AND ADVERTISEMENT -->
+    <section id="announcements" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">LATEST ANNOUNCEMENTS</span>
+          <h2>Posters & Advertisements</h2>
+        </div>
+
+        <div class="content-media-grid">
+
+          <div class="media-card">
+            <img id="posterImage" src="" alt="Latest CHEMPHYBIO poster" hidden>
+            <p>Latest educational poster</p>
+          </div>
+
+          <div class="media-card">
+            <img id="advertisementImage" src="" alt="Advertisement" hidden>
+            <p>Advertisement</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- UPDATES -->
+    <section id="updates" class="section updates-section">
+      <div class="container">
+
+        <div class="section-heading">
+          <span class="eyebrow">STAY INFORMED</span>
+          <h2>Latest MDCAT Updates</h2>
+          <p>Important announcements and preparation updates.</p>
+        </div>
+
+        <div id="updatesList" class="updates-grid">
+          <article class="update-card">
+            <span class="update-label">CHEMPHYBIO</span>
+            <h3>Welcome to our learning platform</h3>
+            <p>Stay connected for educational updates and practice material.</p>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section about-section">
+      <div class="container about-grid">
+
+        <div>
+          <span class="eyebrow">ABOUT THE PLATFORM</span>
+          <h2>About CHEMPHYBIO MDCAT</h2>
+
+          <p>
+            CHEMPHYBIO MDCAT is an educational platform designed to help
+            students practice important subjects through quizzes and tests.
+          </p>
+
+          <p lang="ur">
+            ہمارا مقصد طلبہ کو مفت اور آسان تعلیمی مواد فراہم کرنا ہے۔
+          </p>
+        </div>
+
+        <div class="admin-public-card">
+          <img id="adminPublicPhoto" src="" alt="Admin profile" hidden>
+          <h3 id="adminPublicName">Platform Admin</h3>
+          <p>Administrator — CHEMPHYBIO MDCAT</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- WHATSAPP COMMUNITY -->
+    <section class="section community-section">
+      <div class="container">
+        <h2>Join Our WhatsApp Community</h2>
+        <p>Connect with fellow students and receive educational updates.</p>
+        <a id="whatsappCommunity" href="#" target="_blank" rel="noopener noreferrer" hidden>
+          Join WhatsApp Community
+        </a>
+      </div>
+    </section>
+
   </main>
 
-  <footer><a class="brand footer-brand" href="#home"><span class="brand-mark">C<span>+</span></span><span class="brand-copy"><strong>CHEMPHYBIO</strong><small>MDCAT PREPARATION</small></span></a><p>© <span id="year"></span> CHEMPHYBIO MDCAT. Independent educational project.</p><a href="#home" class="back-top">Back to top ↑</a></footer>
+  <!-- ADMIN LOGIN AND DASHBOARD -->
+  <section id="adminPanel" class="section admin-section">
+    <div class="container">
+
+      <div class="section-heading">
+        <span class="eyebrow">RESTRICTED AREA</span>
+        <h2>Admin Panel</h2>
+        <p>Authorized administrator access only.</p>
+      </div>
+
+      <div class="admin-panel-card">
+
+        <form id="adminLoginForm">
+          <h3>Admin Login</h3>
+
+          <label for="adminEmail">Email address</label>
+          <input id="adminEmail" type="email" autocomplete="username"
+            placeholder="Admin email" required>
+
+          <label for="adminPassword">Password</label>
+          <input id="adminPassword" type="password"
+            autocomplete="current-password" placeholder="Password" required>
+
+          <button type="submit" class="btn btn-primary">Login</button>
+
+          <p id="adminMessage" aria-live="polite"></p>
+        </form>
+
+        <div id="adminDashboard" hidden>
+
+          <h2>Admin Dashboard</h2>
+
+          <div class="admin-form-card">
+            <h3>Add / Edit MCQ</h3>
+
+            <form id="mcqForm">
+
+              <label for="mcqSubject">Subject</label>
+              <select id="mcqSubject" required>
+                <option value="">Select subject</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics">Physics</option>
+                <option value="English">English</option>
+                <option value="Logical Reasoning">Logical Reasoning</option>
+              </select>
+
+              <label for="mcqChapter">Chapter</label>
+              <input id="mcqChapter" type="text" placeholder="Chapter name">
+
+              <label for="mcqQuestion">Question</label>
+              <textarea id="mcqQuestion" rows="3"
+                placeholder="Write your MCQ question" required></textarea>
+
+              <label for="mcqOption0">Option A</label>
+              <input id="mcqOption0" type="text" required>
+
+              <label for="mcqOption1">Option B</label>
+              <input id="mcqOption1" type="text" required>
+
+              <label for="mcqOption2">Option C</label>
+              <input id="mcqOption2" type="text" required>
+
+              <label for="mcqOption3">Option D</label>
+              <input id="mcqOption3" type="text" required>
+
+              <label for="mcqAnswer">Correct answer</label>
+              <select id="mcqAnswer" required>
+                <option value="">Select correct option</option>
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+
+              <label for="mcqExplanation">Explanation</label>
+              <textarea id="mcqExplanation" rows="3"
+                placeholder="Explain the correct answer"></textarea>
+
+              <button type="submit" class="btn btn-primary">Save MCQ</button>
+
+              <p id="adminStatus" aria-live="polite"></p>
+            </form>
+          </div>
+
+          <div class="admin-list-card">
+            <h3>Saved Questions</h3>
+            <div id="adminMcqList"></div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <a href="#home" class="footer-brand">CHEMPHYBIO MDCAT</a>
+      <p>Free learning. Better preparation. Brighter futures.</p>
+      <p>© <span id="currentYear">2026</span> CHEMPHYBIO MDCAT. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("currentYear").textContent =
+      new Date().getFullYear();
+  </script>
+
   <script type="module" src="script.js"></script>
+
 </body>
 </html>
