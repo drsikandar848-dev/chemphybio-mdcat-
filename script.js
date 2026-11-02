@@ -1,3 +1,4 @@
+
 import { auth, db } from "./firebase-config.js";
 
 import {
@@ -12,1080 +13,884 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  query,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-/* ADMIN UID
-   Apni purani file wala ADMIN UID yahan paste karein.
-*/
-const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1;
+/* =====================================================
+   CHEMPHYBIO MDCAT — MAIN SCRIPT
+   Replace the ADMIN_UID placeholder with your own UID.
+===================================================== */
 
-/* SAMPLE QUIZ QUESTIONS */
+const ADMIN_UID = "PASTE_YOUR_ADMIN_UID_HER";
 
-const sampleQuizData = {
-  Biology: [
-    {
-      q: "Which organelle is known as the powerhouse of the cell?",
-      o: ["Nucleus", "Mitochondrion", "Ribosome", "Golgi apparatus"],
-      a: 1,
-      e: "Mitochondria produce most of the usable energy (ATP)."
-    },
-    {
-      q: "What is the basic structural and functional unit of life?",
-      o: ["Tissue", "Organ", "Cell", "Organ system"],
-      a: 2,
-      e: "The cell is the basic structural and functional unit of life."
-    },
-    {
-      q: "Which molecule carries hereditary information?",
-      o: ["DNA", "Glucose", "ATP", "Cellulose"],
-      a: 0,
-      e: "DNA stores hereditary information."
-    }
-  ],
+const QUESTIONS_COLLECTION = "questions";
+const CONTENT_COLLECTION = "siteContent";
+const CONTRIBUTORS_COLLECTION = "contributors";
 
-  Chemistry: [
-    {
-      q: "What is the chemical symbol for sodium?",
-      o: ["So", "S", "Na", "N"],
-      a: 2,
-      e: "Na is the chemical symbol for sodium."
-    },
-    {
-      q: "A solution with pH 3 is:",
-      o: ["Acidic", "Neutral", "Basic", "Pure water"],
-      a: 0,
-      e: "A pH below 7 is acidic."
-    },
-    {
-      q: "Which particle has a negative charge?",
-      o: ["Proton", "Neutron", "Electron", "Nucleus"],
-      a: 2,
-      e: "Electrons carry a negative charge."
-    }
-  ],
+const $ = (id) => document.getElementById(id);
 
-  Physics: [
-    {
-      q: "What is the SI unit of force?",
-      o: ["Joule", "Newton", "Watt", "Pascal"],
-      a: 1,
-      e: "Force is measured in newtons."
-    },
-    {
-      q: "Distance travelled per unit time is:",
-      o: ["Acceleration", "Velocity", "Speed", "Momentum"],
-      a: 2,
-      e: "Speed is distance travelled per unit time."
-    },
-    {
-      q: "Which lens is thicker at the centre?",
-      o: ["Concave", "Convex", "Plane glass", "None"],
-      a: 1,
-      e: "A convex lens is thicker at its centre."
-    }
-  ],
+let currentUser = null;
+let isAdmin = false;
+let allQuestions = [];
+let currentQuiz = [];
+let currentQuestionIndex = 0;
+let selectedAnswers = [];
+let testTimer = null;
+let secondsRemaining = 0;
+let editingQuestionId = null;
 
-  English: [
-    {
-      q: "Choose the correctly spelled word:",
-      o: ["Accomodation", "Accommodation", "Acommodation", "Accommadation"],
-      a: 1,
-      e: "Accommodation is the correct spelling."
-    },
-    {
-      q: "Choose the synonym of rapid:",
-      o: ["Slow", "Quick", "Dull", "Weak"],
-      a: 1,
-      e: "Rapid means fast or quick."
-    },
-    {
-      q: "Choose the correct sentence:",
-      o: [
-        "She go to school.",
-        "She going to school.",
-        "She goes to school.",
-        "She gone to school."
-      ],
-      a: 2,
-      e: "She goes is correct in the simple present tense."
-    }
-  ],
+/* =====================================================
+   SAMPLE QUESTIONS — USED WHEN FIRESTORE HAS NO DATA
+===================================================== */
 
-  "Logical Reasoning": [
-    {
-      q: "What number comes next: 2, 4, 8, 16, …?",
-      o: ["18", "24", "30", "32"],
-      a: 3,
-      e: "Each number is doubled."
-    },
-    {
-      q: "If all roses are flowers, which statement is true?",
-      o: [
-        "All flowers are roses",
-        "Every rose is a flower",
-        "No rose is a flower",
-        "All plants are roses"
-      ],
-      a: 1,
-      e: "Every rose is a flower."
-    },
-    {
-      q: "Find the odd one out:",
-      o: ["Triangle", "Square", "Circle", "Blue"],
-      a: 3,
-      e: "Blue is a colour; the others are shapes."
-    }
-  ]
-};
-
-/* WEBSITE DATA */
-
-let quizData = structuredClone(sampleQuizData);
-
-const updates = [
+const sampleQuestions = [
   {
-    day: "INFO",
-    month: "NOTE",
-    title: "Check official MDCAT announcements",
-    text: "For current dates and policies, check the relevant official authority website."
+    subject: "Biology",
+    chapter: "Cell Biology",
+    question: "Which organelle is known as the powerhouse of the cell?",
+    options: ["Nucleus", "Ribosome", "Mitochondrion", "Golgi body"],
+    answer: 2,
+    explanation: "Mitochondria produce most of the ATP used by the cell."
   },
   {
-    day: "STUDY",
-    month: "TIP",
-    title: "Build a consistent revision routine",
-    text: "Practise MCQs daily and review their explanations."
+    subject: "Biology",
+    chapter: "Cell Biology",
+    question: "What is the basic structural and functional unit of life?",
+    options: ["Tissue", "Cell", "Organ", "Organ system"],
+    answer: 1,
+    explanation: "The cell is the basic structural and functional unit of life."
   },
   {
-    day: "VERIFY",
-    month: "ALERT",
-    title: "Beware of unverified notices",
-    text: "Confirm important information from official sources."
+    subject: "Biology",
+    chapter: "Genetics",
+    question: "Which molecule carries hereditary information?",
+    options: ["Protein", "Lipid", "DNA", "Glucose"],
+    answer: 2,
+    explanation: "DNA stores hereditary information in most organisms."
+  },
+  {
+    subject: "Chemistry",
+    chapter: "Periodic Table",
+    question: "What is the chemical symbol of sodium?",
+    options: ["S", "So", "Na", "N"],
+    answer: 2,
+    explanation: "The chemical symbol of sodium is Na."
+  },
+  {
+    subject: "Physics",
+    chapter: "Motion",
+    question: "What is the SI unit of force?",
+    options: ["Joule", "Newton", "Watt", "Pascal"],
+    answer: 1,
+    explanation: "Force is measured in newtons."
+  },
+  {
+    subject: "English",
+    chapter: "Vocabulary",
+    question: "Choose the synonym of 'Rapid'.",
+    options: ["Slow", "Quick", "Weak", "Late"],
+    answer: 1,
+    explanation: "Rapid means fast or quick."
+  },
+  {
+    subject: "Logical Reasoning",
+    chapter: "Patterns",
+    question: "What comes next: 2, 4, 6, 8, ...?",
+    options: ["9", "10", "11", "12"],
+    answer: 1,
+    explanation: "The sequence increases by 2."
   }
 ];
 
-/* GLOBAL VARIABLES */
+/* =====================================================
+   GENERAL HELPERS
+===================================================== */
 
-let currentSubject = "Biology";
-let questionIndex = 0;
-let score = 0;
-let answered = false;
-let language = "en";
-let editingQuestionId = null;
+function showMessage(id, message, type = "info") {
+  const element = $(id);
+  if (!element) return;
 
-let fullTestQuestionBank = {};
-let isFullTest = false;
-let fullTestQuestions = [];
-let fullTestIndex = 0;
-let fullTestScore = 0;
-let fullTestAnswers = {};
-let fullTestReview = new Set();
-let fullTestTimeLeft = 0;
-let fullTestTimer = null;
-let fullTestSubmitted = false;
+  element.textContent = message;
+  element.dataset.type = type;
+}
 
-const $ = id => document.getElementById(id);
-const subjectSelect = $("subjectSelect");
+function escapeHTML(value = "") {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
 
-/* FULL TEST DISTRIBUTION
-   These are the project's configured distributions,
-   not a confirmation of the official MDCAT pattern.
-*/
+function shuffle(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
 
-const testDistributions = {
-  100: {
-    Biology: 45,
-    Chemistry: 25,
-    Physics: 20,
-    English: 5,
-    "Logical Reasoning": 5
+function normalizeQuestion(data, id = null) {
+  return {
+    id,
+    subject: data.subject || "Biology",
+    chapter: data.chapter || "General",
+    question: data.question || "",
+    options: Array.isArray(data.options) ? data.options : [],
+    answer: Number(data.answer),
+    explanation: data.explanation || ""
+  };
+}
+
+/* =====================================================
+   LANGUAGE SWITCH
+===================================================== */
+
+const translations = {
+  en: {
+    welcome: "Welcome to CHEMPHYBIO MDCAT",
+    start: "Start Quiz",
+    next: "Next Question",
+    submit: "Submit Test",
+    correct: "Correct",
+    incorrect: "Incorrect",
+    noQuestions: "No questions available."
   },
-
-  180: {
-    Biology: 81,
-    Chemistry: 45,
-    Physics: 36,
-    English: 9,
-    "Logical Reasoning": 9
+  ur: {
+    welcome: "CHEMPHYBIO MDCAT میں خوش آمدید",
+    start: "کوئز شروع کریں",
+    next: "اگلا سوال",
+    submit: "ٹیسٹ جمع کریں",
+    correct: "درست",
+    incorrect: "غلط",
+    noQuestions: "فی الحال کوئی سوال موجود نہیں۔"
   }
 };
 
-/* QUICK QUIZ */
+let currentLanguage = localStorage.getItem("chempyLanguage") || "en";
 
-function renderQuestion() {
-  if (isFullTest) return;
+function applyLanguage() {
+  document.documentElement.lang = currentLanguage;
 
-  const list = quizData[currentSubject] || [];
-
-  $("quizTitle").textContent = currentSubject + " Quick Quiz";
-  $("options").innerHTML = "";
-  $("feedback").textContent = "";
-  $("scoreText").textContent = `Score: ${score}`;
-
-  if (!list.length) {
-    $("questionCount").textContent = "No questions available";
-    $("progressPercent").textContent = "0%";
-    $("progressBar").style.width = "0%";
-    $("questionText").textContent =
-      "No questions have been added for this subject yet.";
-
-    $("nextQuestion").disabled = true;
-    $("quizArea").classList.remove("hidden");
-    $("quizResult").classList.add("hidden");
-    return;
-  }
-
-  if (questionIndex >= list.length) {
-    questionIndex = 0;
-  }
-
-  const item = list[questionIndex];
-  answered = false;
-
-  $("questionCount").textContent =
-    `Question ${questionIndex + 1} of ${list.length}`;
-
-  $("progressPercent").textContent =
-    `${Math.round((questionIndex + 1) / list.length * 100)}%`;
-
-  $("progressBar").style.width =
-    `${(questionIndex + 1) / list.length * 100}%`;
-
-  $("questionText").textContent = item.q;
-  $("nextQuestion").disabled = true;
-
-  $("nextQuestion").textContent =
-    questionIndex === list.length - 1
-      ? "See result →"
-      : "Next question →";
-
-  item.o.forEach((option, index) => {
-    const button = document.createElement("button");
-
-    button.className = "option";
-    button.type = "button";
-    button.textContent =
-      `${String.fromCharCode(65 + index)}. ${option}`;
-
-    button.addEventListener("click", () => selectAnswer(index));
-
-    $("options").appendChild(button);
+  document.querySelectorAll("[data-en][data-ur]").forEach(element => {
+    element.textContent =
+      element.dataset[currentLanguage] || element.dataset.en;
   });
 
-  $("quizArea").classList.remove("hidden");
-  $("quizResult").classList.add("hidden");
+  document.body.classList.toggle("urdu-mode", currentLanguage === "ur");
 }
 
-function selectAnswer(index) {
-  if (answered || isFullTest) return;
+function setupLanguage() {
+  const button = $("languageToggle");
+  if (!button) return;
 
-  const item = quizData[currentSubject][questionIndex];
-  answered = true;
-
-  [...$("options").children].forEach((button, i) => {
-    button.disabled = true;
-
-    if (i === item.a) {
-      button.classList.add("correct");
-    } else if (i === index) {
-      button.classList.add("wrong");
-    }
-  });
-
-  if (index === item.a) {
-    score++;
-    $("feedback").textContent = "✓ Correct! " + item.e;
-  } else {
-    $("feedback").textContent = "Not quite. " + item.e;
-  }
-
-  $("scoreText").textContent = `Score: ${score}`;
-  $("nextQuestion").disabled = false;
-}
-
-function nextQuestion() {
-  if (isFullTest) {
-    nextFullTestQuestion();
-    return;
-  }
-
-  if (!answered) return;
-
-  if (questionIndex < quizData[currentSubject].length - 1) {
-    questionIndex++;
-    renderQuestion();
-  } else {
-    $("quizArea").classList.add("hidden");
-    $("quizResult").classList.remove("hidden");
-
-    const total = quizData[currentSubject].length;
-    const percent = Math.round(score / total * 100);
-
-    $("quizResult").innerHTML = `
-      <div style="font-size:38px">🎓</div>
-      <h3>Quiz completed!</h3>
-      <strong>${score}/${total}</strong>
-      <p>You scored ${percent}%. Keep practising!</p>
-      <button class="btn btn-primary" id="retryQuiz">
-        Try again
-      </button>
-    `;
-
-    $("retryQuiz").addEventListener("click", resetQuiz);
-  }
-}
-
-function resetQuiz() {
-  if (isFullTest) {
-    clearInterval(fullTestTimer);
-    isFullTest = false;
-  }
-
-  questionIndex = 0;
-  score = 0;
-  answered = false;
-
-  $("quizTitle").textContent = currentSubject + " Quick Quiz";
-  renderQuestion();
-}
-
-function changeSubject(subject) {
-  if (isFullTest) return;
-
-  currentSubject = subject;
-  subjectSelect.value = subject;
-
-  resetQuiz();
-
-  $("quiz").scrollIntoView({ behavior: "smooth" });
-}
-
-subjectSelect.addEventListener("change", event => {
-  changeSubject(event.target.value);
-});
-
-$("nextQuestion").addEventListener("click", nextQuestion);
-
-document.querySelectorAll(".subject-quiz").forEach(button => {
   button.addEventListener("click", () => {
-    changeSubject(button.dataset.subject);
+    currentLanguage = currentLanguage === "en" ? "ur" : "en";
+    localStorage.setItem("chempyLanguage", currentLanguage);
+    applyLanguage();
   });
-});
 
-/* LOAD QUESTIONS FROM FIRESTORE */
+  applyLanguage();
+}
+
+/* =====================================================
+   LOAD QUESTIONS FROM FIRESTORE
+===================================================== */
 
 async function loadQuestions() {
   try {
-    const snapshot = await getDocs(collection(db, "questions"));
-    const onlineQuestions = {};
+    const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
 
-    snapshot.forEach(documentSnapshot => {
-      const item = documentSnapshot.data();
+    const firebaseQuestions = snapshot.docs.map(item =>
+      normalizeQuestion(item.data(), item.id)
+    );
 
-      const validQuestion =
-        typeof item.question === "string" &&
-        Array.isArray(item.options) &&
-        item.options.length === 4 &&
-        Number.isInteger(item.answer) &&
-        item.answer >= 0 &&
-        item.answer <= 3 &&
-        typeof item.subject === "string";
+    allQuestions = [...sampleQuestions];
 
-      if (!validQuestion) return;
-
-      if (!onlineQuestions[item.subject]) {
-        onlineQuestions[item.subject] = [];
-      }
-
-      onlineQuestions[item.subject].push({
-        id: documentSnapshot.id,
-        q: item.question,
-        o: item.options,
-        a: item.answer,
-        e: item.explanation || ""
-      });
-    });
-
-    // Full Test uses Firestore questions only.
-    fullTestQuestionBank = structuredClone(onlineQuestions);
-
-    // Quick Quiz can use sample questions.
-    quizData = structuredClone(sampleQuizData);
-
-    Object.keys(onlineQuestions).forEach(subject => {
-      if (onlineQuestions[subject].length) {
-        quizData[subject] = onlineQuestions[subject];
-      }
-    });
-
-    if (!isFullTest) {
-      renderQuestion();
-    }
-
-  } catch (error) {
-    console.error("Question loading error:", error);
-
-    $("feedback").textContent =
-      "Online questions could not be loaded. Showing sample questions.";
-  }
-}
-
-/* FULL TEST SYSTEM */
-
-function shuffleQuestions(array) {
-  const shuffled = [...array];
-
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [shuffled[i], shuffled[j]] =
-      [shuffled[j], shuffled[i]];
-  }
-
-  return shuffled;
-}
-
-function createFullTestQuestions(total) {
-  const distribution = testDistributions[total];
-
-  if (!distribution) {
-    return { error: "Invalid test size." };
-  }
-
-  const testQuestions = [];
-
-  for (const subject in distribution) {
-    const required = distribution[subject];
-    const available = fullTestQuestionBank[subject] || [];
-
-    if (available.length < required) {
-      return {
-        error: `${subject}: ${required} required, ${available.length} available.`
-      };
-    }
-
-    const selected =
-      shuffleQuestions(available).slice(0, required);
-
-    selected.forEach(question => {
-      testQuestions.push({
-        ...question,
-        subject
-      });
-    });
-  }
-
-  return {
-    questions: shuffleQuestions(testQuestions)
-  };
-}
-
-/* CREATE TEST CONTROLS */
-
-function prepareFullTestControls() {
-  if (!$("fullTestTimerDisplay")) {
-    const timer = document.createElement("p");
-
-    timer.id = "fullTestTimerDisplay";
-    timer.style.fontWeight = "bold";
-    timer.style.textAlign = "center";
-    timer.style.fontSize = "18px";
-
-    $("quizArea").prepend(timer);
-  }
-
-  if (!$("fullTestNavigation")) {
-    const controls = document.createElement("div");
-
-    controls.id = "fullTestNavigation";
-
-    controls.style.cssText =
-      "display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;";
-
-    controls.innerHTML = `
-      <button type="button" class="btn btn-outline" id="previousFullTest">
-        Previous
-      </button>
-
-      <button type="button" class="btn btn-outline" id="markFullTest">
-        Mark for Review
-      </button>
-
-      <button type="button" class="btn btn-outline" id="nextFullTest">
-        Next
-      </button>
-    `;
-
-    $("quizArea").appendChild(controls);
-
-    $("previousFullTest").addEventListener("click", () => {
-      if (fullTestIndex > 0 && isFullTest) {
-        fullTestIndex--;
-        renderFullTestQuestion();
-      }
-    });
-
-    $("markFullTest").addEventListener("click", () => {
-      if (!isFullTest) return;
-
-      if (fullTestReview.has(fullTestIndex)) {
-        fullTestReview.delete(fullTestIndex);
-      } else {
-        fullTestReview.add(fullTestIndex);
-      }
-
-      renderFullTestQuestion();
-    });
-
-    $("nextFullTest").addEventListener("click", nextFullTestQuestion);
-  }
-}
-
-/* START FULL TEST */
-
-function startFullTest() {
-  if (isFullTest) return;
-
-  const total = Number($("testModeSelect").value);
-  const result = createFullTestQuestions(total);
-
-  if (!result || result.error) {
-    $("fullTestMessage").textContent =
-      "Not enough MCQs. " +
-      (result?.error || "Please check the test size.");
-
-    return;
-  }
-
-  fullTestQuestions = result.questions;
-  fullTestIndex = 0;
-  fullTestScore = 0;
-  fullTestAnswers = {};
-  fullTestReview = new Set();
-  fullTestTimeLeft = total * 60;
-  fullTestSubmitted = false;
-  isFullTest = true;
-
-  $("fullTestMessage").textContent = "";
-  $("fullTestSetup").classList.add("hidden");
-  $("quizResult").classList.add("hidden");
-  $("quizArea").classList.remove("hidden");
-
-  prepareFullTestControls();
-  renderFullTestQuestion();
-  startFullTestTimer();
-}
-
-/* FULL TEST TIMER */
-
-function startFullTestTimer() {
-  clearInterval(fullTestTimer);
-
-  fullTestTimer = setInterval(() => {
-    if (!isFullTest || fullTestSubmitted) {
-      clearInterval(fullTestTimer);
-      return;
-    }
-
-    fullTestTimeLeft--;
-
-    const minutes = Math.floor(fullTestTimeLeft / 60);
-    const seconds = fullTestTimeLeft % 60;
-
-    $("fullTestTimerDisplay").textContent =
-      `Time Left: ${minutes}:${String(seconds).padStart(2, "0")}`;
-
-    if (fullTestTimeLeft <= 0) {
-      submitFullTest();
-    }
-  }, 1000);
-}
-
-/* DISPLAY FULL TEST QUESTION */
-
-function renderFullTestQuestion() {
-  const item = fullTestQuestions[fullTestIndex];
-
-  if (!item || !isFullTest) return;
-
-  $("quizTitle").textContent = "Full-Length MDCAT Test";
-
-  $("questionCount").textContent =
-    `Question ${fullTestIndex + 1} of ${fullTestQuestions.length}`;
-
-  $("questionText").textContent = item.q;
-  $("options").innerHTML = "";
-  $("feedback").textContent = "";
-
-  $("progressPercent").textContent =
-    `${Math.round((fullTestIndex + 1) / fullTestQuestions.length * 100)}%`;
-
-  $("progressBar").style.width =
-    `${(fullTestIndex + 1) / fullTestQuestions.length * 100}%`;
-
-  item.o.forEach((option, index) => {
-    const button = document.createElement("button");
-
-    button.className = "option";
-    button.type = "button";
-
-    button.textContent =
-      `${String.fromCharCode(65 + index)}. ${option}`;
-
-    if (fullTestAnswers[fullTestIndex] === index) {
-      button.classList.add("selected");
-    }
-
-    button.addEventListener("click", () => {
-      if (!isFullTest) return;
-
-      fullTestAnswers[fullTestIndex] = index;
-      renderFullTestQuestion();
-    });
-
-    $("options").appendChild(button);
-  });
-
-  $("scoreText").textContent =
-    `Answered: ${Object.keys(fullTestAnswers).length}`;
-
-  $("previousFullTest").disabled = fullTestIndex === 0;
-
-  $("markFullTest").textContent =
-    fullTestReview.has(fullTestIndex)
-      ? "Remove Review Mark"
-      : "Mark for Review";
-
-  $("nextFullTest").textContent =
-    fullTestIndex === fullTestQuestions.length - 1
-      ? "Submit Test"
-      : "Next";
-
-  const minutes = Math.floor(fullTestTimeLeft / 60);
-  const seconds = fullTestTimeLeft % 60;
-
-  $("fullTestTimerDisplay").textContent =
-    `Time Left: ${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-/* NEXT FULL TEST QUESTION */
-
-function nextFullTestQuestion() {
-  if (!isFullTest || fullTestSubmitted) return;
-
-  if (fullTestIndex < fullTestQuestions.length - 1) {
-    fullTestIndex++;
-    renderFullTestQuestion();
-  } else {
-    submitFullTest();
-  }
-}
-
-/* SUBMIT FULL TEST AND SHOW RESULTS */
-
-function submitFullTest() {
-  if (fullTestSubmitted || !isFullTest) return;
-
-  fullTestSubmitted = true;
-  clearInterval(fullTestTimer);
-
-  fullTestScore = fullTestQuestions.reduce((total, question, index) => {
-    return total +
-      (fullTestAnswers[index] === question.a ? 1 : 0);
-  }, 0);
-
-  const total = fullTestQuestions.length;
-  const percentage = Math.round((fullTestScore / total) * 100);
-
-  const unanswered =
-    total - Object.keys(fullTestAnswers).length;
-
-  const subjectResults = {};
-
-  fullTestQuestions.forEach((question, index) => {
-    const subject = question.subject;
-
-    if (!subjectResults[subject]) {
-      subjectResults[subject] = {
-        correct: 0,
-        total: 0
-      };
-    }
-
-    subjectResults[subject].total++;
-
-    if (fullTestAnswers[index] === question.a) {
-      subjectResults[subject].correct++;
-    }
-  });
-
-  const subjectHTML = Object.entries(subjectResults)
-    .map(([subject, result]) => {
-      const subjectPercentage =
-        Math.round(result.correct / result.total * 100);
-
-      return `
-        <p>
-          <strong>${subject}:</strong>
-          ${result.correct}/${result.total}
-          (${subjectPercentage}%)
-        </p>
-      `;
-    })
-    .join("");
-
-  isFullTest = false;
-
-  $("quizArea").classList.add("hidden");
-  $("quizResult").classList.remove("hidden");
-
-  $("quizResult").innerHTML = `
-    <h3>Full Test Completed!</h3>
-
-    <div style="font-size:36px">🎓</div>
-
-    <h2>${fullTestScore} / ${total}</h2>
-
-    <p>Percentage: ${percentage}%</p>
-    <p>Unanswered: ${unanswered}</p>
-    <p>Marked for Review: ${fullTestReview.size}</p>
-
-    <hr>
-
-    <h3>Subject-wise Result</h3>
-
-    ${subjectHTML}
-
-    <button class="btn btn-primary" id="fullTestAgain">
-      Back to Quiz
-    </button>
-  `;
-
-  $("fullTestAgain").addEventListener("click", () => {
-    $("quizResult").classList.add("hidden");
-    $("fullTestSetup").classList.remove("hidden");
-
-    $("fullTestMessage").textContent = "";
-    $("fullTestTimerDisplay").textContent = "";
-
-    resetQuiz();
-  });
-}
-
-$("startFullTest").addEventListener("click", startFullTest);
-
-/* UPDATES */
-
-function renderUpdates() {
-  $("updatesList").innerHTML = "";
-
-  updates.forEach(item => {
-    const card = document.createElement("article");
-    card.className = "update-card";
-
-    const date = document.createElement("div");
-    date.className = "update-date";
-
-    const strong = document.createElement("strong");
-    strong.textContent = item.day;
-
-    const small = document.createElement("span");
-    small.textContent = item.month;
-
-    date.append(strong, small);
-
-    const body = document.createElement("div");
-
-    const title = document.createElement("h3");
-    title.textContent = item.title;
-
-    const paragraph = document.createElement("p");
-    paragraph.textContent = item.text;
-
-    body.append(title, paragraph);
-    card.append(date, body);
-
-    $("updatesList").append(card);
-  });
-}
-
-/* LANGUAGE */
-
-function setLanguage(next) {
-  language = next;
-
-  document.body.classList.toggle("urdu", language === "ur");
-
-  document.documentElement.lang =
-    language === "ur" ? "ur" : "en";
-
-  document.querySelectorAll("[data-en]").forEach(element => {
-    element.innerHTML =
-      language === "ur"
-        ? element.dataset.ur
-        : element.dataset.en;
-  });
-
-  $("languageToggle").textContent =
-    language === "ur" ? "English" : "اردو";
-}
-
-$("languageToggle").addEventListener("click", () => {
-  setLanguage(language === "en" ? "ur" : "en");
-});
-
-$("menuToggle").addEventListener("click", () => {
-  $("mainNav").classList.toggle("open");
-});
-
-document.querySelectorAll("#mainNav a").forEach(link => {
-  link.addEventListener("click", () => {
-    $("mainNav").classList.remove("open");
-  });
-});
-
-$("year").textContent = new Date().getFullYear();
-
-/* ADMIN LOGIN */
-
-$("adminLoginForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const email = $("adminEmail").value.trim();
-  const password = $("adminPassword").value;
-
-  $("adminMessage").textContent = "Logging in...";
-
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (error) {
-    console.error("Admin login error:", error);
-
-    $("adminMessage").textContent =
-      "Login failed. Please check your details.";
-  }
-});
-
-/* CHECK ADMIN ACCOUNT */
-
-onAuthStateChanged(auth, async user => {
-  if (user && user.uid === ADMIN_UID) {
-    $("adminLogin").classList.add("hidden");
-    $("adminDashboard").classList.remove("hidden");
-
-    await renderAdminQuestions();
-  } else {
-    $("adminLogin").classList.remove("hidden");
-    $("adminDashboard").classList.add("hidden");
-
-    if (user) {
-      await signOut(auth);
-
-      $("adminMessage").textContent =
-        "This account is not an authorized admin.";
-    }
-  }
-});
-
-$("adminLogout").addEventListener("click", () => {
-  signOut(auth);
-});
-
-/* DISPLAY ADMIN QUESTIONS */
-
-async function renderAdminQuestions() {
-  const list = $("adminMcqList");
-
-  list.innerHTML = "Loading questions...";
-
-  try {
-    const snapshot = await getDocs(collection(db, "questions"));
-
-    list.innerHTML = "";
-
-    if (snapshot.empty) {
-      list.textContent = "No online questions added yet.";
-      return;
-    }
-
-    snapshot.forEach(documentSnapshot => {
-      const item = documentSnapshot.data();
-
-      const card = document.createElement("article");
-      card.className = "admin-mcq-card";
-
-      const title = document.createElement("strong");
-
-      title.textContent =
-        item.subject + ": " + item.question;
-
-      const details = document.createElement("p");
-
-      details.textContent =
-        (item.options || []).join(" | ");
-
-      const edit = document.createElement("button");
-
-      edit.className = "btn btn-outline";
-      edit.type = "button";
-      edit.textContent = "Edit";
-
-      edit.addEventListener("click", () => {
-        editQuestion(documentSnapshot.id, item);
-      });
-
-      const remove = document.createElement("button");
-
-      remove.className = "btn btn-outline";
-      remove.type = "button";
-      remove.textContent = "Delete";
-
-      remove.addEventListener("click", () => {
-        removeQuestion(documentSnapshot.id);
-      });
-
-      card.append(title, details, edit, remove);
-      list.appendChild(card);
-    });
-
-  } catch (error) {
-    console.error("Admin questions error:", error);
-
-    list.textContent =
-      "Could not load questions. Check Firestore security rules.";
-  }
-}
-
-/* ADD OR UPDATE QUESTION */
-
-$("mcqForm").addEventListener("submit", async event => {
-  event.preventDefault();
-
-  const data = {
-    subject: $("mcqSubject").value,
-    question: $("mcqQuestion").value.trim(),
-
-    options: [
-      $("mcqOption0").value.trim(),
-      $("mcqOption1").value.trim(),
-      $("mcqOption2").value.trim(),
-      $("mcqOption3").value.trim()
-    ],
-
-    answer: Number($("mcqAnswer").value),
-    explanation: $("mcqExplanation").value.trim()
-  };
-
-  if (
-    !data.question ||
-    data.options.some(option => !option) ||
-    !Number.isInteger(data.answer) ||
-    data.answer < 0 ||
-    data.answer > 3
-  ) {
-    $("adminStatus").textContent =
-      "Please complete all question fields correctly.";
-
-    return;
-  }
-
-  $("adminStatus").textContent = "Saving...";
-
-  try {
-    if (editingQuestionId) {
-      await updateDoc(
-        doc(db, "questions", editingQuestionId),
-        data
+    firebaseQuestions.forEach(question => {
+      const existingIndex = allQuestions.findIndex(item =>
+        item.question === question.question
       );
 
-      $("adminStatus").textContent =
-        "Question updated successfully.";
+      if (existingIndex >= 0) {
+        allQuestions[existingIndex] = question;
+      } else {
+        allQuestions.push(question);
+      }
+    });
 
-    } else {
-      await addDoc(collection(db, "questions"), data);
-
-      $("adminStatus").textContent =
-        "Question added successfully.";
-    }
-
-    $("mcqForm").reset();
-
-    editingQuestionId = null;
-    $("mcqId").value = "";
-    $("saveMcq").textContent = "Save MCQ";
-
-    await renderAdminQuestions();
-    await loadQuestions();
-
+    renderQuestionLists();
+    return allQuestions;
   } catch (error) {
-    console.error("MCQ save error:", error);
-
-    $("adminStatus").textContent =
-      "Save failed. Check Firestore security rules.";
+    console.error("Question loading error:", error);
+    allQuestions = [...sampleQuestions];
+    renderQuestionLists();
+    return allQuestions;
   }
-});
-
-/* EDIT QUESTION */
-
-function editQuestion(id, item) {
-  editingQuestionId = id;
-
-  $("mcqId").value = id;
-  $("mcqSubject").value = item.subject;
-  $("mcqQuestion").value = item.question;
-
-  $("mcqOption0").value = item.options[0] || "";
-  $("mcqOption1").value = item.options[1] || "";
-  $("mcqOption2").value = item.options[2] || "";
-  $("mcqOption3").value = item.options[3] || "";
-
-  $("mcqAnswer").value = String(item.answer);
-  $("mcqExplanation").value = item.explanation || "";
-
-  $("saveMcq").textContent = "Update MCQ";
-
-  $("mcqForm").scrollIntoView({
-    behavior: "smooth"
-  });
 }
 
-/* DELETE QUESTION */
+function renderQuestionLists() {
+  const list = $("adminMcqList");
+  if (!list) return;
 
-async function removeQuestion(id) {
-  if (!confirm("Are you sure you want to delete this question?")) {
+  const firebaseOnly = allQuestions.filter(question => question.id);
+
+  if (!firebaseOnly.length) {
+    list.textContent = "No saved Firebase questions yet.";
     return;
   }
 
+  list.innerHTML = firebaseOnly.map(question => `
+    <div class="admin-question-item">
+      <strong>${escapeHTML(question.subject)}</strong>
+      <small>${escapeHTML(question.chapter)}</small>
+      <p>${escapeHTML(question.question)}</p>
+      <button type="button" data-edit="${escapeHTML(question.id)}">Edit</button>
+      <button type="button" data-delete="${escapeHTML(question.id)}">Delete</button>
+    </div>
+  `).join("");
+
+  list.querySelectorAll("[data-edit]").forEach(button => {
+    button.addEventListener("click", () => {
+      editQuestion(button.dataset.edit);
+    });
+  });
+
+  list.querySelectorAll("[data-delete]").forEach(button => {
+    button.addEventListener("click", () => {
+      removeQuestion(button.dataset.delete);
+    });
+  });
+}
+
+/* =====================================================
+   QUICK QUIZ
+===================================================== */
+
+function startQuickQuiz(subject = "All") {
+  const available = subject === "All"
+    ? allQuestions
+    : allQuestions.filter(q => q.subject === subject);
+
+  if (!available.length) {
+    alert(translations[currentLanguage].noQuestions);
+    return;
+  }
+
+  currentQuiz = shuffle(available).slice(0, Math.min(10, available.length));
+  currentQuestionIndex = 0;
+  selectedAnswers = [];
+
+  const area = $("quizArea");
+  if (area) area.hidden = false;
+
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  const area = $("quizArea");
+  if (!area) return;
+
+  const question = currentQuiz[currentQuestionIndex];
+  if (!question) return;
+
+  area.innerHTML = `
+    <div class="quiz-question">
+      <p>Question ${currentQuestionIndex + 1} of ${currentQuiz.length}</p>
+      <h3>${escapeHTML(question.question)}</h3>
+
+      <div class="quiz-options">
+        ${question.options.map((option, index) => `
+          <label>
+            <input type="radio" name="quizAnswer" value="${index}">
+            ${escapeHTML(option)}
+          </label>
+        `).join("")}
+      </div>
+
+      <button type="button" id="quizNext">
+        ${currentQuestionIndex === currentQuiz.length - 1
+          ? "Finish Quiz"
+          : "Next Question"}
+      </button>
+    </div>
+  `;
+
+  area.querySelector("#quizNext").addEventListener("click", () => {
+    const selected = area.querySelector('input[name="quizAnswer"]:checked');
+
+    if (!selected) {
+      alert("Please select an answer.");
+      return;
+    }
+
+    selectedAnswers[currentQuestionIndex] = Number(selected.value);
+
+    if (currentQuestionIndex < currentQuiz.length - 1) {
+      currentQuestionIndex++;
+      renderQuizQuestion();
+    } else {
+      showQuizResult();
+    }
+  });
+}
+
+function showQuizResult() {
+  const correct = currentQuiz.reduce((total, question, index) => {
+    return total + (
+      selectedAnswers[index] === question.answer ? 1 : 0
+    );
+  }, 0);
+
+  const area = $("quizArea");
+  if (!area) return;
+
+  area.innerHTML = `
+    <div class="quiz-result">
+      <h2>Quiz Completed!</h2>
+      <h3>${correct} / ${currentQuiz.length}</h3>
+      <p>Your score: ${Math.round(correct / currentQuiz.length * 100)}%</p>
+      <button type="button" id="restartQuiz">Try Again</button>
+    </div>
+  `;
+
+  $("restartQuiz").addEventListener("click", () => startQuickQuiz());
+}
+
+/* =====================================================
+   FULL TEST
+===================================================== */
+
+function getFullTestQuestions(count = 100) {
+  const subjects = [
+    "Biology",
+    "Chemistry",
+    "Physics",
+    "English",
+    "Logical Reasoning"
+  ];
+
+  const result = [];
+
+  subjects.forEach(subject => {
+    const subjectQuestions = shuffle(
+      allQuestions.filter(q => q.subject === subject)
+    );
+
+    result.push(...subjectQuestions);
+  });
+
+  return shuffle(result).slice(0, Math.min(count, result.length));
+}
+
+function startFullTest() {
+  const countInput = $("testQuestionCount");
+  const count = countInput ? Number(countInput.value) : 100;
+
+  currentQuiz = getFullTestQuestions(count);
+
+  if (!currentQuiz.length) {
+    alert("No questions available for this test.");
+    return;
+  }
+
+  currentQuestionIndex = 0;
+  selectedAnswers = [];
+
+  renderQuizQuestion();
+}
+
+function submitFullTest() {
+  showQuizResult();
+  if (testTimer) clearInterval(testTimer);
+}
+
+/* =====================================================
+   ADMIN LOGIN
+===================================================== */
+
+function setupAdminLogin() {
+  const form = $("adminLoginForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const email = $("adminEmail")?.value.trim();
+    const password = $("adminPassword")?.value;
+
+    if (!email || !password) {
+      showMessage("adminMessage", "Enter email and password.", "error");
+      return;
+    }
+
+    if (!ADMIN_UID || ADMIN_UID === "PASTE_YOUR_ADMIN_UID_HERE") {
+      showMessage("adminMessage", "Admin UID has not been configured.", "error");
+      return;
+    }
+
+    try {
+      showMessage("adminMessage", "Signing in...");
+
+      const result = await signInWithEmailAndPassword(auth, email, password);
+
+      if (result.user.uid !== ADMIN_UID) {
+        await signOut(auth);
+        showMessage("adminMessage", "This account is not the authorized admin.", "error");
+        return;
+      }
+
+      showMessage("adminMessage", "Login successful!", "success");
+    } catch (error) {
+      console.error(error);
+      showMessage("adminMessage", authErrorMessage(error.code), "error");
+    }
+  });
+}
+
+function authErrorMessage(code) {
+  const messages = {
+    "auth/invalid-credential": "Email or password is incorrect.",
+    "auth/user-not-found": "No account found with this email.",
+    "auth/wrong-password": "Incorrect password.",
+    "auth/invalid-email": "Please enter a valid email.",
+    "auth/too-many-requests": "Too many attempts. Please try later.",
+    "auth/network-request-failed": "Check your internet connection."
+  };
+
+  return messages[code] || `Login failed: ${code || "Unknown error"}`;
+}
+
+function setupAuthListener() {
+  onAuthStateChanged(auth, async user => {
+    currentUser = user;
+    isAdmin = Boolean(user && user.uid === ADMIN_UID);
+
+    const loginForm = $("adminLoginForm");
+    const dashboard = $("adminDashboard");
+
+    if (isAdmin) {
+      if (loginForm) loginForm.hidden = true;
+      if (dashboard) dashboard.hidden = false;
+      await loadAdminContent();
+    } else {
+      if (loginForm) loginForm.hidden = false;
+      if (dashboard) dashboard.hidden = true;
+    }
+  });
+}
+
+/* =====================================================
+   ADMIN MCQ ADD / EDIT / DELETE
+===================================================== */
+
+function setupMCQForm() {
+  const form = $("mcqForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    if (!isAdmin) {
+      showMessage("adminStatus", "Admin access required.", "error");
+      return;
+    }
+
+    const subject = $("mcqSubject")?.value;
+    const question = $("mcqQuestion")?.value.trim();
+
+    const options = [0, 1, 2, 3].map(index =>
+      $(`mcqOption${index}`)?.value.trim() || ""
+    );
+
+    const answer = Number($("mcqAnswer")?.value);
+    const explanation = $("mcqExplanation")?.value.trim() || "";
+
+    if (!subject || !question || options.some(option => !option)) {
+      showMessage("adminStatus", "Complete all question fields.", "error");
+      return;
+    }
+
+    if (!Number.isInteger(answer) || answer < 0 || answer > 3) {
+      showMessage("adminStatus", "Select a valid correct answer.", "error");
+      return;
+    }
+
+    const chapter = $("mcqChapter")?.value.trim() || "General";
+
+    const questionData = {
+      subject,
+      chapter,
+      question,
+      options,
+      answer,
+      explanation,
+      updatedAt: serverTimestamp()
+    };
+
+    try {
+      if (editingQuestionId) {
+        await updateDoc(
+          doc(db, QUESTIONS_COLLECTION, editingQuestionId),
+          questionData
+        );
+        editingQuestionId = null;
+      } else {
+        questionData.createdAt = serverTimestamp();
+        await addDoc(collection(db, QUESTIONS_COLLECTION), questionData);
+      }
+
+      form.reset();
+      showMessage("adminStatus", "Question saved successfully!", "success");
+      await loadQuestions();
+    } catch (error) {
+      console.error(error);
+      showMessage("adminStatus", `Save failed: ${error.message}`, "error");
+    }
+  });
+}
+
+async function editQuestion(id) {
+  if (!isAdmin) return;
+
+  const question = allQuestions.find(item => item.id === id);
+  if (!question) return;
+
+  editingQuestionId = id;
+
+  if ($("mcqSubject")) $("mcqSubject").value = question.subject;
+  if ($("mcqQuestion")) $("mcqQuestion").value = question.question;
+  if ($("mcqAnswer")) $("mcqAnswer").value = String(question.answer);
+  if ($("mcqExplanation")) $("mcqExplanation").value = question.explanation;
+  if ($("mcqChapter")) $("mcqChapter").value = question.chapter;
+
+  question.options.forEach((option, index) => {
+    const input = $(`mcqOption${index}`);
+    if (input) input.value = option;
+  });
+
+  $("mcqForm")?.scrollIntoView({ behavior: "smooth" });
+}
+
+async function removeQuestion(id) {
+  if (!isAdmin) return;
+
+  if (!confirm("Are you sure you want to delete this question?")) return;
+
   try {
-    await deleteDoc(doc(db, "questions", id));
-
-    $("adminStatus").textContent = "Question deleted.";
-
-    await renderAdminQuestions();
+    await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
+    showMessage("adminStatus", "Question deleted.", "success");
     await loadQuestions();
-
   } catch (error) {
-    console.error("Question delete error:", error);
-
-    $("adminStatus").textContent =
-      "Delete failed. Check Firestore security rules.";
+    console.error(error);
+    showMessage("adminStatus", `Delete failed: ${error.message}`, "error");
   }
 }
 
-/* CANCEL EDIT */
+/* =====================================================
+   ADMIN CONTENT: PROFILE, POSTERS, ADS, WHATSAPP
+   Images must be hosted on GitHub or another public
+   image host because Firebase Storage is not enabled.
+===================================================== */
 
-$("cancelEdit").addEventListener("click", () => {
-  editingQuestionId = null;
+function createAdminExtraTools() {
+  if (!isAdmin || $("adminExtraTools")) return;
 
-  $("mcqForm").reset();
-  $("mcqId").value = "";
+  const dashboard = $("adminDashboard");
+  if (!dashboard) return;
 
-  $("saveMcq").textContent = "Save MCQ";
-  $("adminStatus").textContent = "";
+  const section = document.createElement("section");
+  section.id = "adminExtraTools";
+  section.className = "admin-extra-tools";
+
+  section.innerHTML = `
+    <hr>
+    <h2>Website Content Manager</h2>
+
+    <form id="siteContentForm">
+      <label>Admin name</label>
+      <input id="siteAdminName" type="text" placeholder="Admin name">
+
+      <label>Admin photo URL</label>
+      <input id="siteAdminPhoto" type="url" placeholder="https://...">
+
+      <label>Welcome message</label>
+      <textarea id="siteWelcome"></textarea>
+
+      <label>WhatsApp community URL</label>
+      <input id="siteWhatsApp" type="url" placeholder="https://chat.whatsapp.com/...">
+
+      <label>Poster image URL</label>
+      <input id="sitePoster" type="url" placeholder="https://...">
+
+      <label>Advertisement image URL</label>
+      <input id="siteAd" type="url" placeholder="https://...">
+
+      <button type="submit">Save Website Content</button>
+    </form>
+
+    <hr>
+    <h3>Contributor Access List</h3>
+    <form id="contributorForm">
+      <input id="contributorEmail" type="email" placeholder="Contributor email" required>
+      <button type="submit">Authorize Contributor Email</button>
+    </form>
+    <div id="contributorList"></div>
+
+    <button type="button" id="adminLogout">Logout</button>
+  `;
+
+  dashboard.appendChild(section);
+
+  $("siteContentForm").addEventListener("submit", saveSiteContent);
+  $("contributorForm").addEventListener("submit", addContributor);
+
+  $("adminLogout").addEventListener("click", async () => {
+    await signOut(auth);
+  });
+}
+
+async function loadAdminContent() {
+  createAdminExtraTools();
+
+  try {
+    const contentRef = doc(db, CONTENT_COLLECTION, "main");
+    const snapshot = await getDoc(contentRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+
+      if ($("siteAdminName")) $("siteAdminName").value = data.adminName || "";
+      if ($("siteAdminPhoto")) $("siteAdminPhoto").value = data.adminPhoto || "";
+      if ($("siteWelcome")) $("siteWelcome").value = data.welcome || "";
+      if ($("siteWhatsApp")) $("siteWhatsApp").value = data.whatsapp || "";
+      if ($("sitePoster")) $("sitePoster").value = data.poster || "";
+      if ($("siteAd")) $("siteAd").value = data.ad || "";
+
+      renderPublicContent(data);
+    }
+
+    await loadContributors();
+  } catch (error) {
+    console.error("Content loading error:", error);
+  }
+}
+
+async function saveSiteContent(event) {
+  event.preventDefault();
+  if (!isAdmin) return;
+
+  const data = {
+    adminName: $("siteAdminName").value.trim(),
+    adminPhoto: $("siteAdminPhoto").value.trim(),
+    welcome: $("siteWelcome").value.trim(),
+    whatsapp: $("siteWhatsApp").value.trim(),
+    poster: $("sitePoster").value.trim(),
+    ad: $("siteAd").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    await setDoc(doc(db, CONTENT_COLLECTION, "main"), data, { merge: true });
+    renderPublicContent(data);
+    alert("Website content saved.");
+  } catch (error) {
+    console.error(error);
+    alert("Could not save content: " + error.message);
+  }
+}
+
+function renderPublicContent(data) {
+  const welcome = $("welcomeMessage");
+  if (welcome) welcome.textContent = data.welcome || "";
+
+  const name = $("adminPublicName");
+  if (name) name.textContent = data.adminName || "";
+
+  const photo = $("adminPublicPhoto");
+  if (photo && data.adminPhoto) photo.src = data.adminPhoto;
+
+  const whatsapp = $("whatsappCommunity");
+  if (whatsapp) {
+    whatsapp.href = data.whatsapp || "#";
+    whatsapp.hidden = !data.whatsapp;
+  }
+
+  const poster = $("posterImage");
+  if (poster && data.poster) poster.src = data.poster;
+
+  const ad = $("advertisementImage");
+  if (ad && data.ad) ad.src = data.ad;
+}
+
+/* =====================================================
+   CONTRIBUTORS
+   This authorizes an email in Firestore. It does NOT
+   create a Firebase Authentication account or send an
+   invitation email. Security rules must enforce roles.
+===================================================== */
+
+async function addContributor(event) {
+  event.preventDefault();
+  if (!isAdmin) return;
+
+  const email = $("contributorEmail").value.trim().toLowerCase();
+  if (!email) return;
+
+  try {
+    await setDoc(doc(db, CONTRIBUTORS_COLLECTION, email), {
+      email,
+      role: "contributor",
+      active: true,
+      addedAt: serverTimestamp()
+    });
+
+    $("contributorEmail").value = "";
+    await loadContributors();
+    alert("Contributor email authorized.");
+  } catch (error) {
+    console.error(error);
+    alert("Could not authorize contributor: " + error.message);
+  }
+}
+
+async function loadContributors() {
+  if (!isAdmin) return;
+
+  const container = $("contributorList");
+  if (!container) return;
+
+  try {
+    const snapshot = await getDocs(collection(db, CONTRIBUTORS_COLLECTION));
+
+    container.innerHTML = snapshot.docs.map(item => `
+      <div>
+        ${escapeHTML(item.data().email || item.id)}
+        <button type="button" data-remove-contributor="${escapeHTML(item.id)}">
+          Remove
+        </button>
+      </div>
+    `).join("");
+
+    container.querySelectorAll("[data-remove-contributor]").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (!confirm("Remove this contributor?")) return;
+
+        await deleteDoc(
+          doc(db, CONTRIBUTORS_COLLECTION, button.dataset.removeContributor)
+        );
+
+        await loadContributors();
+      });
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+/* =====================================================
+   MDCAT AGGREGATE CALCULATOR
+   Default weights are editable below. Confirm the
+   official formula for the relevant admission year.
+===================================================== */
+
+function setupAggregateCalculator() {
+  const button = $("calculateAggregate");
+  if (!button) return;
+
+  button.addEventListener("click", () => {
+    const matric = Number($("matricMarks")?.value);
+    const fsc = Number($("fscMarks")?.value);
+    const mdcat = Number($("mdcatMarks")?.value);
+
+    const matricTotal = Number($("matricTotal")?.value);
+    const fscTotal = Number($("fscTotal")?.value);
+    const mdcatTotal = Number($("mdcatTotal")?.value);
+
+    if (
+      !matricTotal || !fscTotal || !mdcatTotal ||
+      matric < 0 || matric > matricTotal ||
+      fsc < 0 || fsc > fscTotal ||
+      mdcat < 0 || mdcat > mdcatTotal
+    ) {
+      alert("Please enter valid marks and total marks.");
+      return;
+    }
+
+    // Example weights only — update according to official policy.
+    const aggregate =
+      (matric / matricTotal * 100 * 0.10) +
+      (fsc / fscTotal * 100 * 0.40) +
+      (mdcat / mdcatTotal * 100 * 0.50);
+
+    const result = $("aggregateResult");
+    if (result) {
+      result.textContent = `Aggregate: ${aggregate.toFixed(2)}%`;
+    }
+  });
+}
+
+/* =====================================================
+   FULL TEST BUTTONS AND SUBJECT SELECTOR
+===================================================== */
+
+function setupQuizButtons() {
+  document.querySelectorAll("[data-subject]").forEach(button => {
+    button.addEventListener("click", () => {
+      startQuickQuiz(button.dataset.subject);
+    });
+  });
+
+  const startButton = $("startFullTest");
+  if (startButton) {
+    startButton.addEventListener("click", startFullTest);
+  }
+
+  const subjectSelect = $("subjectSelect");
+  if (subjectSelect) {
+    subjectSelect.addEventListener("change", () => {
+      startQuickQuiz(subjectSelect.value || "All");
+    });
+  }
+}
+
+/* =====================================================
+   MOBILE MENU
+===================================================== */
+
+function setupMobileMenu() {
+  const button = $("menuToggle");
+  const menu = $("navLinks");
+
+  if (!button || !menu) return;
+
+  button.addEventListener("click", () => {
+    menu.classList.toggle("active");
+  });
+}
+
+/* =====================================================
+   START WEBSITE
+===================================================== */
+
+async function initializeWebsite() {
+  setupLanguage();
+  setupAdminLogin();
+  setupMCQForm();
+  setupQuizButtons();
+  setupAggregateCalculator();
+  setupMobileMenu();
+
+  await loadQuestions();
+
+  setupAuthListener();
+
+  console.log("CHEMPHYBIO MDCAT initialized.");
+}
+
+initializeWebsite().catch(error => {
+  console.error("Website initialization failed:", error);
 });
-
-/* INITIALIZE WEBSITE */
-
-renderUpdates();
-renderQuestion();
-loadQuestions();
