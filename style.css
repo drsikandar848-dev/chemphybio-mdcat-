@@ -96,3 +96,661 @@ body.urdu{font-family:"Noto Nastaliq Urdu","DM Sans",sans-serif}body.urdu .hero 
     padding: 18px;
   }
 }
+/* =====================================================
+   CHEMPHYBIO MDCAT — PREMIUM LUXURY THEME
+   Midnight Navy • Champagne Gold • Modern Medical UI
+===================================================== */
+
+:root {
+  --navy: #09172b;
+  --navy2: #102642;
+  --blue: #c5a66a;
+  --ink: #17253a;
+  --muted: #718096;
+  --line: #e8e1d4;
+  --bg: #f7f5f0;
+  --white: #ffffff;
+  --green: #16845b;
+  --shadow: 0 18px 55px rgba(9, 23, 43, .12);
+  --gold: #c5a66a;
+  --gold-light: #e5d2a7;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #fbfaf7;
+  color: var(--ink);
+  font-family: "DM Sans", Arial, sans-serif;
+}
+
+/* ANNOUNCEMENT */
+
+.announcement {
+  background: #071426;
+  color: #eee5d4;
+  padding: 12px 15px;
+  font-size: 12px;
+  letter-spacing: .4px;
+}
+
+.live-dot {
+  background: var(--gold);
+  box-shadow: 0 0 10px #c5a66a88;
+}
+
+.announcement-urdu {
+  color: #d6c39b;
+}
+
+/* HEADER */
+
+.site-header {
+  min-height: 78px;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid #e9e1d2;
+  box-shadow: 0 5px 25px rgba(9,23,43,.04);
+}
+
+.brand-mark,
+.about-mark {
+  background: linear-gradient(145deg, #142e4d, #071426);
+  border: 1px solid #c5a66a;
+  box-shadow: 0 8px 22px #09172b25;
+}
+
+.brand-mark span,
+.about-mark span {
+  color: var(--gold-light);
+}
+
+.brand-copy strong {
+  color: var(--navy);
+  letter-spacing: 1.3px;
+}
+
+nav a {
+  color: #46546a;
+  transition: .25s;
+}
+
+nav a:hover {
+  color: #a17c3e;
+}
+
+.language-btn {
+  background: #fff;
+  border: 1px solid var(--gold);
+  color: var(--navy);
+  border-radius: 30px;
+}
+
+.menu-toggle {
+  color: var(--navy);
+}
+
+/* HERO SECTION */
+
+.hero {
+  position: relative;
+  background:
+    radial-gradient(circle at 80% 30%, #c5a66a22, transparent 30%),
+    linear-gradient(120deg, #071426 0%, #102b49 58%, #183653 100%);
+  color: white;
+  min-height: 570px;
+  padding-top: 85px;
+  padding-bottom: 85px;
+}
+
+.hero .eyebrow,
+.hero .section-kicker {
+  color: var(--gold-light);
+}
+
+.eyebrow span:first-child {
+  background: var(--gold);
+}
+
+.hero h1 {
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.hero h1 em {
+  color: var(--gold-light);
+}
+
+.hero-content > p {
+  color: #d0d9e4;
+  line-height: 1.9;
+}
+
+.hero-actions {
+  gap: 14px;
+}
+
+.btn {
+  border-radius: 10px;
+  padding: 14px 22px;
+  transition: .25s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #d8bd83, #b18b4c);
+  color: #101c2c;
+  border: 1px solid #e8d5a9;
+  box-shadow: 0 10px 28px #c5a66a30;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #ead7ae, #c5a66a);
+  transform: translateY(-3px);
+}
+
+.btn-outline {
+  color: #f5ead4;
+  border: 1px solid #c5a66a88;
+  background: #ffffff0d;
+}
+
+.btn-outline:hover {
+  background: #ffffff18;
+  border-color: var(--gold-light);
+}
+
+.hero-note {
+  color: #c5d0dd;
+}
+
+.hero-note span:first-child {
+  color: var(--gold-light);
+}
+
+/* HERO SCIENCE CARD */
+
+.science-card {
+  background: linear-gradient(145deg, #1d3c5d, #08182c);
+  border: 1px solid #c5a66a88;
+  box-shadow: 0 28px 65px #00000055;
+}
+
+.science-icon {
+  color: var(--gold-light);
+}
+
+.science-card small {
+  color: #d6c39b;
+}
+
+.mini-bars i {
+  background: var(--gold);
+}
+
+.orbit {
+  border-color: #c5a66a55;
+}
+
+.float-chip {
+  background: #fffdf8;
+  border: 1px solid #e6d5b5;
+  color: var(--navy);
+  box-shadow: 0 12px 35px #00000020;
+}
+
+/* STATS */
+
+.stats {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 10px 30px #09172b06;
+}
+
+.stats strong {
+  color: #a17c3e;
+}
+
+.stats span {
+  color: #778397;
+}
+
+/* SECTION HEADINGS */
+
+.section,
+.quiz-section {
+  padding-top: 85px;
+  padding-bottom: 85px;
+}
+
+.section-kicker {
+  color: #a17c3e;
+  letter-spacing: 2.2px;
+}
+
+.section-heading h2,
+.about-section h2 {
+  color: var(--navy);
+  font-weight: 800;
+  letter-spacing: -.8px;
+}
+
+/* SUBJECT CARDS */
+
+.subject-grid {
+  gap: 20px;
+}
+
+.subject-card {
+  background: linear-gradient(145deg, #ffffff, #fbfaf6);
+  border: 1px solid #e8e1d4;
+  border-radius: 17px;
+  box-shadow: 0 8px 25px #09172b08;
+  transition: .3s ease;
+}
+
+.subject-card:hover {
+  transform: translateY(-7px);
+  border-color: var(--gold);
+  box-shadow: 0 20px 45px #09172b12;
+}
+
+.subject-icon {
+  border: 1px solid #e7dcc5;
+}
+
+.subject-card h3 {
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.subject-card p {
+  color: #718096;
+}
+
+.subject-tag {
+  color: #a17c3e;
+}
+
+.text-link {
+  color: #a17c3e;
+}
+
+.text-link:hover {
+  color: var(--navy);
+}
+
+/* QUIZ SECTION */
+
+.quiz-section {
+  background:
+    radial-gradient(circle at 90% 10%, #c5a66a16, transparent 25%),
+    #f3f1eb;
+}
+
+.quiz-panel {
+  background: #fff;
+  border: 1px solid #e5ddce;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px #09172b0d;
+}
+
+.quiz-top {
+  border-color: #eee7db;
+}
+
+.quiz-top h3,
+#questionText {
+  color: var(--navy);
+}
+
+.quiz-label {
+  color: #a17c3e;
+}
+
+.free-pill {
+  background: #f5eddd;
+  color: #98743c;
+}
+
+.quiz-controls select {
+  border-color: #ded5c5;
+  border-radius: 9px;
+}
+
+.quiz-controls select:focus {
+  outline: 2px solid #c5a66a44;
+  border-color: var(--gold);
+}
+
+.progress-track {
+  background: #eee9df;
+}
+
+.progress-track div {
+  background: linear-gradient(90deg, #a17c3e, #e0c58f);
+}
+
+.option {
+  border: 1px solid #e6e0d5;
+  border-radius: 11px;
+  background: #fffefa;
+  color: #344258;
+  transition: .2s;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: #faf6ed;
+}
+
+.option.correct {
+  border-color: #2aa879;
+  background: #effaf5;
+}
+
+.option.wrong {
+  border-color: #d77b7b;
+  background: #fff3f3;
+}
+
+.feedback {
+  color: #64748b;
+}
+
+.quiz-result strong {
+  color: #a17c3e;
+}
+
+.disclaimer {
+  border-color: #eee7db;
+}
+
+/* UPDATES */
+
+.update-card {
+  background: #fff;
+  border: 1px solid #e8e1d4;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px #09172b06;
+  transition: .25s;
+}
+
+.update-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.update-date {
+  background: #f5eddd;
+  color: #98743c;
+}
+
+.update-card h3 {
+  color: var(--navy);
+}
+
+.notice-box {
+  background: #faf6ed;
+  border-color: #ead9b5;
+  color: #806333;
+}
+
+/* ABOUT ADMIN */
+
+.about-section {
+  background:
+    radial-gradient(circle at 90% 20%, #c5a66a20, transparent 30%),
+    linear-gradient(120deg, #071426, #142f4d);
+  border-top: 1px solid #c5a66a55;
+  border-bottom: 1px solid #c5a66a55;
+}
+
+.about-section .section-kicker {
+  color: var(--gold-light);
+}
+
+.about-section h2 {
+  color: #fff;
+}
+
+.about-section p {
+  color: #d0d9e4;
+}
+
+.about-mark {
+  background: linear-gradient(145deg, #284968, #09172b);
+}
+
+/* FOOTER */
+
+footer {
+  background: #071426;
+  border-top: 1px solid #c5a66a55;
+}
+
+footer p,
+footer .back-top {
+  color: #bdc8d6;
+}
+
+.footer-brand .brand-copy strong {
+  color: #fff;
+}
+
+.footer-brand .brand-copy small {
+  color: #c5a66a;
+}
+
+/* ADMIN PANEL */
+
+.admin-section {
+  background: #f3f1eb;
+}
+
+.admin-section .quiz-panel {
+  background: #fff;
+  border: 1px solid #e5ddce;
+  border-radius: 20px;
+  box-shadow: 0 18px 50px #09172b0d;
+}
+
+#adminLoginForm input,
+#mcqForm input,
+#mcqForm select,
+#mcqForm textarea,
+#adminExtraTools input,
+#adminExtraTools textarea {
+  border: 1px solid #ded5c5;
+  border-radius: 10px;
+  background: #fffefa;
+  padding: 13px;
+  color: var(--ink);
+}
+
+#adminLoginForm input:focus,
+#mcqForm input:focus,
+#mcqForm select:focus,
+#mcqForm textarea:focus,
+#adminExtraTools input:focus,
+#adminExtraTools textarea:focus {
+  outline: 2px solid #c5a66a44;
+  border-color: var(--gold);
+}
+
+#adminLoginForm label,
+#mcqForm label {
+  color: var(--navy);
+}
+
+#adminDashboard h3,
+#adminExtraTools h2 {
+  color: var(--navy);
+}
+
+#adminMcqList,
+.admin-question-item {
+  border-radius: 12px;
+}
+
+.admin-mcq-card,
+.admin-question-item {
+  background: #fffefa;
+  border: 1px solid #e8e1d4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.admin-mcq-card button,
+.admin-question-item button,
+#adminExtraTools button {
+  border: 1px solid #c5a66a;
+  border-radius: 8px;
+  background: #102642;
+  color: #fff;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.admin-mcq-card button:hover,
+.admin-question-item button:hover,
+#adminExtraTools button:hover {
+  background: #c5a66a;
+  color: #09172b;
+}
+
+/* GENERAL FORM ELEMENTS */
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* MOBILE NAVIGATION
+   Supports both active and open classes.
+*/
+
+@media (max-width: 640px) {
+  nav,
+  nav.active,
+  nav.open {
+    background: #fff;
+    border-top: 1px solid #e8e1d4;
+    box-shadow: 0 18px 30px #09172b15;
+  }
+
+  nav.active,
+  nav.open {
+    display: flex;
+  }
+
+  .site-header {
+    background: rgba(255,255,255,.98);
+  }
+
+  .hero {
+    padding: 55px 24px 35px;
+    min-height: auto;
+  }
+
+  .hero h1 {
+    font-size: 40px;
+    line-height: 1.15;
+    letter-spacing: -1.5px;
+  }
+
+  .hero-content > p {
+    font-size: 14px;
+  }
+
+  .hero-art {
+    margin-top: 20px;
+  }
+
+  .stats {
+    background: #fff;
+  }
+
+  .section,
+  .quiz-section {
+    padding: 58px 20px;
+  }
+
+  .subject-card {
+    border-radius: 14px;
+  }
+
+  .quiz-panel {
+    border-radius: 15px;
+  }
+
+  .about-section {
+    padding: 38px 22px;
+  }
+
+  footer {
+    padding: 25px 20px;
+  }
+}
+
+/* URDU MODE COMPATIBILITY */
+
+body.urdu,
+body.urdu-mode {
+  font-family: "Noto Nastaliq Urdu", "DM Sans", sans-serif;
+}
+
+body.urdu .hero h1,
+body.urdu-mode .hero h1,
+body.urdu h2,
+body.urdu-mode h2,
+body.urdu p,
+body.urdu-mode p,
+body.urdu button,
+body.urdu-mode button {
+  line-height: 1.9;
+  letter-spacing: 0;
+}
+
+body.urdu .announcement-urdu,
+body.urdu-mode .announcement-urdu {
+  display: none;
+}
+
+/* SMALL SCREEN POLISH */
+
+@media (max-width: 380px) {
+  .hero h1 {
+    font-size: 35px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .stats strong {
+    font-size: 18px;
+  }
+}
