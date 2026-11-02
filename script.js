@@ -138,7 +138,37 @@ function selectAnswer(index) {
   $("nextQuestion").disabled = false;
 }
 
+
 function nextQuestion() {
+  if (isFullTest) {
+    nextFullTestQuestion();
+    return;
+  }
+
+  if (!answered) return;
+
+  if (questionIndex < quizData[currentSubject].length - 1) {
+    questionIndex++;
+    renderQuestion();
+  } else {
+    $("quizArea").classList.add("hidden");
+    $("quizResult").classList.remove("hidden");
+
+    const total = quizData[currentSubject].length;
+    const percent = Math.round(score / total * 100);
+
+    $("quizResult").innerHTML = `
+      <div style="font-size:38px">🎓</div>
+      <h3>Quiz completed!</h3>
+      <strong>${score}/${total}</strong>
+      <p>You scored ${percent}%. Keep practising!</p>
+      <button class="btn btn-primary" id="retryQuiz">Try again</button>
+    `;
+
+    $("retryQuiz").addEventListener("click", resetQuiz);
+  }
+}
+
   if (!answered) return;
 
   if (questionIndex < quizData[currentSubject].length - 1) {
