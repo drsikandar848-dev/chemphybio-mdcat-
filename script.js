@@ -26,7 +26,7 @@ import {
    Replace the ADMIN_UID placeholder with your own UID.
 ===================================================== */
 
-const ADMIN_UID = "PASTE_YOUR_ADMIN_UID_HER";
+const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1";
 
 const QUESTIONS_COLLECTION = "questions";
 const CONTENT_COLLECTION = "siteContent";
