@@ -264,7 +264,7 @@ function startFullTest() {
   fullTestTimeLeft = total * 60;
   isFullTest = true;
 
-  $("fullTestMessage").textContent = "";
+  $("feedback").textContent =
   $("quizTitle").textContent = total + " MCQs Full Test";
   $("fullTestSetup").classList.add("hidden");
   $("quizResult").classList.add("hidden");
