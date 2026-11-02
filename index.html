@@ -4,23 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#102b50">
-  <meta name="description" content="CHEMPHYBIO MDCAT — free MDCAT quizzes, chapter practice and updates.">
-  <title>CHEMPHYBIO MDCAT | Free MDCAT Preparation</title>
+  <meta name="theme-color" content="#071426">
+  <meta name="description" content="CHEMPHYBIO MDCAT — free Biology, Chemistry, Physics, English and Logical Reasoning practice, quizzes and tests.">
+  <title>CHEMPHYBIO MDCAT | Premium Free MDCAT Preparation</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- ANNOUNCEMENT -->
+  <!-- TOP ANNOUNCEMENT -->
   <div class="announcement">
-    <p>Free MDCAT practice for every student</p>
-    <p lang="ur">ہر طالب علم کے لیے مفت MDCAT تیاری</p>
+    <span class="live-dot"></span>
+    <span>Free MDCAT practice for every student</span>
+    <span class="announcement-divider">|</span>
+    <span class="announcement-urdu" lang="ur">ہر طالب علم کے لیے مفت MDCAT تیاری</span>
   </div>
 
   <!-- HEADER -->
@@ -29,13 +31,14 @@
 
       <a href="#home" class="brand">
         <span class="brand-mark">CB</span>
-        <span>
+        <span class="brand-copy">
           <strong>CHEMPHYBIO</strong>
           <small>MDCAT PREPARATION</small>
         </span>
       </a>
 
-      <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu">
+      <button id="menuToggle" class="menu-toggle" type="button"
+        aria-label="Open navigation menu" aria-controls="navLinks">
         ☰
       </button>
 
@@ -46,7 +49,9 @@
         <a href="#fullTest">Full Test</a>
         <a href="#updates">Updates</a>
         <a href="#about">About</a>
-        <button id="languageToggle" type="button">اردو / English</button>
+        <button id="languageToggle" class="language-btn" type="button">
+          اردو / English
+        </button>
       </nav>
 
     </div>
@@ -54,269 +59,439 @@
 
   <main>
 
-    <!-- HERO -->
+    <!-- PREMIUM HERO -->
     <section id="home" class="hero-section">
+      <div class="hero-background-glow"></div>
+
       <div class="container hero-content">
 
         <div class="hero-text">
-          <span class="eyebrow">YOUR MDCAT LEARNING PARTNER</span>
+          <span class="eyebrow">
+            <span class="eyebrow-line"></span>
+            YOUR MDCAT LEARNING PARTNER
+            <span class="eyebrow-line"></span>
+          </span>
 
-          <h1>Prepare smarter.<br>Achieve your medical dreams.</h1>
+          <h1>
+            Prepare smarter.<br>
+            Achieve your<br>
+            <em>medical dreams.</em>
+          </h1>
 
-          <p>
-            Practice Biology, Chemistry, Physics, English and Logical Reasoning
-            with free chapter-wise quizzes and tests.
+          <p class="hero-description">
+            Practice Biology, Chemistry, Physics, English and Logical
+            Reasoning with free chapter-wise quizzes and tests.
           </p>
 
-          <p lang="ur">
+          <p class="hero-urdu" lang="ur">
             اپنے میڈیکل کے خواب کو حقیقت بنانے کے لیے آج ہی تیاری شروع کریں۔
           </p>
 
           <div class="hero-actions">
-            <a href="#subjects" class="btn btn-primary">Start Preparation</a>
-            <a href="#fullTest" class="btn btn-outline">Take Full Test</a>
+            <a href="#subjects" class="btn btn-primary">
+              <span>✦</span> Start Preparation <span>→</span>
+            </a>
+
+            <a href="#fullTest" class="btn btn-outline">
+              <span>▶</span> Take Full Test
+            </a>
+          </div>
+
+          <div class="hero-note">
+            <span>✓</span>
+            Free learning • Chapter-wise practice • Anytime access
           </div>
         </div>
 
-        <div class="hero-card">
-          <div class="hero-card-icon">🎓</div>
-          <h2 id="welcomeMessage">Welcome to CHEMPHYBIO MDCAT</h2>
-          <p>Learn • Practice • Improve</p>
-          <strong>100% Free Learning</strong>
-        </div>
+        <!-- MEDICAL VISUAL -->
+        <div class="hero-art" aria-label="Medical education illustration">
 
+          <div class="hero-art-glow"></div>
+
+          <div class="medical-orbit orbit-one"></div>
+          <div class="medical-orbit orbit-two"></div>
+
+          <div class="medical-cross">+</div>
+          <div class="medical-pulse">⌁</div>
+
+          <div class="doctor-illustration">
+            <div class="doctor-halo"></div>
+
+            <svg viewBox="0 0 340 390" role="img"
+              aria-label="Illustration of a medical student in a white coat">
+              <defs>
+                <linearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#ffffff"/>
+                  <stop offset="1" stop-color="#b9cde0"/>
+                </linearGradient>
+                <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#d9eaff"/>
+                  <stop offset="1" stop-color="#7098c0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- shoulders and coat -->
+              <path d="M55 370 Q62 270 112 235 L145 220 L195 220 L230 235 Q285 270 292 370Z"
+                fill="url(#coat)" stroke="#8da8c1" stroke-width="3"/>
+
+              <!-- shirt -->
+              <path d="M132 225 L170 275 L208 225 L198 370 L142 370Z"
+                fill="url(#shirt)"/>
+
+              <!-- neck -->
+              <path d="M145 190 L145 240 Q170 260 195 240 L195 190Z"
+                fill="#c88e70"/>
+
+              <!-- ears -->
+              <ellipse cx="111" cy="137" rx="15" ry="23" fill="#bd8167"/>
+              <ellipse cx="229" cy="137" rx="15" ry="23" fill="#bd8167"/>
+
+              <!-- face -->
+              <path d="M112 104 Q115 47 170 45 Q225 47 228 104
+                L220 166 Q210 207 170 215 Q130 207 120 166Z"
+                fill="#d9a184"/>
+
+              <!-- hair -->
+              <path d="M111 119 Q96 56 145 33 Q200 12 228 73
+                L231 117 Q214 96 207 75 Q175 101 122 91Z"
+                fill="#172437"/>
+
+              <!-- eyes -->
+              <ellipse cx="147" cy="137" rx="5" ry="3.5" fill="#263346"/>
+              <ellipse cx="193" cy="137" rx="5" ry="3.5" fill="#263346"/>
+
+              <!-- eyebrows -->
+              <path d="M135 125 Q147 118 158 124 M181 124 Q194 117 205 125"
+                fill="none" stroke="#49352e" stroke-width="4" stroke-linecap="round"/>
+
+              <!-- nose and smile -->
+              <path d="M170 139 L165 161 L174 163"
+                fill="none" stroke="#a86d59" stroke-width="3" stroke-linecap="round"/>
+              <path d="M151 177 Q170 190 190 177"
+                fill="none" stroke="#8f5148" stroke-width="3" stroke-linecap="round"/>
+
+              <!-- coat lapels -->
+              <path d="M132 225 L165 280 L145 304 L117 239Z"
+                fill="#f9fcff" stroke="#8da8c1" stroke-width="2"/>
+              <path d="M208 225 L175 280 L195 304 L223 239Z"
+                fill="#edf5fc" stroke="#8da8c1" stroke-width="2"/>
+
+              <!-- stethoscope -->
+              <path d="M137 238 Q127 290 170 306 Q213 290 203 238"
+                fill="none" stroke="#b18b4c" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="170" cy="310" r="9" fill="#c5a66a" stroke="#fff" stroke-width="3"/>
+
+              <!-- coat pocket -->
+              <path d="M204 309 L244 309 L244 352 L204 352Z"
+                fill="#dce8f2" stroke="#9aafc3" stroke-width="2"/>
+              <path d="M218 309 L218 330 L229 321 L239 330 L239 309"
+                fill="#c5a66a"/>
+
+              <!-- coat buttons -->
+              <circle cx="181" cy="300" r="3" fill="#b18b4c"/>
+              <circle cx="181" cy="329" r="3" fill="#b18b4c"/>
+            </svg>
+          </div>
+
+          <div class="floating-chip chip-biology">
+            <span>🧬</span> Biology
+          </div>
+
+          <div class="floating-chip chip-chemistry">
+            <span>⚗️</span> Chemistry
+          </div>
+
+          <div class="floating-chip chip-physics">
+            <span>⚛️</span> Physics
+          </div>
+
+          <div class="hero-art-caption">
+            <span>YOUR FUTURE STARTS HERE</span>
+            <strong>Dream • Learn • Achieve</strong>
+          </div>
+
+        </div>
       </div>
-    </section>
 
-    <!-- STATS -->
-    <section class="stats-section">
-      <div class="container stats-grid">
-        <div class="stat-card">
-          <strong>05</strong>
-          <span>Subjects</span>
+      <!-- HERO STATS -->
+      <div class="container hero-stats">
+        <div class="hero-stat">
+          <span class="stat-symbol">🎓</span>
+          <div><strong>05</strong><small>Subjects</small></div>
         </div>
-        <div class="stat-card">
-          <strong>24/7</strong>
-          <span>Practice Access</span>
+
+        <div class="hero-stat">
+          <span class="stat-symbol">◷</span>
+          <div><strong>24/7</strong><small>Practice Access</small></div>
         </div>
-        <div class="stat-card">
-          <strong>FREE</strong>
-          <span>Learning Platform</span>
+
+        <div class="hero-stat">
+          <span class="stat-symbol">✦</span>
+          <div><strong>100%</strong><small>Free Learning</small></div>
         </div>
       </div>
     </section>
 
     <!-- SUBJECTS -->
-    <section id="subjects" class="section">
+    <section id="subjects" class="section subjects-section">
       <div class="container">
 
-        <div class="section-heading">
+        <div class="section-heading centered-heading">
           <span class="eyebrow">LEARN BY SUBJECT</span>
           <h2>Choose Your Subject</h2>
-          <p>Start practicing with subject-based MCQs.</p>
+          <p>Start practising with subject-based MDCAT MCQs.</p>
         </div>
 
         <div class="subject-grid">
 
-          <button class="subject-card" type="button" data-subject="Biology">
+          <button class="subject-card subject-biology" type="button"
+            data-subject="Biology">
             <span class="subject-icon">🧬</span>
+            <span class="subject-tag">LIFE SCIENCE</span>
             <h3>Biology</h3>
             <p>Cell Biology, Genetics and more</p>
+            <span class="subject-arrow">→</span>
           </button>
 
-          <button class="subject-card" type="button" data-subject="Chemistry">
+          <button class="subject-card subject-chemistry" type="button"
+            data-subject="Chemistry">
             <span class="subject-icon">⚗️</span>
+            <span class="subject-tag">CHEMICAL SCIENCE</span>
             <h3>Chemistry</h3>
             <p>Organic, Physical and Inorganic</p>
+            <span class="subject-arrow">→</span>
           </button>
 
-          <button class="subject-card" type="button" data-subject="Physics">
+          <button class="subject-card subject-physics" type="button"
+            data-subject="Physics">
             <span class="subject-icon">⚛️</span>
+            <span class="subject-tag">PHYSICAL SCIENCE</span>
             <h3>Physics</h3>
             <p>Mechanics, Waves and Electricity</p>
+            <span class="subject-arrow">→</span>
           </button>
 
-          <button class="subject-card" type="button" data-subject="English">
-            <span class="subject-icon">📘</span>
+          <button class="subject-card subject-english" type="button"
+            data-subject="English">
+            <span class="subject-icon">📖</span>
+            <span class="subject-tag">LANGUAGE SKILLS</span>
             <h3>English</h3>
             <p>Grammar and Vocabulary</p>
+            <span class="subject-arrow">→</span>
           </button>
 
-          <button class="subject-card" type="button" data-subject="Logical Reasoning">
+          <button class="subject-card subject-logic" type="button"
+            data-subject="Logical Reasoning">
             <span class="subject-icon">🧠</span>
+            <span class="subject-tag">CRITICAL THINKING</span>
             <h3>Logical Reasoning</h3>
             <p>Patterns and Problem Solving</p>
+            <span class="subject-arrow">→</span>
           </button>
 
         </div>
       </div>
     </section>
 
-    <!-- QUICK PRACTICE -->
-    <section id="practice" class="section practice-section">
+    <!-- PRACTICE AND FULL TEST -->
+    <section class="section practice-section">
+      <div class="container practice-grid">
+
+        <!-- QUICK QUIZ -->
+        <div id="practice" class="feature-panel quick-quiz-panel">
+          <div class="feature-panel-content">
+            <span class="feature-kicker">DAILY PRACTICE</span>
+            <h2>Quick Quiz</h2>
+            <p>Test your knowledge and improve your preparation.</p>
+
+            <div class="feature-controls">
+              <label class="visually-hidden" for="subjectSelect">
+                Select subject
+              </label>
+
+              <select id="subjectSelect">
+                <option value="All">All Subjects</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics">Physics</option>
+                <option value="English">English</option>
+                <option value="Logical Reasoning">Logical Reasoning</option>
+              </select>
+
+              <button type="button" class="btn btn-primary"
+                id="quickQuizStart"
+                onclick="document.getElementById('subjectSelect').dispatchEvent(new Event('change'))">
+                Start Quiz ▶
+              </button>
+            </div>
+          </div>
+          <div class="feature-decoration">✓</div>
+        </div>
+
+        <!-- FULL TEST -->
+        <div id="fullTest" class="feature-panel full-test-panel">
+          <div class="feature-panel-content">
+            <span class="feature-kicker">EXAM SIMULATION</span>
+            <h2>Full-Length Practice Test</h2>
+            <p>Attempt a mixed-subject practice test.</p>
+
+            <div class="feature-controls">
+              <label class="visually-hidden" for="testQuestionCount">
+                Number of questions
+              </label>
+
+              <select id="testQuestionCount">
+                <option value="100">100 Questions</option>
+                <option value="180">180 Questions</option>
+              </select>
+
+              <button type="button" id="startFullTest" class="btn btn-primary">
+                Start Test ▶
+              </button>
+            </div>
+          </div>
+          <div class="feature-decoration trophy-decoration">🏆</div>
+        </div>
+
+      </div>
+
+      <!-- QUIZ OUTPUT -->
       <div class="container">
-
-        <div class="section-heading">
-          <span class="eyebrow">DAILY PRACTICE</span>
-          <h2>Quick Quiz</h2>
-          <p>Test your knowledge and improve your preparation.</p>
-        </div>
-
-        <div class="practice-panel">
-          <label for="subjectSelect">Select a subject</label>
-
-          <select id="subjectSelect">
-            <option value="All">All Subjects</option>
-            <option value="Biology">Biology</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Physics">Physics</option>
-            <option value="English">English</option>
-            <option value="Logical Reasoning">Logical Reasoning</option>
-          </select>
-
-          <button type="button" class="btn btn-primary" id="quickQuizStart"
-            onclick="document.getElementById('subjectSelect').dispatchEvent(new Event('change'))">
-            Start Quick Quiz
-          </button>
-        </div>
-
         <div id="quizArea" class="quiz-area" hidden></div>
-
-      </div>
-    </section>
-
-    <!-- FULL TEST -->
-    <section id="fullTest" class="section full-test-section">
-      <div class="container">
-
-        <div class="section-heading">
-          <span class="eyebrow">EXAM SIMULATION</span>
-          <h2>Full-Length Practice Test</h2>
-          <p>Attempt a mixed-subject practice test.</p>
-        </div>
-
-        <div class="full-test-panel">
-
-          <label for="testQuestionCount">Number of questions</label>
-          <select id="testQuestionCount">
-            <option value="100">100 Questions</option>
-            <option value="180">180 Questions</option>
-          </select>
-
-          <button type="button" id="startFullTest" class="btn btn-primary">
-            Start Full Test
-          </button>
-
-          <p class="small-note">
-            Practice test questions depend on the questions available in the database.
-          </p>
-
-        </div>
-
       </div>
     </section>
 
     <!-- AGGREGATE CALCULATOR -->
-    <section id="aggregate" class="section">
+    <section id="aggregate" class="section aggregate-section">
       <div class="container">
-
-        <div class="section-heading">
-          <span class="eyebrow">ADMISSION PLANNING</span>
-          <h2>MDCAT Aggregate Calculator</h2>
-          <p>Enter your marks to calculate an estimated aggregate.</p>
-        </div>
 
         <div class="calculator-panel">
 
-          <div class="calculator-grid">
+          <div class="calculator-heading">
+            <span class="calculator-icon">🎓</span>
             <div>
-              <label for="matricMarks">Matric obtained marks</label>
-              <input id="matricMarks" type="number" min="0" placeholder="Obtained marks">
-            </div>
-
-            <div>
-              <label for="matricTotal">Matric total marks</label>
-              <input id="matricTotal" type="number" min="1" placeholder="Total marks">
-            </div>
-
-            <div>
-              <label for="fscMarks">FSc obtained marks</label>
-              <input id="fscMarks" type="number" min="0" placeholder="Obtained marks">
-            </div>
-
-            <div>
-              <label for="fscTotal">FSc total marks</label>
-              <input id="fscTotal" type="number" min="1" placeholder="Total marks">
-            </div>
-
-            <div>
-              <label for="mdcatMarks">MDCAT obtained marks</label>
-              <input id="mdcatMarks" type="number" min="0" placeholder="Obtained marks">
-            </div>
-
-            <div>
-              <label for="mdcatTotal">MDCAT total marks</label>
-              <input id="mdcatTotal" type="number" min="1" placeholder="Total marks">
+              <span class="feature-kicker">ADMISSION PLANNING</span>
+              <h2>MDCAT Aggregate Calculator</h2>
+              <p>Enter your marks to calculate an estimated aggregate.</p>
             </div>
           </div>
 
-          <button type="button" id="calculateAggregate" class="btn btn-primary">
-            Calculate Aggregate
-          </button>
+          <div class="calculator-grid">
 
-          <h3 id="aggregateResult" aria-live="polite"></h3>
+            <div class="calculator-field">
+              <label for="matricMarks">Matric obtained marks</label>
+              <input id="matricMarks" type="number" min="0"
+                placeholder="Obtained marks">
+            </div>
+
+            <div class="calculator-field">
+              <label for="matricTotal">Matric total marks</label>
+              <input id="matricTotal" type="number" min="1"
+                placeholder="Total marks">
+            </div>
+
+            <div class="calculator-field">
+              <label for="fscMarks">FSc obtained marks</label>
+              <input id="fscMarks" type="number" min="0"
+                placeholder="Obtained marks">
+            </div>
+
+            <div class="calculator-field">
+              <label for="fscTotal">FSc total marks</label>
+              <input id="fscTotal" type="number" min="1"
+                placeholder="Total marks">
+            </div>
+
+            <div class="calculator-field">
+              <label for="mdcatMarks">MDCAT obtained marks</label>
+              <input id="mdcatMarks" type="number" min="0"
+                placeholder="Obtained marks">
+            </div>
+
+            <div class="calculator-field">
+              <label for="mdcatTotal">MDCAT total marks</label>
+              <input id="mdcatTotal" type="number" min="1"
+                placeholder="Total marks">
+            </div>
+
+          </div>
+
+          <div class="calculator-result-area">
+            <button type="button" id="calculateAggregate" class="btn btn-primary">
+              Calculate Aggregate →
+            </button>
+            <h3 id="aggregateResult" aria-live="polite">
+              Your aggregate will appear here
+            </h3>
+          </div>
 
           <p class="small-note">
-            The calculator currently uses example weights. Confirm the official
-            admission formula before relying on the result.
+            This calculator currently uses example weights. Confirm the
+            official admission formula before relying on the result.
           </p>
 
         </div>
       </div>
     </section>
 
-    <!-- POSTER AND ADVERTISEMENT -->
-    <section id="announcements" class="section">
-      <div class="container">
-
-        <div class="section-heading">
-          <span class="eyebrow">LATEST ANNOUNCEMENTS</span>
-          <h2>Posters & Advertisements</h2>
-        </div>
-
-        <div class="content-media-grid">
-
-          <div class="media-card">
-            <img id="posterImage" src="" alt="Latest CHEMPHYBIO poster" hidden>
-            <p>Latest educational poster</p>
-          </div>
-
-          <div class="media-card">
-            <img id="advertisementImage" src="" alt="Advertisement" hidden>
-            <p>Advertisement</p>
-          </div>
-
-        </div>
-
-      </div>
-    </section>
-
-    <!-- UPDATES -->
+    <!-- ANNOUNCEMENTS AND UPDATES -->
     <section id="updates" class="section updates-section">
-      <div class="container">
+      <div class="container updates-layout">
 
-        <div class="section-heading">
-          <span class="eyebrow">STAY INFORMED</span>
-          <h2>Latest MDCAT Updates</h2>
-          <p>Important announcements and preparation updates.</p>
+        <!-- POSTERS -->
+        <div id="announcements" class="updates-column">
+          <span class="feature-kicker">LATEST ANNOUNCEMENTS</span>
+          <h2>Posters & Advertisements</h2>
+
+          <div class="content-media-grid">
+
+            <div class="media-card">
+              <img id="posterImage" src="" alt="Latest CHEMPHYBIO poster" hidden>
+              <div class="media-placeholder">
+                <span>📚</span>
+                <strong>Educational Posters</strong>
+                <small>Latest study material</small>
+              </div>
+            </div>
+
+            <div class="media-card">
+              <img id="advertisementImage" src="" alt="Advertisement" hidden>
+              <div class="media-placeholder">
+                <span>✦</span>
+                <strong>Advertisements</strong>
+                <small>Community announcements</small>
+              </div>
+            </div>
+
+          </div>
         </div>
 
-        <div id="updatesList" class="updates-grid">
-          <article class="update-card">
-            <span class="update-label">CHEMPHYBIO</span>
-            <h3>Welcome to our learning platform</h3>
-            <p>Stay connected for educational updates and practice material.</p>
-          </article>
+        <!-- MDCAT UPDATES -->
+        <div class="updates-column">
+          <span class="feature-kicker">STAY INFORMED</span>
+          <h2>Latest MDCAT Updates</h2>
+
+          <div id="updatesList" class="updates-grid">
+            <article class="update-card">
+              <span class="update-date">CB</span>
+              <div>
+                <h3>Welcome to CHEMPHYBIO</h3>
+                <p>Stay connected for educational updates and practice material.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- ABOUT CARD -->
+        <div class="updates-column about-mini-column">
+          <span class="feature-kicker">OUR PLATFORM</span>
+          <h2>About CHEMPHYBIO</h2>
+          <p>
+            A free learning platform designed to support students with
+            subject practice, quizzes and tests.
+          </p>
+          <a href="#about" class="btn btn-primary">Learn More →</a>
+          <div class="mini-brand-seal">CB</div>
         </div>
 
       </div>
@@ -326,22 +501,26 @@
     <section id="about" class="section about-section">
       <div class="container about-grid">
 
-        <div>
-          <span class="eyebrow">ABOUT THE PLATFORM</span>
+        <div class="about-mark">CB</div>
+
+        <div class="about-content">
+          <span class="feature-kicker">ABOUT THE PLATFORM</span>
           <h2>About CHEMPHYBIO MDCAT</h2>
 
           <p>
             CHEMPHYBIO MDCAT is an educational platform designed to help
-            students practice important subjects through quizzes and tests.
+            students practise important subjects through quizzes and tests.
+            Our goal is to make learning accessible and organised.
           </p>
 
           <p lang="ur">
-            ہمارا مقصد طلبہ کو مفت اور آسان تعلیمی مواد فراہم کرنا ہے۔
+            ہمارا مقصد طلبہ کو مفت، آسان اور معیاری تعلیمی مواد فراہم کرنا ہے۔
           </p>
         </div>
 
         <div class="admin-public-card">
           <img id="adminPublicPhoto" src="" alt="Admin profile" hidden>
+          <div class="admin-avatar-placeholder">CB</div>
           <h3 id="adminPublicName">Platform Admin</h3>
           <p>Administrator — CHEMPHYBIO MDCAT</p>
         </div>
@@ -350,26 +529,30 @@
     </section>
 
     <!-- WHATSAPP COMMUNITY -->
-    <section class="section community-section">
-      <div class="container">
-        <h2>Join Our WhatsApp Community</h2>
-        <p>Connect with fellow students and receive educational updates.</p>
-        <a id="whatsappCommunity" href="#" target="_blank" rel="noopener noreferrer" hidden>
-          Join WhatsApp Community
+    <section class="community-section">
+      <div class="container community-inner">
+        <div class="community-icon">◉</div>
+        <div class="community-copy">
+          <h2>Join Our WhatsApp Community</h2>
+          <p>Get educational updates and study resources.</p>
+        </div>
+        <a id="whatsappCommunity" href="#" target="_blank"
+          rel="noopener noreferrer" hidden>
+          Join Community ↗
         </a>
       </div>
     </section>
 
   </main>
 
-  <!-- ADMIN LOGIN AND DASHBOARD -->
+  <!-- ADMIN PANEL -->
   <section id="adminPanel" class="section admin-section">
     <div class="container">
 
-      <div class="section-heading">
+      <div class="section-heading centered-heading">
         <span class="eyebrow">RESTRICTED AREA</span>
-        <h2>Admin Panel</h2>
-        <p>Authorized administrator access only.</p>
+        <h2>Administrator Access</h2>
+        <p>Secure management of CHEMPHYBIO MDCAT.</p>
       </div>
 
       <div class="admin-panel-card">
@@ -386,7 +569,6 @@
             autocomplete="current-password" placeholder="Password" required>
 
           <button type="submit" class="btn btn-primary">Login</button>
-
           <p id="adminMessage" aria-live="polite"></p>
         </form>
 
@@ -442,7 +624,6 @@
                 placeholder="Explain the correct answer"></textarea>
 
               <button type="submit" class="btn btn-primary">Save MCQ</button>
-
               <p id="adminStatus" aria-live="polite"></p>
             </form>
           </div>
@@ -453,17 +634,36 @@
           </div>
 
         </div>
-
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="container">
-      <a href="#home" class="footer-brand">CHEMPHYBIO MDCAT</a>
-      <p>Free learning. Better preparation. Brighter futures.</p>
+    <div class="container footer-main">
+
+      <a href="#home" class="footer-brand">
+        <span class="brand-mark">CB</span>
+        <span>
+          <strong>CHEMPHYBIO MDCAT</strong>
+          <small>Free learning. Better preparation.</small>
+        </span>
+      </a>
+
+      <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#practice">Practice</a>
+        <a href="#fullTest">Full Test</a>
+        <a href="#updates">Updates</a>
+        <a href="#about">About</a>
+      </div>
+
+    </div>
+
+    <div class="container footer-bottom">
       <p>© <span id="currentYear">2026</span> CHEMPHYBIO MDCAT. All rights reserved.</p>
+      <a href="#home">Back to Top ↑</a>
     </div>
   </footer>
 
