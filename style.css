@@ -1894,3 +1894,65 @@ body.lang-ur .test-option {
     animation-duration: .01ms !important;
   }
 }
+/* ADMIN STUDENTS + GALLERY UPLOAD ENHANCEMENTS */
+
+#adminStudentsList {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+#adminStudentsList .admin-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+input[type="file"] {
+  min-height: auto;
+  padding: 12px;
+  cursor: pointer;
+  border: 1px dashed rgba(82,214,238,.4);
+  background: rgba(82,214,238,.04);
+}
+
+input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 7px;
+  background: #2878cb;
+  color: white;
+  cursor: pointer;
+}
+
+#adminPhotoUploadStatus,
+#posterUploadStatus,
+#adUploadStatus {
+  margin-top: 8px;
+  color: var(--cyan);
+  font-size: 12px;
+}
+
+.admin-tab-panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  #adminStudentsList .admin-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-tabs {
+    gap: 7px;
+  }
+
+  .admin-tab {
+    flex: 1 1 auto;
+    padding: 10px;
+  }
+}
