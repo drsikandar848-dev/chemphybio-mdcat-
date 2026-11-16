@@ -1,8 +1,6 @@
-
 /* =========================================================
    CHEMPHYBIO MDCAT — MAIN APPLICATION
-   Firebase | Google Login | Student Dashboard
-   Practice | Timed Tests | Admin Dashboard
+   Corrected Premium Application
 ========================================================= */
 
 import { auth, db } from "./firebase-config.js";
@@ -30,15 +28,23 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 /* =========================================================
-   IMPORTANT ADMIN SETTING
-   Preserve your existing Admin UID from your old script.js.
-   Never share your UID or password publicly.
+   ADMIN UID
+   Replace placeholder with your existing Admin UID.
+   Never share your UID publicly.
 ========================================================= */
 
-const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1";
+const ADMIN_UID = "PASTE_YOUR_EXISTING_ADMIN_UID_HERE";
 
 /* =========================================================
-   FIRESTORE COLLECTIONS
+   CLOUDINARY SETTINGS
+========================================================= */
+
+const CLOUDINARY_CLOUD_NAME = "uwnimowp";
+const CLOUDINARY_UPLOAD_PRESET = "chemphybio_site_images";
+const CLOUDINARY_FOLDER = "chemphybio-mdcat";
+
+/* =========================================================
+   COLLECTIONS
 ========================================================= */
 
 const QUESTIONS_COLLECTION = "questions";
@@ -74,18 +80,23 @@ let siteContent = {};
 let studentTestHistory = [];
 
 const googleProvider = new GoogleAuthProvider();
+
 googleProvider.setCustomParameters({
   prompt: "select_account"
 });
 
-const $ = (id) => document.getElementById(id);
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const $ = id => document.getElementById(id);
 
 function showMessage(id, message, isError = false) {
   const element = $(id);
   if (!element) return;
 
   element.textContent = message;
-  element.style.color = isError ? "#ff8a8a" : "#52d6ee";
+  element.style.color = isError ? "#ff7272" : "#52d6ee";
 }
 
 function escapeHTML(value = "") {
@@ -105,9 +116,9 @@ function formatDate(value) {
     ? value.toDate()
     : new Date(value);
 
-  if (Number.isNaN(date.getTime())) return "Recently";
-
-  return date.toLocaleDateString();
+  return Number.isNaN(date.getTime())
+    ? "Recently"
+    : date.toLocaleDateString();
 }
 
 function shuffleArray(array) {
@@ -130,8 +141,24 @@ function setButtonLoading(button, loading, text = "Please wait...") {
     button.textContent = text;
   } else {
     button.disabled = false;
-    button.textContent = button.dataset.originalText || button.textContent;
+    button.textContent =
+      button.dataset.originalText || button.textContent;
   }
+}
+
+function isAdmin() {
+  return Boolean(
+    currentUser &&
+    ADMIN_UID !== "PASTE_YOUR_EXISTING_ADMIN_UID_HERE" &&
+    ADMIN_UID &&
+    currentUser.uid === ADMIN_UID
+  );
+}
+
+function safeDocumentId(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, "_");
 }
 
 /* =========================================================
@@ -151,15 +178,16 @@ async function googleLogin(buttonId, messageId) {
 
     let message = "Login failed. Please try again.";
 
-    if (error.code === "auth/popup-closed-by-user") {
-      message = "Login window closed. Please try again.";
-    } else if (error.code === "auth/unauthorized-domain") {
+    if (error.code === "auth/unauthorized-domain") {
       message = "This website domain is not authorized in Firebase.";
     } else if (error.code === "auth/popup-blocked") {
-      message = "Allow popups for this website and try again.";
+      message = "Allow popups and try again.";
+    } else if (error.code === "auth/popup-closed-by-user") {
+      message = "Login window was closed.";
     }
 
     showMessage(messageId, message, true);
+
   } finally {
     setButtonLoading(button, false);
   }
@@ -195,7 +223,7 @@ $("adminLogout")?.addEventListener("click", async () => {
    AUTH STATE
 ========================================================= */
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user => {
   currentUser = user;
 
   if (!user) {
@@ -206,7 +234,7 @@ onAuthStateChanged(auth, async (user) => {
 
   await loadStudentDashboard(user);
 
-  if (ADMIN_UID && ADMIN_UID !== "PASTE_YOUR_EXISTING_ADMIN_UID_HERE" && user.uid === ADMIN_UID) {
+  if (isAdmin()) {
     showAdminLoggedIn(user);
     await loadAdminData();
   } else {
@@ -229,7 +257,8 @@ function showAdminLoggedIn(user) {
   $("adminDashboard")?.removeAttribute("hidden");
 
   if ($("adminDisplayName")) {
-    $("adminDisplayName").textContent = user.displayName || "Administrator";
+    $("adminDisplayName").textContent =
+      user.displayName || "Administrator";
   }
 
   if ($("adminProfilePhoto")) {
@@ -245,7 +274,9 @@ function showAdminLoggedIn(user) {
 
 async function loadQuestions() {
   try {
-    const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
+    const snapshot = await getDocs(
+      collection(db, QUESTIONS_COLLECTION)
+    );
 
     allQuestions = snapshot.docs.map(item => ({
       id: item.id,
@@ -254,7 +285,9 @@ async function loadQuestions() {
       question.question &&
       Array.isArray(question.options) &&
       question.options.length === 4 &&
-      Number.isInteger(Number(question.answer))
+      Number.isInteger(Number(question.answer)) &&
+      Number(question.answer) >= 0 &&
+      Number(question.answer) <= 3
     );
 
     updateSubjectCounts();
@@ -262,7 +295,12 @@ async function loadQuestions() {
 
   } catch (error) {
     console.error("Question loading error:", error);
-    showMessage("mockStatus", "Unable to load questions. Check your internet or Firestore rules.", true);
+
+    showMessage(
+      "mockStatus",
+      "Unable to load questions. Check Firestore rules.",
+      true
+    );
   }
 }
 
@@ -275,11 +313,13 @@ function updateSubjectCounts() {
     "Logical Reasoning": "logicalCount"
   };
 
-  Object.entries(subjects).forEach(([subject, elementId]) => {
-    const count = allQuestions.filter(q => q.subject === subject).length;
+  Object.entries(subjects).forEach(([subject, id]) => {
+    const count = allQuestions.filter(
+      question => question.subject === subject
+    ).length;
 
-    if ($(elementId)) {
-      $(elementId).textContent = `${count} MCQs`;
+    if ($(id)) {
+      $(id).textContent = `${count} MCQs`;
     }
   });
 }
@@ -314,18 +354,23 @@ document.querySelectorAll("[data-start-subject]").forEach(button => {
     }
 
     $("practice")?.scrollIntoView({ behavior: "smooth" });
+
     startQuickPractice(subject, 10);
   });
 });
 
 function startQuickPractice(subject, count) {
-  const available = allQuestions.filter(q => q.subject === subject);
+  const available = allQuestions.filter(
+    question => question.subject === subject
+  );
 
   if (!available.length) {
     $("quizArea").innerHTML = `
       <div class="quiz-result">
-        No questions are currently available for ${escapeHTML(subject)}.
-      </div>`;
+        No questions are currently available for
+        ${escapeHTML(subject)}.
+      </div>
+    `;
     return;
   }
 
@@ -350,16 +395,26 @@ function renderQuickQuestion() {
   $("quizArea").innerHTML = `
     <div class="quiz-question">
       <p>Question ${currentQuizIndex + 1} of ${currentQuiz.length}</p>
+
       <h4>${escapeHTML(question.question)}</h4>
 
       ${question.options.map((option, index) => `
-        <button class="quiz-option" data-quick-option="${index}">
-          ${String.fromCharCode(65 + index)}. ${escapeHTML(option)}
+        <button
+          class="quiz-option"
+          data-quick-option="${index}"
+          type="button">
+          ${String.fromCharCode(65 + index)}.
+          ${escapeHTML(option)}
         </button>
       `).join("")}
 
       <div id="quickFeedback" class="quiz-feedback"></div>
-      <button class="btn" id="quickNext" type="button" disabled>
+
+      <button
+        class="btn"
+        id="quickNext"
+        type="button"
+        disabled>
         Next Question
       </button>
     </div>
@@ -367,7 +422,9 @@ function renderQuickQuestion() {
 
   document.querySelectorAll("[data-quick-option]").forEach(button => {
     button.addEventListener("click", () => {
-      answerQuickQuestion(Number(button.dataset.quickOption));
+      answerQuickQuestion(
+        Number(button.dataset.quickOption)
+      );
     });
   });
 
@@ -387,6 +444,7 @@ function answerQuickQuestion(selectedIndex) {
 
   document.querySelectorAll("[data-quick-option]").forEach(button => {
     const index = Number(button.dataset.quickOption);
+
     button.disabled = true;
 
     if (index === correctAnswer) {
@@ -403,11 +461,13 @@ function answerQuickQuestion(selectedIndex) {
   } else {
     $("quickFeedback").textContent =
       `Incorrect. Correct answer: ${question.options[correctAnswer]}`;
+
     $("quickFeedback").style.color = "#ff9292";
   }
 
   if (question.explanation) {
-    $("quickFeedback").textContent += ` Explanation: ${question.explanation}`;
+    $("quickFeedback").textContent +=
+      ` Explanation: ${question.explanation}`;
   }
 
   $("quickNext").disabled = false;
@@ -425,9 +485,17 @@ function renderQuickResult() {
   $("quizArea").innerHTML = `
     <div class="quiz-result">
       <h3>Practice Completed</h3>
-      <p>Correct Answers: ${currentQuizScore} / ${currentQuiz.length}</p>
+
+      <p>
+        Correct Answers:
+        ${currentQuizScore} / ${currentQuiz.length}
+      </p>
+
       <h2>${percentage}%</h2>
-      <button class="btn" id="practiceAgain" type="button">Practice Again</button>
+
+      <button class="btn" id="practiceAgain" type="button">
+        Practice Again
+      </button>
     </div>
   `;
 
@@ -440,461 +508,637 @@ function renderQuickResult() {
 }
 
 /* =========================================================
-   TIMED TEST SYSTEM
+   PART 1 END
+   Part 2 will continue in the same file.
+========================================================= */
+/* =========================================================
+   FULL EXAM SYSTEM
 ========================================================= */
 
-$("startFullTest")?.addEventListener("click", () => {
-  const subject = $("testSubject")?.value || "All";
-  const count = Number($("testQuestionCount")?.value || 180);
+const TEST_LENGTHS = [10, 20, 30, 40, 50, 70, 80, 100, 180];
 
-  startTest(subject, count);
-});
+const SUBJECT_NAMES = [
+  "Biology",
+  "Chemistry",
+  "Physics",
+  "English",
+  "Logical Reasoning",
+  "All"
+];
 
-function startTest(subject, requestedCount) {
-  const available = subject === "All"
-    ? allQuestions
-    : allQuestions.filter(q => q.subject === subject);
+function getTestDuration(count) {
+  return count * 60;
+}
 
-  if (!available.length) {
-    showMessage("mockStatus", "No MCQs are available for this test yet.", true);
+function startFullTest(subject, requestedCount) {
+  if (!currentUser) {
+    alert("Please login with Google before starting a test.");
     return;
   }
 
-  testQuestions = shuffleArray(available).slice(0, requestedCount);
-
-  testAnswers = new Array(testQuestions.length).fill(null);
-  testReview = new Array(testQuestions.length).fill(false);
-  testCurrentIndex = 0;
-  testFinished = false;
-  testStartedAt = new Date();
-  activeTestSubject = subject;
-
-  // One minute per question as a practice timer.
-  testSecondsRemaining = testQuestions.length * 60;
-
-  $("mainWebsite")?.setAttribute("hidden", "");
-  $("testResultScreen")?.setAttribute("hidden", "");
-  $("testEnvironment")?.removeAttribute("hidden");
-
-  if ($("testSubjectTitle")) {
-    $("testSubjectTitle").textContent =
-      subject === "All" ? "Full MDCAT Mock Test" : `${subject} Test`;
+  if (isAdmin()) {
+    alert("Please use a student account to attempt tests.");
+    return;
   }
 
-  if (testQuestions.length < requestedCount) {
-    showMessage(
-      "mockStatus",
-      `Only ${testQuestions.length} questions are currently available. This test will use the available questions.`
+  const count = Number(requestedCount);
+
+  if (!Number.isInteger(count) || count < 1 || count > 180) {
+    alert("Invalid test length.");
+    return;
+  }
+
+  let available = allQuestions.filter(question =>
+    subject === "All" || question.subject === subject
+  );
+
+  if (!available.length) {
+    alert("No questions available for this test.");
+    return;
+  }
+
+  if (available.length < count) {
+    alert(
+      `Only ${available.length} questions are available. Please choose a smaller test.`
     );
+    return;
   }
+
+  testQuestions = shuffleArray(available).slice(0, count);
+  testAnswers = Array(count).fill(null);
+  testReview = Array(count).fill(false);
+
+  testCurrentIndex = 0;
+  testSecondsRemaining = getTestDuration(count);
+  testStartedAt = Date.now();
+  activeTestSubject = subject;
+  testFinished = false;
+
+  $("testSetup")?.setAttribute("hidden", "");
+  $("testInterface")?.removeAttribute("hidden");
 
   renderTestQuestion();
   renderQuestionNavigator();
-  updateTestProgress();
-  startTestTimer();
-}
+  updateTestTimer();
 
-function startTestTimer() {
   clearInterval(testInterval);
 
-  updateTimerDisplay();
-
   testInterval = setInterval(() => {
+    if (testFinished) {
+      clearInterval(testInterval);
+      return;
+    }
+
     testSecondsRemaining--;
 
-    updateTimerDisplay();
+    updateTestTimer();
 
     if (testSecondsRemaining <= 0) {
       clearInterval(testInterval);
-      finishTest(true);
+      finishFullTest(true);
     }
   }, 1000);
 }
 
-function updateTimerDisplay() {
+/* =========================================================
+   TEST SETUP BUTTONS
+========================================================= */
+
+$("startFullTest")?.addEventListener("click", () => {
+  const subject = $("testSubject")?.value || "All";
+  const count = Number($("testLength")?.value || 10);
+
+  startFullTest(subject, count);
+});
+
+document.querySelectorAll("[data-test-subject]").forEach(button => {
+  button.addEventListener("click", () => {
+    const subject = button.dataset.testSubject;
+
+    if ($("testSubject")) {
+      $("testSubject").value = subject;
+    }
+
+    $("testSetup")?.scrollIntoView({ behavior: "smooth" });
+  });
+});
+
+/* =========================================================
+   TIMER
+========================================================= */
+
+function updateTestTimer() {
   const minutes = Math.floor(testSecondsRemaining / 60);
   const seconds = testSecondsRemaining % 60;
 
+  const display =
+    `${String(minutes).padStart(2, "0")}:` +
+    `${String(seconds).padStart(2, "0")}`;
+
   if ($("testTimer")) {
-    $("testTimer").textContent =
-      `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    $("testTimer").textContent = display;
   }
 
   if ($("testTimer")) {
-    $("testTimer").style.color =
-      testSecondsRemaining <= 60 ? "#ff7272" : "#52d6ee";
+    $("testTimer").classList.toggle(
+      "timer-warning",
+      testSecondsRemaining <= 300
+    );
   }
 }
 
+/* =========================================================
+   RENDER TEST QUESTION
+========================================================= */
+
 function renderTestQuestion() {
+  if (testFinished) return;
+
   const question = testQuestions[testCurrentIndex];
 
   if (!question) return;
 
-  $("testQuestionNumber").textContent =
-    `QUESTION ${String(testCurrentIndex + 1).padStart(2, "0")}`;
+  const selectedAnswer = testAnswers[testCurrentIndex];
 
-  $("testQuestionChapter").textContent = question.chapter || "General";
+  $("testQuestionNumber").textContent =
+    `Question ${testCurrentIndex + 1} of ${testQuestions.length}`;
 
   $("testQuestionText").textContent = question.question;
 
-  $("testOptions").innerHTML = question.options.map((option, index) => `
-    <button
-      class="test-option ${testAnswers[testCurrentIndex] === index ? "selected" : ""}"
-      data-test-option="${index}"
-      type="button">
-      <span class="test-option-letter">${String.fromCharCode(65 + index)}</span>
-      <span>${escapeHTML(option)}</span>
-    </button>
-  `).join("");
+  $("testOptions").innerHTML = question.options.map(
+    (option, index) => `
+      <button
+        class="test-option ${selectedAnswer === index ? "selected" : ""}"
+        data-test-option="${index}"
+        type="button">
+        <span>${String.fromCharCode(65 + index)}.</span>
+        ${escapeHTML(option)}
+      </button>
+    `
+  ).join("");
 
   document.querySelectorAll("[data-test-option]").forEach(button => {
     button.addEventListener("click", () => {
-      const selected = Number(button.dataset.testOption);
-
-      testAnswers[testCurrentIndex] = selected;
-
-      renderTestQuestion();
-      renderQuestionNavigator();
-      updateTestProgress();
+      selectTestAnswer(Number(button.dataset.testOption));
     });
   });
 
-  $("testPrevious").disabled = testCurrentIndex === 0;
+  if ($("markForReview")) {
+    $("markForReview").textContent =
+      testReview[testCurrentIndex]
+        ? "Remove Review Mark"
+        : "Mark for Review";
+  }
 
-  $("testNext").textContent =
-    testCurrentIndex === testQuestions.length - 1 ? "Finish →" : "Next →";
+  if ($("previousQuestion")) {
+    $("previousQuestion").disabled = testCurrentIndex === 0;
+  }
 
-  $("markForReview").textContent =
-    testReview[testCurrentIndex]
-      ? "★ Remove Review Mark"
-      : "☆ Mark for Review";
+  if ($("nextQuestion")) {
+    $("nextQuestion").textContent =
+      testCurrentIndex === testQuestions.length - 1
+        ? "Last Question"
+        : "Next";
+  }
+
+  updateTestProgress();
 }
 
+/* =========================================================
+   SELECT ANSWER
+========================================================= */
+
+function selectTestAnswer(index) {
+  if (testFinished) return;
+
+  testAnswers[testCurrentIndex] = index;
+
+  renderTestQuestion();
+  renderQuestionNavigator();
+}
+
+/* =========================================================
+   QUESTION NAVIGATOR
+========================================================= */
+
 function renderQuestionNavigator() {
-  if (!$("questionNavigator")) return;
+  const navigator = $("questionNavigator");
 
-  $("questionNavigator").innerHTML = testQuestions.map((question, index) => {
-    let status = "";
+  if (!navigator) return;
 
-    if (testAnswers[index] !== null) status = "answered";
-    if (testReview[index]) status = "review";
+  navigator.innerHTML = testQuestions.map((question, index) => {
+    let classes = "question-nav-item";
 
-    if (index === testCurrentIndex) status += " current";
+    if (testAnswers[index] !== null) {
+      classes += " answered";
+    }
+
+    if (testReview[index]) {
+      classes += " review";
+    }
+
+    if (index === testCurrentIndex) {
+      classes += " active";
+    }
 
     return `
       <button
-        type="button"
-        class="navigator-question ${status}"
-        data-jump-question="${index}">
+        class="${classes}"
+        data-nav-question="${index}"
+        type="button">
         ${index + 1}
       </button>
     `;
   }).join("");
 
-  document.querySelectorAll("[data-jump-question]").forEach(button => {
+  document.querySelectorAll("[data-nav-question]").forEach(button => {
     button.addEventListener("click", () => {
-      testCurrentIndex = Number(button.dataset.jumpQuestion);
+      testCurrentIndex = Number(button.dataset.navQuestion);
+
       renderTestQuestion();
       renderQuestionNavigator();
-      updateTestProgress();
     });
   });
 }
 
-function updateTestProgress() {
-  const answered = testAnswers.filter(answer => answer !== null).length;
-  const total = testQuestions.length;
-  const percentage = total ? (answered / total) * 100 : 0;
+/* =========================================================
+   TEST PROGRESS
+========================================================= */
 
-  if ($("testProgressText")) {
-    $("testProgressText").textContent =
-      `Question ${testCurrentIndex + 1} of ${total}`;
+function updateTestProgress() {
+  const answered = testAnswers.filter(
+    answer => answer !== null
+  ).length;
+
+  const total = testQuestions.length;
+
+  if ($("testAnsweredCount")) {
+    $("testAnsweredCount").textContent = answered;
   }
 
-  if ($("testAnsweredText")) {
-    $("testAnsweredText").textContent = `Answered: ${answered}`;
+  if ($("testRemainingCount")) {
+    $("testRemainingCount").textContent = total - answered;
   }
 
   if ($("testProgressBar")) {
-    $("testProgressBar").style.width = `${percentage}%`;
+    $("testProgressBar").style.width =
+      `${(answered / total) * 100}%`;
   }
 }
 
-$("testPrevious")?.addEventListener("click", () => {
-  if (testCurrentIndex <= 0) return;
+/* =========================================================
+   PREVIOUS / NEXT / SKIP
+========================================================= */
 
-  testCurrentIndex--;
-  renderTestQuestion();
-  renderQuestionNavigator();
-  updateTestProgress();
+$("previousQuestion")?.addEventListener("click", () => {
+  if (testCurrentIndex > 0) {
+    testCurrentIndex--;
+    renderTestQuestion();
+    renderQuestionNavigator();
+  }
 });
 
-$("testNext")?.addEventListener("click", () => {
+$("nextQuestion")?.addEventListener("click", () => {
   if (testCurrentIndex < testQuestions.length - 1) {
     testCurrentIndex++;
     renderTestQuestion();
     renderQuestionNavigator();
-    updateTestProgress();
-  } else {
-    finishTest(false);
   }
 });
 
-$("testSkip")?.addEventListener("click", () => {
+$("skipQuestion")?.addEventListener("click", () => {
   if (testCurrentIndex < testQuestions.length - 1) {
     testCurrentIndex++;
-  } else {
-    testCurrentIndex = 0;
-  }
-
-  renderTestQuestion();
-  renderQuestionNavigator();
-  updateTestProgress();
-});
-
-$("markForReview")?.addEventListener("click", () => {
-  testReview[testCurrentIndex] = !testReview[testCurrentIndex];
-
-  renderTestQuestion();
-  renderQuestionNavigator();
-});
-
-$("submitTest")?.addEventListener("click", () => {
-  const unanswered = testAnswers.filter(answer => answer === null).length;
-
-  const confirmation = unanswered
-    ? `You have ${unanswered} unanswered questions. Submit your test?`
-    : "Are you sure you want to submit your test?";
-
-  if (confirm(confirmation)) {
-    finishTest(false);
-  }
-});
-
-$("exitTest")?.addEventListener("click", () => {
-  if (confirm("Exit this test? Your current answers will not be saved as a completed test.")) {
-    clearInterval(testInterval);
-
-    $("testEnvironment")?.setAttribute("hidden", "");
-    $("mainWebsite")?.removeAttribute("hidden");
+    renderTestQuestion();
+    renderQuestionNavigator();
   }
 });
 
 /* =========================================================
-   TEST RESULTS AND REVIEW
+   MARK FOR REVIEW
 ========================================================= */
 
-async function finishTest(timeExpired = false) {
+$("markForReview")?.addEventListener("click", () => {
+  testReview[testCurrentIndex] =
+    !testReview[testCurrentIndex];
+
+  renderTestQuestion();
+  renderQuestionNavigator();
+});
+
+/* =========================================================
+   SUBMIT CONFIRMATION
+========================================================= */
+
+$("submitTest")?.addEventListener("click", () => {
+  const unanswered = testAnswers.filter(
+    answer => answer === null
+  ).length;
+
+  const message = unanswered
+    ? `You have ${unanswered} unanswered questions. Submit anyway?`
+    : "Are you sure you want to submit your test?";
+
+  if (confirm(message)) {
+    finishFullTest(false);
+  }
+});
+
+/* =========================================================
+   FINISH TEST
+========================================================= */
+
+async function finishFullTest(autoSubmitted = false) {
   if (testFinished) return;
 
   testFinished = true;
+
   clearInterval(testInterval);
 
   let correct = 0;
-  let wrong = 0;
-  let unattempted = 0;
+  let incorrect = 0;
+  let skipped = 0;
+
+  const subjectResults = {};
 
   testQuestions.forEach((question, index) => {
-    if (testAnswers[index] === null) {
-      unattempted++;
-    } else if (testAnswers[index] === Number(question.answer)) {
+    const selected = testAnswers[index];
+    const answer = Number(question.answer);
+    const subject = question.subject || "Other";
+
+    if (!subjectResults[subject]) {
+      subjectResults[subject] = {
+        total: 0,
+        correct: 0,
+        incorrect: 0,
+        skipped: 0
+      };
+    }
+
+    subjectResults[subject].total++;
+
+    if (selected === null) {
+      skipped++;
+      subjectResults[subject].skipped++;
+    } else if (selected === answer) {
       correct++;
+      subjectResults[subject].correct++;
     } else {
-      wrong++;
+      incorrect++;
+      subjectResults[subject].incorrect++;
     }
   });
 
   const total = testQuestions.length;
-  const percentage = total
-    ? Math.round((correct / total) * 100)
-    : 0;
-
-  const durationSeconds = Math.max(
-    0,
-    Math.floor((Date.now() - testStartedAt.getTime()) / 1000)
-  );
+  const percentage = Math.round((correct / total) * 100);
 
   const result = {
     subject: activeTestSubject,
     total,
     correct,
-    wrong,
-    unattempted,
+    incorrect,
+    skipped,
     percentage,
-    durationSeconds,
-    completedAt: new Date()
+    subjectResults,
+    autoSubmitted,
+    durationSeconds: Math.max(
+      0,
+      Math.floor((Date.now() - testStartedAt) / 1000)
+    ),
+    createdAt: new Date().toISOString()
   };
 
-  $("testEnvironment")?.setAttribute("hidden", "");
-  $("testResultScreen")?.removeAttribute("hidden");
-
-  $("resultPercentage").textContent = `${percentage}%`;
-  $("resultTotal").textContent = total;
-  $("resultCorrect").textContent = correct;
-  $("resultWrong").textContent = wrong;
-  $("resultUnattempted").textContent = unattempted;
-
-  $("resultMessage").textContent = timeExpired
-    ? "Time is over. Your test has been submitted automatically."
-    : "Your test has been submitted successfully.";
-
-  renderAnswerReview();
-
-  if (currentUser && ADMIN_UID !== currentUser.uid) {
-    await saveStudentTest(result);
-  }
-
-  if (currentUser && ADMIN_UID === currentUser.uid) {
-    // Admin test attempts are not stored as student results.
-  }
-}
-
-function renderAnswerReview() {
-  $("resultAnswerReview").innerHTML = testQuestions.map((question, index) => {
-    const selected = testAnswers[index];
-    const correct = Number(question.answer);
-
-    let status = "Unattempted";
-
-    if (selected !== null) {
-      status = selected === correct ? "Correct" : "Incorrect";
-    }
-
-    return `
-      <div class="answer-review-item">
-        <strong>Q${index + 1}. ${escapeHTML(question.question)}</strong>
-        <p>Status: ${status}</p>
-        <p>Your answer: ${
-          selected === null
-            ? "Not attempted"
-            : escapeHTML(question.options[selected])
-        }</p>
-        <p>Correct answer: ${escapeHTML(question.options[correct])}</p>
-        ${question.explanation
-          ? `<p>Explanation: ${escapeHTML(question.explanation)}</p>`
-          : ""}
-      </div>
-    `;
-  }).join("");
-}
-
-$("reviewAnswers")?.addEventListener("click", () => {
-  const review = $("resultAnswerReview");
-
-  review.hidden = !review.hidden;
-
-  $("reviewAnswers").textContent =
-    review.hidden ? "Review Answers" : "Hide Answer Review";
-});
-
-$("backToWebsite")?.addEventListener("click", () => {
-  $("testResultScreen")?.setAttribute("hidden", "");
-  $("mainWebsite")?.removeAttribute("hidden");
-
-  $("mockTests")?.scrollIntoView({ behavior: "smooth" });
-});
-
-/* =========================================================
-   STUDENT DATA STORAGE
-   Each student uses their own UID document.
-   Test attempts are stored in a subcollection.
-========================================================= */
-
-async function saveStudentTest(result) {
-  if (!currentUser) return;
+  renderFullTestResult(result);
 
   try {
-    const studentRef = doc(
-      db,
-      STUDENTS_COLLECTION,
-      currentUser.uid
-    );
-
-    const testRef = collection(
-      db,
-      STUDENTS_COLLECTION,
-      currentUser.uid,
-      "tests"
-    );
-
-    const subjectStatsRef = doc(
-      db,
-      STUDENTS_COLLECTION,
-      currentUser.uid,
-      "subjects",
-      safeDocumentId(result.subject)
-    );
-
-    const existingStudent = await getDoc(studentRef);
-
-    const oldData = existingStudent.exists()
-      ? existingStudent.data()
-      : {};
-
-    const oldTests = Number(oldData.totalTests || 0);
-    const oldAttempted = Number(oldData.totalAttempted || 0);
-    const oldCorrect = Number(oldData.totalCorrect || 0);
-
-    const attempted = result.total - result.unattempted;
-
-    await addDoc(testRef, {
-      ...result,
-      createdAt: serverTimestamp()
-    });
-
-    await setDoc(studentRef, {
-      uid: currentUser.uid,
-      name: currentUser.displayName || "Student",
-      email: currentUser.email || "",
-      photoURL: currentUser.photoURL || "",
-      totalTests: oldTests + 1,
-      totalAttempted: oldAttempted + attempted,
-      totalCorrect: oldCorrect + result.correct,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    const oldSubjectSnapshot = await getDoc(subjectStatsRef);
-    const oldSubject = oldSubjectSnapshot.exists()
-      ? oldSubjectSnapshot.data()
-      : {};
-
-    await setDoc(subjectStatsRef, {
-      subject: result.subject,
-      totalTests: Number(oldSubject.totalTests || 0) + 1,
-      attempted: Number(oldSubject.attempted || 0) + attempted,
-      correct: Number(oldSubject.correct || 0) + result.correct,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-
-    await loadStudentDashboard(currentUser);
-
+    await saveStudentTestResult(result);
   } catch (error) {
-    console.error("Student progress save error:", error);
+    console.error("Could not save test result:", error);
 
     showMessage(
-      "studentAuthMessage",
-      "Test completed, but progress could not be saved. Firestore student rules may need updating.",
+      "testSaveStatus",
+      "Result displayed, but saving failed. Please check Firestore rules.",
       true
     );
   }
 }
 
-function safeDocumentId(value) {
-  return String(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]/g, "_");
+/* =========================================================
+   SAVE STUDENT RESULT
+========================================================= */
+
+async function saveStudentTestResult(result) {
+  if (!currentUser || isAdmin()) return;
+
+  const studentRef = doc(
+    db,
+    STUDENTS_COLLECTION,
+    currentUser.uid
+  );
+
+  const studentSnapshot = await getDoc(studentRef);
+
+  const previous = studentSnapshot.exists()
+    ? studentSnapshot.data()
+    : {};
+
+  await setDoc(studentRef, {
+    uid: currentUser.uid,
+    name: currentUser.displayName || "Student",
+    email: currentUser.email || "",
+    photoURL: currentUser.photoURL || "",
+    lastActive: serverTimestamp(),
+    totalTests: Number(previous.totalTests || 0) + 1,
+    totalAttempted: Number(previous.totalAttempted || 0) + result.total,
+    totalCorrect: Number(previous.totalCorrect || 0) + result.correct
+  }, { merge: true });
+
+  const testsRef = collection(
+    db,
+    STUDENTS_COLLECTION,
+    currentUser.uid,
+    "tests"
+  );
+
+  await addDoc(testsRef, {
+    ...result,
+    createdAt: serverTimestamp()
+  });
+
+  for (const [subject, data] of Object.entries(result.subjectResults)) {
+    const subjectRef = doc(
+      db,
+      STUDENTS_COLLECTION,
+      currentUser.uid,
+      "subjects",
+      safeDocumentId(subject)
+    );
+
+    const subjectSnapshot = await getDoc(subjectRef);
+
+    const old = subjectSnapshot.exists()
+      ? subjectSnapshot.data()
+      : {};
+
+    await setDoc(subjectRef, {
+      subject,
+      total: Number(old.total || 0) + data.total,
+      correct: Number(old.correct || 0) + data.correct,
+      incorrect: Number(old.incorrect || 0) + data.incorrect,
+      skipped: Number(old.skipped || 0) + data.skipped,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }
+
+  showMessage("testSaveStatus", "Your test result has been saved.");
 }
 
+/* =========================================================
+   RESULT SCREEN
+========================================================= */
+
+function renderFullTestResult(result) {
+  $("testInterface")?.setAttribute("hidden", "");
+  $("testResult")?.removeAttribute("hidden");
+
+  if (!$("testResult")) return;
+
+  $("testResult").innerHTML = `
+    <div class="test-result-card">
+      <h2>${result.autoSubmitted ? "Time Completed" : "Test Submitted"}</h2>
+
+      <h1>${result.percentage}%</h1>
+
+      <p>${result.correct} Correct out of ${result.total}</p>
+
+      <div class="result-stats">
+        <div>
+          <strong>${result.correct}</strong>
+          <span>Correct</span>
+        </div>
+
+        <div>
+          <strong>${result.incorrect}</strong>
+          <span>Incorrect</span>
+        </div>
+
+        <div>
+          <strong>${result.skipped}</strong>
+          <span>Skipped</span>
+        </div>
+      </div>
+
+      <h3>Subject Performance</h3>
+
+      ${Object.entries(result.subjectResults).map(
+        ([subject, data]) => `
+          <div class="subject-result-row">
+            <strong>${escapeHTML(subject)}</strong>
+            <span>${data.correct}/${data.total} correct</span>
+          </div>
+        `
+      ).join("")}
+
+      <button id="viewAnswerReview" class="btn" type="button">
+        Review Answers
+      </button>
+
+      <button id="backToDashboard" class="btn" type="button">
+        Back to Dashboard
+      </button>
+
+      <p id="testSaveStatus"></p>
+    </div>
+  `;
+
+  $("viewAnswerReview")?.addEventListener("click", renderAnswerReview);
+
+  $("backToDashboard")?.addEventListener("click", () => {
+    $("testResult")?.setAttribute("hidden", "");
+    $("testSetup")?.removeAttribute("hidden", "");
+    $("studentDashboard")?.scrollIntoView({ behavior: "smooth" });
+  });
+}
+
+/* =========================================================
+   ANSWER REVIEW
+========================================================= */
+
+function renderAnswerReview() {
+  $("testResult").innerHTML = `
+    <div class="answer-review">
+      <h2>Answer Review</h2>
+
+      ${testQuestions.map((question, index) => {
+        const selected = testAnswers[index];
+        const correct = Number(question.answer);
+
+        return `
+          <div class="review-question">
+            <h4>${index + 1}. ${escapeHTML(question.question)}</h4>
+
+            <p>Your answer:
+              ${selected === null
+                ? "Not answered"
+                : escapeHTML(question.options[selected])}
+            </p>
+
+            <p>Correct answer:
+              ${escapeHTML(question.options[correct])}
+            </p>
+
+            ${question.explanation
+              ? `<p>${escapeHTML(question.explanation)}</p>`
+              : ""}
+          </div>
+        `;
+      }).join("")}
+
+      <button id="returnToResult" class="btn" type="button">
+        Back to Result
+      </button>
+    </div>
+  `;
+
+  $("returnToResult")?.addEventListener("click", () => {
+    $("testResult").innerHTML = "";
+    $("testResult").removeAttribute("hidden");
+
+    // Rebuild the result from the stored answers.
+    const correct = testQuestions.reduce(
+      (sum, question, index) =>
+        sum + (testAnswers[index] === Number(question.answer) ? 1 : 0),
+      0
+    );
+
+    const skipped = testAnswers.filter(
+      answer => answer === null
+    ).length;
+
+    const incorrect = testQuestions.length - correct - skipped;
+
+    renderFullTestResult({
+      total: testQuestions.length,
+      correct,
+      incorrect,
+      skipped,
+      percentage: Math.round(correct / testQuestions.length * 100),
+      subjectResults: {},
+      autoSubmitted: false
+    });
+  });
+}
+
+/* =========================================================
+   PART 2 END
+   Part 3 will complete the application.
+========================================================= */
 /* =========================================================
    STUDENT DASHBOARD
 ========================================================= */
 
 async function loadStudentDashboard(user) {
-  if (!user) {
-    showStudentLoggedOut();
-    return;
-  }
+  if (!user) return;
 
   $("studentLoginPanel")?.setAttribute("hidden", "");
   $("studentDashboard")?.removeAttribute("hidden");
@@ -909,516 +1153,731 @@ async function loadStudentDashboard(user) {
 
   if ($("studentPhoto")) {
     $("studentPhoto").src = user.photoURL || "";
-    $("studentPhoto").onerror = () => {
-      $("studentPhoto").src =
-        "https://www.gravatar.com/avatar/?d=mp&s=120";
-    };
   }
+
+  if (isAdmin()) return;
 
   try {
     const studentRef = doc(db, STUDENTS_COLLECTION, user.uid);
     const studentSnapshot = await getDoc(studentRef);
 
-    const data = studentSnapshot.exists()
-      ? studentSnapshot.data()
-      : {};
+    if (!studentSnapshot.exists()) {
+      await setDoc(studentRef, {
+        uid: user.uid,
+        name: user.displayName || "Student",
+        email: user.email || "",
+        photoURL: user.photoURL || "",
+        totalTests: 0,
+        totalAttempted: 0,
+        totalCorrect: 0,
+        createdAt: serverTimestamp(),
+        lastActive: serverTimestamp()
+      }, { merge: true });
+    } else {
+      await setDoc(studentRef, {
+        name: user.displayName || "Student",
+        email: user.email || "",
+        photoURL: user.photoURL || "",
+        lastActive: serverTimestamp()
+      }, { merge: true });
+    }
 
-    const totalTests = Number(data.totalTests || 0);
-    const totalAttempted = Number(data.totalAttempted || 0);
-    const totalCorrect = Number(data.totalCorrect || 0);
+    const updatedSnapshot = await getDoc(studentRef);
+    const data = updatedSnapshot.data() || {};
 
-    const average = totalAttempted
-      ? Math.round((totalCorrect / totalAttempted) * 100)
+    if ($("studentTotalTests")) {
+      $("studentTotalTests").textContent = data.totalTests || 0;
+    }
+
+    if ($("studentAttempted")) {
+      $("studentAttempted").textContent = data.totalAttempted || 0;
+    }
+
+    if ($("studentCorrect")) {
+      $("studentCorrect").textContent = data.totalCorrect || 0;
+    }
+
+    const average = data.totalAttempted
+      ? Math.round((data.totalCorrect / data.totalAttempted) * 100)
       : 0;
 
-    const estimated = Math.round((average / 100) * 180);
+    if ($("studentAverage")) {
+      $("studentAverage").textContent = `${average}%`;
+    }
 
-    $("studentTotalTests").textContent = totalTests;
-    $("studentAverage").textContent = `${average}%`;
-    $("studentAttempted").textContent = totalAttempted;
-    $("studentEstimatedScore").textContent =
-      totalTests ? `${estimated} / 180` : "— / 180";
+    const estimatedScore = data.totalAttempted
+      ? Math.round((data.totalCorrect / data.totalAttempted) * 180)
+      : 0;
 
-    const subjectsSnapshot = await getDocs(
-      collection(db, STUDENTS_COLLECTION, user.uid, "subjects")
+    if ($("studentEstimatedScore")) {
+      $("studentEstimatedScore").textContent = `${estimatedScore}/180`;
+    }
+
+    await loadStudentHistory(user.uid);
+    await loadStudentSubjectPerformance(user.uid);
+
+  } catch (error) {
+    console.error("Student dashboard error:", error);
+  }
+}
+
+/* =========================================================
+   STUDENT TEST HISTORY
+========================================================= */
+
+async function loadStudentHistory(uid) {
+  const historyContainer = $("studentTestHistory");
+  if (!historyContainer) return;
+
+  try {
+    const snapshot = await getDocs(
+      collection(db, STUDENTS_COLLECTION, uid, "tests")
     );
 
-    const subjectData = subjectsSnapshot.docs.map(item => item.data());
-
-    renderSubjectPerformance(subjectData);
-
-    const testsQuery = query(
-      collection(db, STUDENTS_COLLECTION, user.uid, "tests"),
-      orderBy("createdAt", "desc"),
-      limit(30)
-    );
-
-    const testsSnapshot = await getDocs(testsQuery);
-
-    studentTestHistory = testsSnapshot.docs.map(item => ({
+    studentTestHistory = snapshot.docs.map(item => ({
       id: item.id,
       ...item.data()
     }));
 
-    renderStudentHistory();
+    studentTestHistory.sort((a, b) => {
+      const dateA = a.createdAt?.toMillis
+        ? a.createdAt.toMillis()
+        : new Date(a.createdAt || 0).getTime();
+
+      const dateB = b.createdAt?.toMillis
+        ? b.createdAt.toMillis()
+        : new Date(b.createdAt || 0).getTime();
+
+      return dateB - dateA;
+    });
+
+    if (!studentTestHistory.length) {
+      historyContainer.innerHTML =
+        "<p>No test history yet. Start your first test!</p>";
+      return;
+    }
+
+    historyContainer.innerHTML = studentTestHistory.map(test => `
+      <div class="history-item">
+        <div>
+          <strong>${escapeHTML(test.subject || "MDCAT Test")}</strong>
+          <p>${formatDate(test.createdAt)}</p>
+        </div>
+
+        <div>
+          <strong>${test.correct || 0}/${test.total || 0}</strong>
+          <p>${test.percentage || 0}%</p>
+        </div>
+      </div>
+    `).join("");
 
   } catch (error) {
-    console.error("Student dashboard error:", error);
-
-    showMessage(
-      "studentAuthMessage",
-      "Dashboard data is not available yet. Check Firestore rules.",
-      true
-    );
+    console.error("Student history error:", error);
+    historyContainer.innerHTML =
+      "<p>Unable to load test history.</p>";
   }
-}
-
-function renderSubjectPerformance(subjects) {
-  const container = $("subjectPerformance");
-  if (!container) return;
-
-  const names = [
-    "Biology",
-    "Chemistry",
-    "Physics",
-    "English",
-    "Logical Reasoning"
-  ];
-
-  container.innerHTML = names.map(name => {
-    const subject = subjects.find(item => item.subject === name);
-
-    const attempted = Number(subject?.attempted || 0);
-    const correct = Number(subject?.correct || 0);
-
-    const percentage = attempted
-      ? Math.round((correct / attempted) * 100)
-      : 0;
-
-    return `
-      <div class="performance-row">
-        <div class="performance-row-top">
-          <strong>${escapeHTML(name)}</strong>
-          <span>${percentage}% · ${attempted} attempted</span>
-        </div>
-        <div class="performance-track">
-          <div class="performance-fill" style="width:${percentage}%"></div>
-        </div>
-      </div>
-    `;
-  }).join("");
-}
-
-function renderStudentHistory() {
-  const container = $("studentTestHistory");
-  if (!container) return;
-
-  if (!studentTestHistory.length) {
-    container.innerHTML = "<p>No completed tests yet. Start your first test!</p>";
-    return;
-  }
-
-  container.innerHTML = studentTestHistory.map(test => `
-    <div class="history-item">
-      <div>
-        <strong>${escapeHTML(test.subject || "Test")}</strong>
-        <br>
-        <span>${formatDate(test.completedAt || test.createdAt)}</span>
-      </div>
-      <div>
-        <strong>${Number(test.percentage || 0)}%</strong>
-        <br>
-        <span>${Number(test.correct || 0)} / ${Number(test.total || 0)} correct</span>
-      </div>
-    </div>
-  `).join("");
 }
 
 /* =========================================================
-   ADMIN QUESTION MANAGEMENT
+   SUBJECT PERFORMANCE
 ========================================================= */
 
-function isAdmin() {
-  return Boolean(
-    currentUser &&
-    ADMIN_UID &&
-    ADMIN_UID !== "PASTE_YOUR_EXISTING_ADMIN_UID_HERE" &&
-    currentUser.uid === ADMIN_UID
-  );
+async function loadStudentSubjectPerformance(uid) {
+  const container = $("studentSubjectPerformance");
+  if (!container) return;
+
+  try {
+    const snapshot = await getDocs(
+      collection(db, STUDENTS_COLLECTION, uid, "subjects")
+    );
+
+    if (snapshot.empty) {
+      container.innerHTML = "<p>No subject performance available yet.</p>";
+      return;
+    }
+
+    container.innerHTML = snapshot.docs.map(item => {
+      const data = item.data();
+      const percentage = data.total
+        ? Math.round((data.correct / data.total) * 100)
+        : 0;
+
+      return `
+        <div class="subject-performance-item">
+          <strong>${escapeHTML(data.subject || item.id)}</strong>
+
+          <span>${data.correct || 0}/${data.total || 0}</span>
+
+          <div class="performance-track">
+            <div style="width:${percentage}%"></div>
+          </div>
+
+          <small>${percentage}%</small>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Subject performance error:", error);
+  }
 }
+
+/* =========================================================
+   ADMIN DASHBOARD
+========================================================= */
 
 async function loadAdminData() {
   if (!isAdmin()) return;
 
-  await loadAdminQuestions();
+  await loadQuestions();
+  await loadSiteContent();
+  await loadAdminStudents();
   await loadContributors();
+
+  updateQuestionStats();
 }
 
-async function loadAdminQuestions() {
+/* =========================================================
+   ADMIN TABS
+========================================================= */
+
+document.querySelectorAll("[data-admin-tab]").forEach(button => {
+  button.addEventListener("click", () => {
+    const selectedTab = button.dataset.adminTab;
+
+    document.querySelectorAll("[data-admin-tab]").forEach(tab => {
+      tab.classList.toggle("active", tab === button);
+    });
+
+    document.querySelectorAll("[data-admin-panel]").forEach(panel => {
+      panel.hidden = panel.dataset.adminPanel !== selectedTab;
+    });
+
+    if (selectedTab === "students") {
+      loadAdminStudents();
+    }
+
+    if (selectedTab === "contributors") {
+      loadContributors();
+    }
+  });
+});
+
+/* =========================================================
+   ADMIN STUDENT REGISTRATION LIST
+========================================================= */
+
+async function loadAdminStudents() {
   if (!isAdmin()) return;
 
-  const container = $("adminMcqList");
-  if (!container) return;
-
-  container.innerHTML = "<p>Loading questions...</p>";
+  const container = $("adminStudentsList");
 
   try {
     const snapshot = await getDocs(
-      collection(db, QUESTIONS_COLLECTION)
+      collection(db, STUDENTS_COLLECTION)
     );
 
-    const questions = snapshot.docs.map(item => ({
+    const students = snapshot.docs.map(item => ({
       id: item.id,
       ...item.data()
     }));
 
-    container.innerHTML = questions.length
-      ? questions.map(question => `
-          <div class="admin-item">
-            <strong>${escapeHTML(question.subject || "Subject")}</strong>
-            <p>${escapeHTML(question.chapter || "General")}</p>
-            <p>${escapeHTML(question.question || "")}</p>
-
-            <button
-              class="btn btn-secondary"
-              data-edit-question="${question.id}"
-              type="button">
-              Edit
-            </button>
-
-            <button
-              class="btn btn-danger"
-              data-delete-question="${question.id}"
-              type="button">
-              Delete
-            </button>
-          </div>
-        `).join("")
-      : "<p>No questions found.</p>";
-
-    document.querySelectorAll("[data-edit-question]").forEach(button => {
-      button.addEventListener("click", () => {
-        const question = questions.find(
-          item => item.id === button.dataset.editQuestion
-        );
-
-        if (question) editQuestion(question);
-      });
-    });
-
-    document.querySelectorAll("[data-delete-question]").forEach(button => {
-      button.addEventListener("click", () => {
-        deleteQuestion(button.dataset.deleteQuestion);
-      });
-    });
-
-    $("adminTotalQuestions").textContent = questions.length;
-
-  } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to load admin questions.", true);
-  }
-}
-
-function editQuestion(question) {
-  editingQuestionId = question.id;
-
-  $("mcqSubject").value = question.subject || "Biology";
-  $("mcqChapter").value = question.chapter || "";
-  $("mcqQuestion").value = question.question || "";
-
-  question.options.forEach((option, index) => {
-    $(`mcqOption${index}`).value = option || "";
-  });
-
-  $("mcqAnswer").value = String(question.answer ?? 0);
-  $("mcqExplanation").value = question.explanation || "";
-
-  $("saveMcq").textContent = "Update Question";
-  $("cancelEdit").hidden = false;
-
-  $("mcqForm").scrollIntoView({ behavior: "smooth" });
-}
-
-function resetQuestionForm() {
-  editingQuestionId = null;
-  $("mcqForm")?.reset();
-
-  $("saveMcq").textContent = "Save Question";
-  $("cancelEdit").hidden = true;
-}
-
-$("cancelEdit")?.addEventListener("click", resetQuestionForm);
-
-$("mcqForm")?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (!isAdmin()) {
-    showMessage("adminStatus", "Administrator access required.", true);
-    return;
-  }
-
-  const questionData = {
-    subject: $("mcqSubject").value,
-    chapter: $("mcqChapter").value.trim(),
-    question: $("mcqQuestion").value.trim(),
-    options: [
-      $("mcqOption0").value.trim(),
-      $("mcqOption1").value.trim(),
-      $("mcqOption2").value.trim(),
-      $("mcqOption3").value.trim()
-    ],
-    answer: Number($("mcqAnswer").value),
-    explanation: $("mcqExplanation").value.trim(),
-    updatedAt: serverTimestamp()
-  };
-
-  if (
-    !questionData.question ||
-    !questionData.chapter ||
-    questionData.options.some(option => !option)
-  ) {
-    showMessage("adminStatus", "Please complete all question fields.", true);
-    return;
-  }
-
-  try {
-    if (editingQuestionId) {
-      await updateDoc(
-        doc(db, QUESTIONS_COLLECTION, editingQuestionId),
-        questionData
-      );
-
-      showMessage("adminStatus", "Question updated successfully.");
-    } else {
-      questionData.createdAt = serverTimestamp();
-
-      await addDoc(
-        collection(db, QUESTIONS_COLLECTION),
-        questionData
-      );
-
-      showMessage("adminStatus", "New question added successfully.");
+    if ($("adminTotalStudents")) {
+      $("adminTotalStudents").textContent = students.length;
     }
 
-    resetQuestionForm();
+    if ($("adminStudentCount")) {
+      $("adminStudentCount").textContent = students.length;
+    }
 
-    await loadQuestions();
-    await loadAdminQuestions();
+    if (!container) return;
+
+    if (!students.length) {
+      container.innerHTML = "<p>No student records found yet.</p>";
+      return;
+    }
+
+    students.sort((a, b) => {
+      const dateA = a.lastActive?.toMillis?.() || 0;
+      const dateB = b.lastActive?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
+
+    container.innerHTML = students.map(student => `
+      <div class="admin-item">
+        <div>
+          <strong>${escapeHTML(student.name || "Student")}</strong>
+          <p>${escapeHTML(student.email || "")}</p>
+          <small>UID: ${escapeHTML(student.uid || student.id)}</small>
+        </div>
+
+        <div>
+          <p>Tests: ${Number(student.totalTests || 0)}</p>
+          <p>MCQs: ${Number(student.totalAttempted || 0)}</p>
+          <p>Correct: ${Number(student.totalCorrect || 0)}</p>
+        </div>
+      </div>
+    `).join("");
 
   } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to save question. Check Firestore permissions.", true);
-  }
-});
+    console.error("Admin students error:", error);
 
-async function deleteQuestion(id) {
-  if (!isAdmin()) return;
-
-  if (!confirm("Delete this question permanently?")) return;
-
-  try {
-    await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
-
-    showMessage("adminStatus", "Question deleted.");
-
-    await loadQuestions();
-    await loadAdminQuestions();
-
-  } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to delete question.", true);
+    if (container) {
+      container.innerHTML =
+        "<p>Unable to load students. Check Firestore permissions.</p>";
+    }
   }
 }
 
 /* =========================================================
-   ADMIN CONTENT MANAGEMENT
+   ADMIN QUESTION FORM
+========================================================= */
+
+function getQuestionFormData() {
+  const question = $("questionText")?.value.trim();
+  const subject = $("questionSubject")?.value;
+
+  const options = [
+    $("optionA")?.value.trim(),
+    $("optionB")?.value.trim(),
+    $("optionC")?.value.trim(),
+    $("optionD")?.value.trim()
+  ];
+
+  const answer = Number($("correctAnswer")?.value);
+
+  const explanation = $("questionExplanation")?.value.trim() || "";
+
+  if (!question || !subject || options.some(option => !option)) {
+    throw new Error("Please complete the question and all four options.");
+  }
+
+  if (!Number.isInteger(answer) || answer < 0 || answer > 3) {
+    throw new Error("Please select a valid correct answer.");
+  }
+
+  return {
+    question,
+    subject,
+    options,
+    answer,
+    explanation,
+    updatedAt: serverTimestamp()
+  };
+}
+
+function clearQuestionForm() {
+  [
+    "questionText",
+    "optionA",
+    "optionB",
+    "optionC",
+    "optionD",
+    "questionExplanation"
+  ].forEach(id => {
+    if ($(id)) $(id).value = "";
+  });
+
+  if ($("questionSubject")) $("questionSubject").value = "Biology";
+  if ($("correctAnswer")) $("correctAnswer").value = "0";
+
+  editingQuestionId = null;
+
+  if ($("saveQuestion")) {
+    $("saveQuestion").textContent = "Add Question";
+  }
+}
+
+$("saveQuestion")?.addEventListener("click", async () => {
+  if (!isAdmin()) {
+    alert("Admin access required.");
+    return;
+  }
+
+  try {
+    const data = getQuestionFormData();
+
+    if (editingQuestionId) {
+      await updateDoc(
+        doc(db, QUESTIONS_COLLECTION, editingQuestionId),
+        data
+      );
+
+      showMessage("questionStatus", "Question updated successfully.");
+
+    } else {
+      await addDoc(
+        collection(db, QUESTIONS_COLLECTION),
+        {
+          ...data,
+          createdAt: serverTimestamp()
+        }
+      );
+
+      showMessage("questionStatus", "Question added successfully.");
+    }
+
+    clearQuestionForm();
+    await loadQuestions();
+    await renderAdminQuestions();
+
+  } catch (error) {
+    console.error("Save question error:", error);
+    showMessage("questionStatus", error.message, true);
+  }
+});
+
+$("clearQuestionForm")?.addEventListener("click", clearQuestionForm);
+
+/* =========================================================
+   ADMIN QUESTION LIST
+========================================================= */
+
+async function renderAdminQuestions() {
+  if (!isAdmin()) return;
+
+  const container = $("adminQuestionsList");
+  if (!container) return;
+
+  if (!allQuestions.length) {
+    container.innerHTML = "<p>No questions available.</p>";
+    return;
+  }
+
+  container.innerHTML = allQuestions.map(question => `
+    <div class="admin-item">
+      <div>
+        <strong>${escapeHTML(question.subject || "Subject")}</strong>
+        <p>${escapeHTML(question.question)}</p>
+      </div>
+
+      <div>
+        <button
+          type="button"
+          class="btn"
+          data-edit-question="${escapeHTML(question.id)}">
+          Edit
+        </button>
+
+        <button
+          type="button"
+          class="btn"
+          data-delete-question="${escapeHTML(question.id)}">
+          Delete
+        </button>
+      </div>
+    </div>
+  `).join("");
+
+  container.querySelectorAll("[data-edit-question]").forEach(button => {
+    button.addEventListener("click", () => {
+      editAdminQuestion(button.dataset.editQuestion);
+    });
+  });
+
+  container.querySelectorAll("[data-delete-question]").forEach(button => {
+    button.addEventListener("click", () => {
+      deleteAdminQuestion(button.dataset.deleteQuestion);
+    });
+  });
+}
+
+function editAdminQuestion(id) {
+  if (!isAdmin()) return;
+
+  const question = allQuestions.find(item => item.id === id);
+  if (!question) return;
+
+  editingQuestionId = id;
+
+  if ($("questionText")) $("questionText").value = question.question || "";
+  if ($("questionSubject")) $("questionSubject").value = question.subject || "Biology";
+
+  ["optionA", "optionB", "optionC", "optionD"].forEach((field, index) => {
+    if ($(field)) {
+      $(field).value = question.options?.[index] || "";
+    }
+  });
+
+  if ($("correctAnswer")) {
+    $("correctAnswer").value = String(question.answer ?? 0);
+  }
+
+  if ($("questionExplanation")) {
+    $("questionExplanation").value = question.explanation || "";
+  }
+
+  if ($("saveQuestion")) {
+    $("saveQuestion").textContent = "Update Question";
+  }
+
+  $("questionForm")?.scrollIntoView({ behavior: "smooth" });
+}
+
+async function deleteAdminQuestion(id) {
+  if (!isAdmin()) return;
+
+  if (!confirm("Are you sure you want to delete this question?")) {
+    return;
+  }
+
+  try {
+    await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
+
+    showMessage("questionStatus", "Question deleted.");
+
+    await loadQuestions();
+    await renderAdminQuestions();
+
+  } catch (error) {
+    console.error("Delete question error:", error);
+    showMessage("questionStatus", "Could not delete question.", true);
+  }
+}
+
+/* =========================================================
+   CLOUDINARY GALLERY UPLOAD
+========================================================= */
+
+async function uploadGalleryImage(file, statusId) {
+  if (!isAdmin()) {
+    throw new Error("Admin access required.");
+  }
+
+  if (!file) {
+    throw new Error("Please select an image from your Gallery.");
+  }
+
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error("Only JPG, PNG and WEBP images are allowed.");
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image must be smaller than 5 MB.");
+  }
+
+  showMessage(statusId, "Uploading image...");
+
+  const formData = new FormData();
+
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+  formData.append("folder", CLOUDINARY_FOLDER);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok || !result.secure_url) {
+    console.error("Cloudinary error:", result);
+    throw new Error("Image upload failed. Check Cloudinary preset settings.");
+  }
+
+  showMessage(statusId, "Image uploaded successfully.");
+
+  return result.secure_url;
+}
+
+/* =========================================================
+   SAVE WEBSITE CONTENT
+========================================================= */
+
+async function saveSiteContent(key, data) {
+  if (!isAdmin()) {
+    throw new Error("Admin access required.");
+  }
+
+  await setDoc(
+    doc(db, CONTENT_COLLECTION, key),
+    {
+      ...data,
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
+}
+
+/* =========================================================
+   ADMIN PHOTO UPLOAD
+========================================================= */
+
+$("uploadAdminPhoto")?.addEventListener("click", async () => {
+  try {
+    const file = $("contentAdminPhotoFile")?.files?.[0];
+
+    const url = await uploadGalleryImage(
+      file,
+      "adminPhotoUploadStatus"
+    );
+
+    await saveSiteContent("main", {
+      adminPhoto: url
+    });
+
+    if ($("adminProfilePhoto")) {
+      $("adminProfilePhoto").src = url;
+    }
+
+    showMessage(
+      "adminPhotoUploadStatus",
+      "Admin profile photo saved."
+    );
+
+  } catch (error) {
+    showMessage(
+      "adminPhotoUploadStatus",
+      error.message,
+      true
+    );
+  }
+});
+
+/* =========================================================
+   ANNOUNCEMENT POSTER UPLOAD
+========================================================= */
+
+$("uploadPoster")?.addEventListener("click", async () => {
+  try {
+    const file = $("contentPosterFile")?.files?.[0];
+
+    const url = await uploadGalleryImage(
+      file,
+      "posterUploadStatus"
+    );
+
+    await saveSiteContent("main", {
+      posterImage: url
+    });
+
+    showMessage(
+      "posterUploadStatus",
+      "Announcement poster saved."
+    );
+
+    await loadSiteContent();
+
+  } catch (error) {
+    showMessage("posterUploadStatus", error.message, true);
+  }
+});
+
+/* =========================================================
+   ADVERTISEMENT IMAGE UPLOAD
+========================================================= */
+
+$("uploadAd")?.addEventListener("click", async () => {
+  try {
+    const file = $("contentAdFile")?.files?.[0];
+
+    const url = await uploadGalleryImage(
+      file,
+      "adUploadStatus"
+    );
+
+    await saveSiteContent("main", {
+      adImage: url
+    });
+
+    showMessage(
+      "adUploadStatus",
+      "Advertisement image saved."
+    );
+
+    await loadSiteContent();
+
+  } catch (error) {
+    showMessage("adUploadStatus", error.message, true);
+  }
+});
+
+/* =========================================================
+   ANNOUNCEMENT TEXT SAVE
+========================================================= */
+
+$("saveAnnouncement")?.addEventListener("click", async () => {
+  try {
+    await saveSiteContent("main", {
+      announcement: $("contentAnnouncement")?.value || "",
+      announcementUrdu: $("contentAnnouncementUrdu")?.value || ""
+    });
+
+    showMessage("contentStatus", "Announcement saved.");
+    await loadSiteContent();
+
+  } catch (error) {
+    showMessage("contentStatus", error.message, true);
+  }
+});
+
+/* =========================================================
+   LOAD WEBSITE CONTENT
 ========================================================= */
 
 async function loadSiteContent() {
   try {
-    const contentRef = doc(db, CONTENT_COLLECTION, "main");
-    const snapshot = await getDoc(contentRef);
+    const snapshot = await getDoc(
+      doc(db, CONTENT_COLLECTION, "main")
+    );
 
     if (!snapshot.exists()) return;
 
     siteContent = snapshot.data();
 
-    renderPublicContent();
-    fillAdminContent();
-    showAnnouncementSplash();
+    if ($("contentAnnouncement")) {
+      $("contentAnnouncement").value =
+        siteContent.announcement || "";
+    }
+
+    if ($("contentAnnouncementUrdu")) {
+      $("contentAnnouncementUrdu").value =
+        siteContent.announcementUrdu || "";
+    }
+
+    if (siteContent.adminPhoto && $("adminProfilePhoto")) {
+      $("adminProfilePhoto").src = siteContent.adminPhoto;
+    }
+
+    const poster = $("announcementPoster");
+
+    if (poster && siteContent.posterImage) {
+      poster.src = siteContent.posterImage;
+      poster.hidden = false;
+    }
+
+    const ad = $("advertisementImage");
+
+    if (ad && siteContent.adImage) {
+      ad.src = siteContent.adImage;
+      ad.hidden = false;
+    }
+
+    const announcement = $("announcementText");
+
+    if (announcement && siteContent.announcement) {
+      announcement.textContent = siteContent.announcement;
+    }
+
+    const announcementUrdu = $("announcementUrdu");
+
+    if (announcementUrdu && siteContent.announcementUrdu) {
+      announcementUrdu.textContent = siteContent.announcementUrdu;
+    }
 
   } catch (error) {
-    console.error("Content loading error:", error);
+    console.error("Site content error:", error);
   }
-}
-
-function renderPublicContent() {
-  if ($("adminPublicName")) {
-    $("adminPublicName").textContent =
-      siteContent.adminName || "CHEMPHYBIO MDCAT Team";
-  }
-
-  if ($("welcomeMessage")) {
-    $("welcomeMessage").textContent =
-      siteContent.welcomeMessage ||
-      "Our mission is to make quality MDCAT preparation accessible to every student.";
-  }
-
-  if ($("adminPublicPhoto")) {
-    if (siteContent.adminPhoto) {
-      $("adminPublicPhoto").src = siteContent.adminPhoto;
-      $("adminPublicPhoto").hidden = false;
-    } else {
-      $("adminPublicPhoto").hidden = true;
-    }
-  }
-
-  if ($("whatsappCommunity")) {
-    if (siteContent.whatsapp) {
-      $("whatsappCommunity").href = siteContent.whatsapp;
-      $("whatsappCommunity").hidden = false;
-    } else {
-      $("whatsappCommunity").hidden = true;
-    }
-  }
-
-  if ($("posterCard")) {
-    const poster = siteContent.poster || "";
-
-    $("posterCard").hidden = !poster;
-
-    if (poster) {
-      $("posterImage").src = poster;
-      $("posterTitle").textContent =
-        siteContent.posterTitle || "Latest Announcement";
-    }
-  }
-
-  if ($("advertisementCard")) {
-    const advertisement = siteContent.advertisement || "";
-
-    $("advertisementCard").hidden = !advertisement;
-
-    if (advertisement) {
-      $("advertisementImage").src = advertisement;
-      $("advertisementTitle").textContent =
-        siteContent.adTitle || "Advertisement";
-    }
-  }
-
-  renderUpdates();
-}
-
-function renderUpdates() {
-  const container = $("updatesList");
-  if (!container) return;
-
-  const updates = Array.isArray(siteContent.updates)
-    ? siteContent.updates
-    : [];
-
-  container.innerHTML = updates.map(update => `
-    <article class="update-card">
-      <h3>${escapeHTML(update.title || "Update")}</h3>
-      <p>${escapeHTML(update.message || "")}</p>
-    </article>
-  `).join("");
-}
-
-function fillAdminContent() {
-  if (!isAdmin()) return;
-
-  $("contentAdminName").value = siteContent.adminName || "";
-  $("contentAdminPhoto").value = siteContent.adminPhoto || "";
-  $("contentWelcome").value = siteContent.welcomeMessage || "";
-  $("contentWhatsapp").value = siteContent.whatsapp || "";
-  $("contentPosterTitle").value = siteContent.posterTitle || "";
-  $("contentPoster").value = siteContent.poster || "";
-  $("contentAnnouncement").value = siteContent.announcement || "";
-  $("contentAdTitle").value = siteContent.adTitle || "";
-  $("contentAd").value = siteContent.advertisement || "";
-}
-
-$("adminContentForm")?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (!isAdmin()) return;
-
-  const button = $("saveSiteContent");
-  setButtonLoading(button, true, "Publishing...");
-
-  const content = {
-    adminName: $("contentAdminName").value.trim(),
-    adminPhoto: $("contentAdminPhoto").value.trim(),
-    welcomeMessage: $("contentWelcome").value.trim(),
-    whatsapp: $("contentWhatsapp").value.trim(),
-    posterTitle: $("contentPosterTitle").value.trim(),
-    poster: $("contentPoster").value.trim(),
-    announcement: $("contentAnnouncement").value.trim(),
-    adTitle: $("contentAdTitle").value.trim(),
-    advertisement: $("contentAd").value.trim(),
-    updatedAt: serverTimestamp()
-  };
-
-  try {
-    await setDoc(
-      doc(db, CONTENT_COLLECTION, "main"),
-      content,
-      { merge: true }
-    );
-
-    siteContent = {
-      ...siteContent,
-      ...content
-    };
-
-    renderPublicContent();
-    showAnnouncementSplash();
-
-    showMessage("adminStatus", "Website content published successfully.");
-
-  } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to publish content. Check Firestore permissions.", true);
-  } finally {
-    setButtonLoading(button, false);
-  }
-});
-
-/* =========================================================
-   ANNOUNCEMENT SPLASH
-========================================================= */
-
-function showAnnouncementSplash() {
-  const splash = $("announcementSplash");
-
-  if (!splash) return;
-
-  const message = siteContent.announcement || "";
-  const poster = siteContent.poster || "";
-  const title = siteContent.posterTitle || "Latest Announcement";
-
-  if (!message && !poster) {
-    splash.hidden = true;
-    return;
-  }
-
-  $("splashTitle").textContent = title;
-  $("splashMessage").textContent = message;
-
-  if (poster) {
-    $("splashImage").src = poster;
-    $("splashImage").hidden = false;
-  } else {
-    $("splashImage").hidden = true;
-  }
-
-  splash.hidden = false;
-
-  setTimeout(() => {
-    splash.hidden = true;
-  }, 3000);
 }
 
 /* =========================================================
@@ -1428,281 +1887,131 @@ function showAnnouncementSplash() {
 async function loadContributors() {
   if (!isAdmin()) return;
 
+  const container = $("adminContributorsList");
+  if (!container) return;
+
   try {
     const snapshot = await getDocs(
       collection(db, CONTRIBUTORS_COLLECTION)
     );
 
-    const contributors = snapshot.docs.map(item => ({
-      id: item.id,
-      ...item.data()
-    }));
+    if (snapshot.empty) {
+      container.innerHTML = "<p>No contributors added yet.</p>";
+      return;
+    }
 
-    $("adminTotalContributors").textContent = contributors.length;
+    container.innerHTML = snapshot.docs.map(item => `
+      <div class="admin-item">
+        <div>
+          <strong>${escapeHTML(item.data().email || item.id)}</strong>
+          <p>${escapeHTML(item.data().name || "Contributor")}</p>
+        </div>
 
-    $("contributorsList").innerHTML = contributors.length
-      ? contributors.map(item => `
-          <div class="admin-item">
-            <strong>${escapeHTML(item.email || "Contributor")}</strong>
-            <button
-              class="btn btn-danger"
-              type="button"
-              data-remove-contributor="${item.id}">
-              Remove
-            </button>
-          </div>
-        `).join("")
-      : "<p>No contributors added.</p>";
+        <button
+          class="btn"
+          type="button"
+          data-remove-contributor="${escapeHTML(item.id)}">
+          Remove
+        </button>
+      </div>
+    `).join("");
 
-    document.querySelectorAll("[data-remove-contributor]").forEach(button => {
-      button.addEventListener("click", () => {
-        removeContributor(button.dataset.removeContributor);
+    container.querySelectorAll("[data-remove-contributor]").forEach(button => {
+      button.addEventListener("click", async () => {
+        if (!confirm("Remove this contributor?")) return;
+
+        try {
+          await deleteDoc(
+            doc(db, CONTRIBUTORS_COLLECTION, button.dataset.removeContributor)
+          );
+
+          await loadContributors();
+
+        } catch (error) {
+          console.error(error);
+          showMessage("contributorStatus", "Unable to remove contributor.", true);
+        }
       });
     });
 
   } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to load contributors.", true);
+    console.error("Contributor loading error:", error);
+    showMessage("contributorStatus", "Unable to load contributors.", true);
   }
 }
 
 $("addContributor")?.addEventListener("click", async () => {
   if (!isAdmin()) return;
 
-  const email = $("contributorEmail").value.trim().toLowerCase();
+  const email = $("contributorEmail")?.value.trim().toLowerCase();
 
   if (!email || !email.includes("@")) {
-    showMessage("adminStatus", "Enter a valid email address.", true);
+    showMessage("contributorStatus", "Enter a valid email address.", true);
     return;
   }
 
   try {
-    await addDoc(collection(db, CONTRIBUTORS_COLLECTION), {
-      email,
-      createdAt: serverTimestamp()
-    });
+    await setDoc(
+      doc(db, CONTRIBUTORS_COLLECTION, email),
+      {
+        email,
+        name: $("contributorName")?.value.trim() || "",
+        createdAt: serverTimestamp(),
+        addedBy: currentUser.uid
+      }
+    );
 
-    $("contributorEmail").value = "";
+    if ($("contributorEmail")) $("contributorEmail").value = "";
+    if ($("contributorName")) $("contributorName").value = "";
 
-    showMessage("adminStatus", "Contributor added.");
+    showMessage("contributorStatus", "Contributor added successfully.");
+
     await loadContributors();
 
   } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to add contributor.", true);
+    console.error("Add contributor error:", error);
+    showMessage("contributorStatus", "Unable to add contributor.", true);
   }
 });
 
-async function removeContributor(id) {
-  if (!isAdmin()) return;
-
-  if (!confirm("Remove this contributor?")) return;
-
-  try {
-    await deleteDoc(doc(db, CONTRIBUTORS_COLLECTION, id));
-
-    showMessage("adminStatus", "Contributor removed.");
-    await loadContributors();
-
-  } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", "Unable to remove contributor.", true);
-  }
-}
-
 /* =========================================================
-   ADMIN TABS
+   LANGUAGE SWITCH
 ========================================================= */
-
-document.querySelectorAll("[data-admin-tab]").forEach(button => {
-  button.addEventListener("click", () => {
-    const selected = button.dataset.adminTab;
-
-    document.querySelectorAll("[data-admin-tab]").forEach(tab => {
-      tab.classList.toggle("active", tab === button);
-    });
-
-    const panels = {
-      questions: "adminQuestionsPanel",
-      content: "adminContentPanel",
-      contributors: "adminContributorsPanel"
-    };
-
-    Object.entries(panels).forEach(([key, id]) => {
-      const panel = $(id);
-
-      if (!panel) return;
-
-      panel.hidden = key !== selected;
-      panel.classList.toggle("active", key === selected);
-    });
-
-    if (selected === "content") {
-      fillAdminContent();
-    }
-
-    if (selected === "contributors") {
-      loadContributors();
-    }
-  });
-});
-
-/* =========================================================
-   AGGREGATE CALCULATOR
-   Illustrative weightage: Matric 10%, FSc 40%, MDCAT 50%.
-   Confirm official weightage separately.
-========================================================= */
-
-$("calculateAggregate")?.addEventListener("click", calculateAggregate);
-
-function calculateAggregate() {
-  const matric = Number($("matricMarks").value);
-  const matricTotal = Number($("matricTotal").value);
-
-  const fsc = Number($("fscMarks").value);
-  const fscTotal = Number($("fscTotal").value);
-
-  const mdcat = Number($("mdcatMarks").value);
-  const mdcatTotal = Number($("mdcatTotal").value);
-
-  const valid =
-    matricTotal > 0 &&
-    fscTotal > 0 &&
-    mdcatTotal > 0 &&
-    matric >= 0 &&
-    fsc >= 0 &&
-    mdcat >= 0 &&
-    matric <= matricTotal &&
-    fsc <= fscTotal &&
-    mdcat <= mdcatTotal;
-
-  if (!valid) {
-    $("aggregateResult").innerHTML =
-      "<p>Please enter valid marks and totals.</p>";
-    return;
-  }
-
-  const aggregate =
-    (matric / matricTotal) * 10 +
-    (fsc / fscTotal) * 40 +
-    (mdcat / mdcatTotal) * 50;
-
-  $("aggregateResult").innerHTML = `
-    <p>Your Illustrative Aggregate</p>
-    <strong>${aggregate.toFixed(2)}%</strong>
-    <small>Weightage used: Matric 10% · FSc 40% · MDCAT 50%</small>
-  `;
-}
-
-/* =========================================================
-   LANGUAGE TOGGLE
-========================================================= */
-
-const translations = {
-  en: {
-    home: "Home",
-    subjects: "Subjects",
-    practice: "Practice",
-    mockTests: "Mock Tests",
-    updates: "Updates",
-    about: "About"
-  },
-  ur: {
-    home: "صفحہ اول",
-    subjects: "مضامین",
-    practice: "مشق",
-    mockTests: "ٹیسٹ",
-    updates: "تازہ خبریں",
-    about: "تعارف"
-  }
-};
-
-function setupLanguage() {
-  const saved = localStorage.getItem("chemphybio-language");
-
-  currentLanguage = saved === "ur" ? "ur" : "en";
-
-  applyLanguage();
-}
-
-function applyLanguage() {
-  document.body.classList.toggle("lang-ur", currentLanguage === "ur");
-  document.documentElement.lang = currentLanguage;
-
-  if ($("languageToggle")) {
-    $("languageToggle").textContent =
-      currentLanguage === "en" ? "اردو" : "English";
-  }
-
-  const nav = document.querySelectorAll(".nav-links a");
-
-  const keys = [
-    "home",
-    "subjects",
-    "practice",
-    "mockTests",
-    "updates",
-    "about"
-  ];
-
-  nav.forEach(link => {
-    const href = link.getAttribute("href")?.replace("#", "");
-
-    if (translations[currentLanguage][href]) {
-      link.textContent = translations[currentLanguage][href];
-    }
-  });
-}
 
 $("languageToggle")?.addEventListener("click", () => {
   currentLanguage = currentLanguage === "en" ? "ur" : "en";
 
-  localStorage.setItem("chemphybio-language", currentLanguage);
+  document.documentElement.lang = currentLanguage;
 
-  applyLanguage();
-});
+  document.documentElement.dir =
+    currentLanguage === "ur" ? "rtl" : "ltr";
 
-/* =========================================================
-   MOBILE NAVIGATION
-========================================================= */
+  $("languageToggle").textContent =
+    currentLanguage === "ur" ? "English" : "اردو";
 
-$("menuToggle")?.addEventListener("click", () => {
-  $("navLinks")?.classList.toggle("open");
-});
-
-document.querySelectorAll("#navLinks a").forEach(link => {
-  link.addEventListener("click", () => {
-    $("navLinks")?.classList.remove("open");
-    $("navLinks")?.classList.remove("active");
+  document.querySelectorAll("[data-en][data-ur]").forEach(element => {
+    element.textContent =
+      element.dataset[currentLanguage];
   });
 });
 
 /* =========================================================
-   FOOTER
-========================================================= */
-
-if ($("currentYear")) {
-  $("currentYear").textContent = new Date().getFullYear();
-}
-
-/* =========================================================
-   INITIALIZE APPLICATION
+   APPLICATION INITIALIZATION
 ========================================================= */
 
 async function initializeApplication() {
-  setupLanguage();
-
   await loadQuestions();
-  await loadSiteContent();
 
-  if (currentUser) {
-    await loadStudentDashboard(currentUser);
-
-    if (isAdmin()) {
-      showAdminLoggedIn(currentUser);
-      await loadAdminData();
-    }
+  if (isAdmin()) {
+    await loadAdminData();
+    await renderAdminQuestions();
   }
 }
 
-initializeApplication();
+initializeApplication().catch(error => {
+  console.error("Application initialization error:", error);
+});
+
+/* =========================================================
+   CHEMPHYBIO MDCAT — APPLICATION COMPLETE
+========================================================= */
