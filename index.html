@@ -4,415 +4,770 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#071426">
-  <meta name="description" content="CHEMPHYBIO MDCAT — free MDCAT quizzes, chapter practice and verified updates.">
-  <title>CHEMPHYBIO MDCAT | Learn. Practice. Achieve.</title>
+  <meta name="description" content="CHEMPHYBIO MDCAT — Free MDCAT preparation, chapter-wise quizzes, mock tests and student progress tracking.">
+  <title>CHEMPHYBIO MDCAT | Smart Preparation</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
   <script type="module" src="script.js"></script>
 </head>
+
 <body>
-  <div class="topline">
-    <span data-i18n="announcement">FREE MDCAT PREPARATION • PRACTICE SMARTER EVERY DAY</span>
-    <span class="topline-mark">CHEMPHYBIO / 01</span>
+
+  <!-- ANNOUNCEMENT SPLASH -->
+  <div id="announcementSplash" class="announcement-splash" hidden>
+    <div class="splash-content">
+      <span class="splash-label">CHEMPHYBIO MDCAT</span>
+      <h2 id="splashTitle">Latest Announcement</h2>
+      <p id="splashMessage"></p>
+      <img id="splashImage" src="" alt="Announcement poster" hidden>
+    </div>
   </div>
 
-  <header class="site-header">
-    <div class="container nav-container">
-      <a class="brand" href="#home">
-        <span class="brand-symbol">C<span>+</span></span>
-        <span class="brand-copy">
-          <strong>CHEMPHYBIO</strong>
-          <small>MDCAT PREPARATION</small>
-        </span>
+  <!-- TOP LINE -->
+  <div class="topline">
+    FREE MDCAT PREPARATION • LEARN SMART • PRACTICE BETTER
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header" id="home">
+    <div class="nav-container">
+
+      <a href="#home" class="brand">
+        <div class="brand-symbol">C</div>
+        <div class="brand-copy">
+          <strong>CHEMPHYBIO MDCAT</strong>
+          <span>YOUR SUCCESS STARTS HERE</span>
+        </div>
       </a>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open navigation">☰</button>
 
       <nav class="nav-links" id="navLinks">
-        <a href="#home" data-i18n="navHome">Home</a>
-        <a href="#subjects" data-i18n="navSubjects">Subjects</a>
-        <a href="#practice" data-i18n="navPractice">Practice</a>
-        <a href="#mock" data-i18n="navMock">Mock Tests</a>
-        <a href="#updates" data-i18n="navUpdates">Updates</a>
-        <a href="#about" data-i18n="navAbout">About</a>
-        <button id="languageToggle" class="language-toggle" type="button">اردو</button>
+        <a href="#home">Home</a>
+        <a href="#subjects">Subjects</a>
+        <a href="#practice">Practice</a>
+        <a href="#mockTests">Mock Tests</a>
+        <a href="#updates">Updates</a>
+        <a href="#about">About</a>
+        <button id="languageToggle" type="button">اردو</button>
+        <a href="#studentLogin" class="nav-login">Student Login</a>
       </nav>
+
     </div>
   </header>
 
-  <main>
-    <section class="hero-section" id="home">
-      <div class="hero-orbit orbit-one"></div>
-      <div class="hero-orbit orbit-two"></div>
+  <main id="mainWebsite">
 
-      <div class="container hero-layout">
-        <div class="hero-text">
-          <div class="eyebrow">
-            <span class="eyebrow-line"></span>
-            <span data-i18n="heroEyebrow">YOUR MDCAT JOURNEY STARTS HERE</span>
-          </div>
+    <!-- HERO -->
+    <section class="hero-section">
+      <div class="hero-text">
+        <div class="eyebrow">SMART MDCAT PREPARATION PLATFORM</div>
 
-          <h1>
-            <span data-i18n="heroLine1">Build knowledge.</span><br>
-            <em data-i18n="heroLine2">Earn confidence.</em>
-          </h1>
+        <h1>
+          Prepare Smarter.<br>
+          Perform <span>Better.</span>
+        </h1>
 
-          <p data-i18n="heroDescription">
-            A focused learning space for MDCAT aspirants. Practice chapter-wise MCQs, test your preparation and stay informed.
-          </p>
+        <p>
+          Your complete MDCAT preparation platform. Practice subject-wise
+          MCQs, attempt full mock tests and track your learning progress.
+        </p>
 
-          <div class="hero-actions">
-            <a class="btn btn-gold" href="#subjects" data-i18n="exploreSubjects">Explore subjects ↗</a>
-            <a class="btn btn-glass" href="#practice" data-i18n="startPractice">Start practice</a>
-          </div>
-
-          <div class="hero-footnote">
-            <span class="live-dot"></span>
-            <span data-i18n="heroFootnote">Free learning resources • Built for focused preparation</span>
-          </div>
+        <div class="hero-actions">
+          <a href="#subjects" class="btn">Explore Subjects</a>
+          <a href="#mockTests" class="btn btn-secondary">Start Mock Test</a>
         </div>
+      </div>
 
-        <div class="hero-visual">
-          <div class="visual-top">
-            <span>CHEMPHYBIO</span>
-            <span>LEARNING DASHBOARD / 2026</span>
-          </div>
-
-          <div class="visual-core">
-            <div class="science-ring ring-a"></div>
-            <div class="science-ring ring-b"></div>
-            <div class="core-letter">C<span>×</span>B</div>
-            <div class="core-caption">SCIENCE / KNOWLEDGE / PROGRESS</div>
-          </div>
-
-          <div class="visual-bottom">
-            <div><strong>05</strong><span>SUBJECT AREAS</span></div>
-            <div><strong>24/7</strong><span>LEARN AT YOUR PACE</span></div>
-          </div>
-          <div class="visual-index">01 — PREPARE WITH PURPOSE</div>
-        </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-orbit"></div>
+        <div class="hero-core">C+</div>
       </div>
     </section>
 
+    <!-- STATS -->
     <section class="stats-strip">
-      <div class="container stats-grid">
-        <div class="stat-item"><strong>05</strong><span data-i18n="statSubjects">Core subject areas</span></div>
-        <div class="stat-item"><strong>FREE</strong><span data-i18n="statAccess">Open practice access</span></div>
-        <div class="stat-item"><strong>01</strong><span data-i18n="statGoal">One goal — better preparation</span></div>
+      <div class="stat-item">
+        <strong id="totalQuestionsCount">0</strong>
+        <span>Available MCQs</span>
+      </div>
+      <div class="stat-item">
+        <strong>05</strong>
+        <span>Core Subjects</span>
+      </div>
+      <div class="stat-item">
+        <strong>180</strong>
+        <span>Mock Test MCQs</span>
+      </div>
+      <div class="stat-item">
+        <strong>24/7</strong>
+        <span>Practice Access</span>
       </div>
     </section>
 
-    <section class="section subjects-section" id="subjects">
-      <div class="container">
-        <div class="section-heading heading-row">
+    <!-- SUBJECTS -->
+    <section class="section" id="subjects">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">YOUR LEARNING PATH</span>
+          <h2>Explore Subjects</h2>
+          <p>Select a subject and start improving your preparation.</p>
+        </div>
+      </div>
+
+      <div class="subject-grid">
+
+        <article class="subject-card" data-subject="Biology">
+          <span class="subject-number">01 / SCIENCE</span>
+          <div class="subject-monogram">BIO</div>
+          <h3>Biology</h3>
+          <div class="subject-meta">
+            <span id="biologyCount">0 MCQs</span>
+            <span>Chapter Practice</span>
+          </div>
+          <button class="subject-link" data-start-subject="Biology">Start Practice →</button>
+        </article>
+
+        <article class="subject-card" data-subject="Chemistry">
+          <span class="subject-number">02 / SCIENCE</span>
+          <div class="subject-monogram">CHE</div>
+          <h3>Chemistry</h3>
+          <div class="subject-meta">
+            <span id="chemistryCount">0 MCQs</span>
+            <span>Chapter Practice</span>
+          </div>
+          <button class="subject-link" data-start-subject="Chemistry">Start Practice →</button>
+        </article>
+
+        <article class="subject-card" data-subject="Physics">
+          <span class="subject-number">03 / SCIENCE</span>
+          <div class="subject-monogram">PHY</div>
+          <h3>Physics</h3>
+          <div class="subject-meta">
+            <span id="physicsCount">0 MCQs</span>
+            <span>Chapter Practice</span>
+          </div>
+          <button class="subject-link" data-start-subject="Physics">Start Practice →</button>
+        </article>
+
+        <article class="subject-card" data-subject="English">
+          <span class="subject-number">04 / LANGUAGE</span>
+          <div class="subject-monogram">ENG</div>
+          <h3>English</h3>
+          <div class="subject-meta">
+            <span id="englishCount">0 MCQs</span>
+            <span>Chapter Practice</span>
+          </div>
+          <button class="subject-link" data-start-subject="English">Start Practice →</button>
+        </article>
+
+        <article class="subject-card" data-subject="Logical Reasoning">
+          <span class="subject-number">05 / REASONING</span>
+          <div class="subject-monogram">LOG</div>
+          <h3>Logical Reasoning</h3>
+          <div class="subject-meta">
+            <span id="logicalCount">0 MCQs</span>
+            <span>Practice Questions</span>
+          </div>
+          <button class="subject-link" data-start-subject="Logical Reasoning">Start Practice →</button>
+        </article>
+
+        <article class="subject-note">
+          <h3>Prepare With Purpose</h3>
+          <p>Build your concepts, improve accuracy and monitor your progress with every test.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="section" id="practice">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">DAILY LEARNING</span>
+          <h2>Quick Practice</h2>
+          <p>Choose your subject and practice available MCQs.</p>
+        </div>
+      </div>
+
+      <div class="practice-panel">
+        <h3>Start Your Practice Session</h3>
+        <p>Practice questions with instant feedback and explanations.</p>
+
+        <div class="practice-controls">
           <div>
-            <div class="eyebrow dark-eyebrow">01 / LEARNING AREAS</div>
-            <h2 data-i18n="subjectsTitle">Choose your subject</h2>
-            <p data-i18n="subjectsDesc">Build a strong foundation, one chapter at a time.</p>
+            <label for="subjectSelect">Select Subject</label>
+            <select id="subjectSelect">
+              <option value="Biology">Biology</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Physics">Physics</option>
+              <option value="English">English</option>
+              <option value="Logical Reasoning">Logical Reasoning</option>
+            </select>
           </div>
-          <span class="heading-side-note">SELECT / PRACTICE / IMPROVE</span>
-        </div>
 
-        <div class="subject-grid">
-          <button class="subject-card" data-subject="Biology" type="button">
-            <span class="subject-number">01</span>
-            <span class="subject-monogram">BIO</span>
-            <h3 data-i18n="biology">Biology</h3>
-            <p data-i18n="biologyDesc">Cell biology, genetics and life sciences.</p>
-            <span class="subject-meta"><b class="mcq-count" data-count-for="Biology">—</b> <span data-i18n="mcqsAvailable">MCQs available</span></span>
-            <span class="subject-link" data-i18n="practiceNow">Practice now ↗</span>
-          </button>
-
-          <button class="subject-card" data-subject="Chemistry" type="button">
-            <span class="subject-number">02</span>
-            <span class="subject-monogram">CHE</span>
-            <h3 data-i18n="chemistry">Chemistry</h3>
-            <p data-i18n="chemistryDesc">Understand matter, reactions and concepts.</p>
-            <span class="subject-meta"><b class="mcq-count" data-count-for="Chemistry">—</b> <span data-i18n="mcqsAvailable">MCQs available</span></span>
-            <span class="subject-link" data-i18n="practiceNow">Practice now ↗</span>
-          </button>
-
-          <button class="subject-card" data-subject="Physics" type="button">
-            <span class="subject-number">03</span>
-            <span class="subject-monogram">PHY</span>
-            <h3 data-i18n="physics">Physics</h3>
-            <p data-i18n="physicsDesc">Explore motion, energy and physical laws.</p>
-            <span class="subject-meta"><b class="mcq-count" data-count-for="Physics">—</b> <span data-i18n="mcqsAvailable">MCQs available</span></span>
-            <span class="subject-link" data-i18n="practiceNow">Practice now ↗</span>
-          </button>
-
-          <button class="subject-card" data-subject="English" type="button">
-            <span class="subject-number">04</span>
-            <span class="subject-monogram">ENG</span>
-            <h3 data-i18n="english">English</h3>
-            <p data-i18n="englishDesc">Improve vocabulary and language skills.</p>
-            <span class="subject-meta"><b class="mcq-count" data-count-for="English">—</b> <span data-i18n="mcqsAvailable">MCQs available</span></span>
-            <span class="subject-link" data-i18n="practiceNow">Practice now ↗</span>
-          </button>
-
-          <button class="subject-card" data-subject="Logical Reasoning" type="button">
-            <span class="subject-number">05</span>
-            <span class="subject-monogram">LOG</span>
-            <h3 data-i18n="logic">Logical Reasoning</h3>
-            <p data-i18n="logicDesc">Sharpen reasoning and problem-solving.</p>
-            <span class="subject-meta"><b class="mcq-count" data-count-for="Logical Reasoning">—</b> <span data-i18n="mcqsAvailable">MCQs available</span></span>
-            <span class="subject-link" data-i18n="practiceNow">Practice now ↗</span>
-          </button>
-
-          <div class="subject-note">
-            <span class="note-kicker">YOUR NEXT STEP</span>
-            <strong data-i18n="subjectNoteTitle">Consistency creates confidence.</strong>
-            <p data-i18n="subjectNoteText">Choose a subject and start with the questions currently available in the practice bank.</p>
-            <a href="#practice" data-i18n="goToPractice">Go to practice ↗</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section challenge-section" id="challenge">
-      <div class="container challenge-layout">
-        <div>
-          <div class="eyebrow">02 / DAILY PROGRESS</div>
-          <h2 data-i18n="challengeTitle">Small steps. Strong results.</h2>
-          <p data-i18n="challengeDesc">Make practice part of your routine. Pick a subject, attempt questions and review every explanation.</p>
-        </div>
-        <a class="btn btn-gold" href="#practice" data-i18n="takeChallenge">Take a practice session ↗</a>
-      </div>
-    </section>
-
-    <section class="section practice-section" id="practice">
-      <div class="container">
-        <div class="section-heading">
-          <div class="eyebrow dark-eyebrow">03 / QUICK PRACTICE</div>
-          <h2 data-i18n="practiceTitle">Test your understanding</h2>
-          <p data-i18n="practiceDesc">Choose a subject to begin a short MCQ session.</p>
-        </div>
-
-        <div class="practice-panel">
-          <label for="subjectSelect" data-i18n="selectSubject">Select subject</label>
-          <select id="subjectSelect">
-            <option value="">Choose a subject</option>
-            <option>Biology</option>
-            <option>Chemistry</option>
-            <option>Physics</option>
-            <option>English</option>
-            <option>Logical Reasoning</option>
-          </select>
-          <button class="btn btn-gold" id="quickQuizStart" type="button" data-i18n="beginQuiz">Begin quiz ↗</button>
-          <span class="panel-hint" data-i18n="practiceHint">Questions are loaded from the live question bank.</span>
-        </div>
-
-        <div id="quizArea" class="quiz-area" hidden aria-live="polite"></div>
-      </div>
-    </section>
-
-    <section class="section mock-section" id="mock">
-      <div class="container mock-layout">
-        <div>
-          <div class="eyebrow dark-eyebrow">04 / EXAM SIMULATION</div>
-          <h2 data-i18n="mockTitle">Full mock test</h2>
-          <p data-i18n="mockDesc">Attempt a mixed-subject test using the MCQs currently available in the question bank. The test will never duplicate questions to fill a target.</p>
-        </div>
-
-        <div class="mock-card">
-          <label for="testQuestionCount" data-i18n="testLength">Test length</label>
-          <select id="testQuestionCount">
-            <option value="100">100 questions</option>
-            <option value="180">180 questions</option>
-          </select>
-          <button class="btn btn-dark" id="startFullTest" type="button" data-i18n="startMock">Start mock test ↗</button>
-          <p class="fine-print" data-i18n="mockNote">If fewer questions are available, the test will use the available number and tell you.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section updates-section" id="updates">
-      <div class="container">
-        <div class="section-heading heading-row">
           <div>
-            <div class="eyebrow dark-eyebrow">05 / INFORMATION DESK</div>
-            <h2 data-i18n="updatesTitle">Latest updates</h2>
-            <p data-i18n="updatesDesc">Important notices and preparation resources.</p>
+            <label for="practiceQuestionCount">Number of MCQs</label>
+            <select id="practiceQuestionCount">
+              <option value="10">10 MCQs</option>
+              <option value="20">20 MCQs</option>
+              <option value="30">30 MCQs</option>
+              <option value="40">40 MCQs</option>
+              <option value="50">50 MCQs</option>
+            </select>
           </div>
-          <span class="heading-side-note">STAY INFORMED</span>
         </div>
 
-        <div class="content-media-grid">
-          <article class="media-card" id="posterCard" hidden>
-            <img id="posterImage" alt="Latest announcement poster">
-            <p data-i18n="posterCaption">Latest announcement</p>
-          </article>
-          <article class="media-card" id="advertisementCard" hidden>
-            <img id="advertisementImage" alt="Featured information">
-            <p data-i18n="adCaption">Featured information</p>
-          </article>
-        </div>
-
-        <div id="updatesList" class="updates-grid">
-          <article class="update-card">
-            <span class="update-label">WELCOME</span>
-            <h3>CHEMPHYBIO MDCAT</h3>
-            <p>Updates will appear here when published by the site administrator.</p>
-          </article>
-        </div>
+        <button class="btn" id="quickQuizStart" type="button">Start Practice</button>
+        <div id="quizArea" aria-live="polite"></div>
       </div>
     </section>
 
-    <section class="section calculator-section" id="aggregate">
-      <div class="container calculator-layout">
+    <!-- MOCK TESTS -->
+    <section class="section" id="mockTests">
+      <div class="section-heading">
         <div>
-          <div class="eyebrow dark-eyebrow">06 / ESTIMATION TOOL</div>
-          <h2 data-i18n="aggregateTitle">Aggregate calculator</h2>
-          <p data-i18n="aggregateDesc">Enter your marks to calculate an estimate. The displayed weighting is an example and must be checked against the current official admission policy.</p>
+          <span class="section-kicker">EXAM SIMULATION</span>
+          <h2>Test Centre</h2>
+          <p>Attempt a timed test in a dedicated exam-style environment.</p>
         </div>
+      </div>
 
-        <div class="calculator-panel">
-          <div class="calculator-grid">
-            <label>Matric marks<input id="matricMarks" type="number" min="0" step="any" placeholder="Obtained"></label>
-            <label>Matric total<input id="matricTotal" type="number" min="1" step="any" placeholder="Total"></label>
-            <label>FSc marks<input id="fscMarks" type="number" min="0" step="any" placeholder="Obtained"></label>
-            <label>FSc total<input id="fscTotal" type="number" min="1" step="any" placeholder="Total"></label>
-            <label>MDCAT marks<input id="mdcatMarks" type="number" min="0" step="any" placeholder="Obtained"></label>
-            <label>MDCAT total<input id="mdcatTotal" type="number" min="1" step="any" placeholder="Total"></label>
+      <div class="mock-panel">
+        <h3>Configure Your Test</h3>
+        <p>Choose a subject, test length and begin your examination.</p>
+
+        <div class="practice-controls">
+          <div>
+            <label for="testSubject">Test Category</label>
+            <select id="testSubject">
+              <option value="Biology">Biology</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Physics">Physics</option>
+              <option value="English">English</option>
+              <option value="Logical Reasoning">Logical Reasoning</option>
+              <option value="All">Full MDCAT Mock Test</option>
+            </select>
           </div>
 
-          <button class="btn btn-dark" id="calculateAggregate" type="button" data-i18n="calculate">Calculate estimate</button>
-          <p class="weight-note">Example weighting: Matric 10% • FSc 40% • MDCAT 50%</p>
-          <div id="aggregateResult" aria-live="polite"></div>
+          <div>
+            <label for="testQuestionCount">Number of MCQs</label>
+            <select id="testQuestionCount">
+              <option value="10">10 MCQs</option>
+              <option value="20">20 MCQs</option>
+              <option value="30">30 MCQs</option>
+              <option value="40">40 MCQs</option>
+              <option value="50">50 MCQs</option>
+              <option value="70">70 MCQs</option>
+              <option value="80">80 MCQs</option>
+              <option value="100">100 MCQs</option>
+              <option value="180" selected>180 MCQs</option>
+            </select>
+          </div>
         </div>
+
+        <div class="test-information">
+          <p>✓ Countdown timer</p>
+          <p>✓ Previous / Next / Skip</p>
+          <p>✓ Mark for Review</p>
+          <p>✓ Detailed result</p>
+        </div>
+
+        <button class="btn" id="startFullTest" type="button">Enter Test Centre</button>
+        <div id="mockStatus" aria-live="polite"></div>
       </div>
     </section>
 
-    <section class="section about-section" id="about">
-      <div class="container about-layout">
+    <!-- UPDATES -->
+    <section class="section" id="updates">
+      <div class="section-heading">
         <div>
-          <div class="eyebrow">07 / ABOUT THE PLATFORM</div>
-          <h2 data-i18n="aboutTitle">A clearer way to prepare.</h2>
-          <p data-i18n="aboutDesc">CHEMPHYBIO MDCAT is designed to make practice accessible, organized and focused. Learn at your own pace, revise important concepts and follow verified updates.</p>
-          <div class="about-tags">
-            <span>FREE PRACTICE</span>
-            <span>CHAPTER-WISE LEARNING</span>
-            <span>STUDENT-FOCUSED</span>
+          <span class="section-kicker">LATEST INFORMATION</span>
+          <h2>Announcements & Updates</h2>
+          <p>Important notices, educational updates and announcements.</p>
+        </div>
+      </div>
+
+      <div class="updates-grid">
+        <article class="poster-card" id="posterCard" hidden>
+          <img id="posterImage" src="" alt="Latest announcement poster">
+          <h3 id="posterTitle">Latest Announcement</h3>
+        </article>
+
+        <article class="advertisement-card" id="advertisementCard" hidden>
+          <img id="advertisementImage" src="" alt="Advertisement">
+          <h3 id="advertisementTitle">Advertisement</h3>
+        </article>
+      </div>
+
+      <div id="updatesList" class="updates-list"></div>
+    </section>
+
+    <!-- AGGREGATE CALCULATOR -->
+    <section class="section" id="calculator">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">ADMISSION PLANNING</span>
+          <h2>Aggregate Calculator</h2>
+          <p>Calculate an illustrative aggregate using your marks.</p>
+        </div>
+      </div>
+
+      <div class="calculator-panel">
+        <h3>Enter Your Marks</h3>
+
+        <div class="calculator-fields">
+          <div>
+            <label for="matricMarks">Matric Obtained</label>
+            <input id="matricMarks" type="number" min="0" placeholder="e.g. 1050">
+          </div>
+
+          <div>
+            <label for="matricTotal">Matric Total</label>
+            <input id="matricTotal" type="number" min="1" placeholder="e.g. 1100">
+          </div>
+
+          <div>
+            <label for="fscMarks">FSc Obtained</label>
+            <input id="fscMarks" type="number" min="0" placeholder="e.g. 1050">
+          </div>
+
+          <div>
+            <label for="fscTotal">FSc Total</label>
+            <input id="fscTotal" type="number" min="1" placeholder="e.g. 1200">
+          </div>
+
+          <div>
+            <label for="mdcatMarks">MDCAT Obtained</label>
+            <input id="mdcatMarks" type="number" min="0" placeholder="e.g. 160">
+          </div>
+
+          <div>
+            <label for="mdcatTotal">MDCAT Total</label>
+            <input id="mdcatTotal" type="number" min="1" placeholder="e.g. 180">
           </div>
         </div>
 
-        <div class="admin-public-card">
-          <img id="adminPublicPhoto" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='100%25' height='100%25' fill='%23102b49'/%3E%3Ctext x='50%25' y='55%25' fill='%23e8d5a9' font-size='42' text-anchor='middle' font-family='Arial'%3ECB%3C/text%3E%3C/svg%3E" alt="Platform administrator">
-          <h3 id="adminPublicName">CHEMPHYBIO MDCAT</h3>
-          <p data-i18n="platformAdmin">Platform administrator</p>
+        <button class="btn" id="calculateAggregate" type="button">Calculate Aggregate</button>
+        <div id="aggregateResult" class="result-panel" aria-live="polite"></div>
+        <p class="calculator-note">This is an illustrative calculator. Always check the official admission policy and weightage.</p>
+      </div>
+    </section>
+
+    <!-- STUDENT LOGIN -->
+    <section class="section" id="studentLogin">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">YOUR PERSONAL LEARNING SPACE</span>
+          <h2>Student Account</h2>
+          <p>Sign in with Google to save your test history and learning progress.</p>
+        </div>
+      </div>
+
+      <div class="student-login-panel" id="studentLoginPanel">
+        <div class="login-mark">C</div>
+        <h3>Welcome to Your Dashboard</h3>
+        <p>Your progress stays connected to your Google account.</p>
+        <button class="btn" id="studentGoogleLogin" type="button">Continue with Google</button>
+        <p id="studentAuthMessage" class="status-message" aria-live="polite"></p>
+      </div>
+
+      <div class="student-dashboard" id="studentDashboard" hidden>
+        <div class="student-profile">
+          <img id="studentPhoto" src="" alt="Student profile">
+          <div>
+            <span class="section-kicker">STUDENT PROFILE</span>
+            <h3 id="studentName">Student</h3>
+            <p id="studentEmail"></p>
+          </div>
+          <button class="btn btn-secondary" id="studentLogout" type="button">Logout</button>
+        </div>
+
+        <div class="student-stats-grid">
+          <article class="student-stat">
+            <span>Total Tests</span>
+            <strong id="studentTotalTests">0</strong>
+          </article>
+          <article class="student-stat">
+            <span>Average Score</span>
+            <strong id="studentAverage">0%</strong>
+          </article>
+          <article class="student-stat">
+            <span>MCQs Attempted</span>
+            <strong id="studentAttempted">0</strong>
+          </article>
+          <article class="student-stat">
+            <span>Estimated MDCAT</span>
+            <strong id="studentEstimatedScore">— / 180</strong>
+          </article>
+        </div>
+
+        <div class="student-progress-section">
+          <h3>Subject-wise Performance</h3>
+          <div id="subjectPerformance" class="subject-performance"></div>
+        </div>
+
+        <div class="student-history-section">
+          <h3>Test History</h3>
+          <div id="studentTestHistory" class="student-history">
+            <p>Your completed tests will appear here.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section community-section" id="contact">
-      <div class="container community-inner">
-        <div class="eyebrow dark-eyebrow">08 / STUDENT COMMUNITY</div>
-        <h2 data-i18n="communityTitle">Learn together. Grow together.</h2>
-        <p data-i18n="communityDesc">A community link will be available here when added by the administrator.</p>
-        <a id="whatsappCommunity" class="btn btn-green" href="#" target="_blank" rel="noopener" hidden data-i18n="joinCommunity">Join community ↗</a>
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">OUR MISSION</span>
+          <h2>About CHEMPHYBIO</h2>
+        </div>
+      </div>
+
+      <div class="about-panel">
+        <img id="adminPublicPhoto" src="" alt="Platform administrator" hidden>
+        <div>
+          <h3 id="adminPublicName">CHEMPHYBIO MDCAT Team</h3>
+          <p id="welcomeMessage">
+            Our mission is to make quality MDCAT preparation accessible to every student.
+          </p>
+        </div>
       </div>
     </section>
 
-    <section class="section admin-section" id="admin">
-      <div class="container">
-        <div class="admin-panel-card">
-          <div class="section-heading">
-            <div class="eyebrow dark-eyebrow">ADMINISTRATION</div>
-            <h2 data-i18n="adminAccess">Admin access</h2>
-            <p data-i18n="adminSecure">Authorized administrator sign-in only.</p>
-          </div>
+    <!-- COMMUNITY -->
+    <section class="section" id="community">
+      <div class="community-panel">
+        <div>
+          <span class="section-kicker">STAY CONNECTED</span>
+          <h2>Join Our Community</h2>
+          <p>Stay informed about learning resources and platform updates.</p>
+        </div>
+        <a id="whatsappCommunity" class="btn" href="#" target="_blank" rel="noopener">Join Community</a>
+      </div>
+    </section>
 
-          <form id="adminLoginForm">
-            <label for="adminEmail">Email</label>
-            <input id="adminEmail" type="email" autocomplete="username" required>
-            <label for="adminPassword">Password</label>
-            <input id="adminPassword" type="password" autocomplete="current-password" required>
-            <button class="btn btn-dark" type="submit" data-i18n="adminLogin">Sign in</button>
+    <!-- ADMIN LOGIN -->
+    <section class="admin-section" id="admin">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">PLATFORM MANAGEMENT</span>
+          <h2>Administrator Access</h2>
+          <p>Authorized administrator sign-in only.</p>
+        </div>
+      </div>
+
+      <div class="admin-login" id="adminLoginPanel">
+        <h3>Admin Login</h3>
+        <p>Sign in using your authorized Google account.</p>
+        <button class="btn" id="adminGoogleLogin" type="button">Admin Sign in with Google</button>
+        <p id="adminLoginMessage" class="status-message" aria-live="polite"></p>
+      </div>
+
+      <!-- ADMIN DASHBOARD -->
+      <div class="admin-dashboard" id="adminDashboard" hidden>
+
+        <div class="admin-topbar">
+          <div class="admin-profile">
+            <img id="adminProfilePhoto" src="" alt="Administrator profile">
+            <div>
+              <span class="section-kicker">CONTROL CENTRE</span>
+              <h3 id="adminDisplayName">Administrator</h3>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="adminLogout" type="button">Logout</button>
+        </div>
+
+        <div id="adminStatus" class="admin-message" aria-live="polite"></div>
+
+        <div class="admin-overview">
+          <article>
+            <span>Total MCQs</span>
+            <strong id="adminTotalQuestions">0</strong>
+          </article>
+          <article>
+            <span>Contributors</span>
+            <strong id="adminTotalContributors">0</strong>
+          </article>
+        </div>
+
+        <!-- ADMIN NAVIGATION -->
+        <div class="admin-tabs">
+          <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
+          <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
+          <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
+        </div>
+
+        <!-- QUESTIONS MANAGER -->
+        <section class="admin-tab-panel active" id="adminQuestionsPanel">
+          <h3>Question Manager</h3>
+
+          <form id="mcqForm">
+            <input type="hidden" id="editingQuestionId">
+
+            <div class="admin-form-grid">
+              <div>
+                <label for="mcqSubject">Subject</label>
+                <select id="mcqSubject" required>
+                  <option value="Biology">Biology</option>
+                  <option value="Chemistry">Chemistry</option>
+                  <option value="Physics">Physics</option>
+                  <option value="English">English</option>
+                  <option value="Logical Reasoning">Logical Reasoning</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="mcqChapter">Chapter</label>
+                <input id="mcqChapter" type="text" required placeholder="Chapter name">
+              </div>
+            </div>
+
+            <div>
+              <label for="mcqQuestion">Question</label>
+              <textarea id="mcqQuestion" required placeholder="Write your MCQ question"></textarea>
+            </div>
+
+            <div class="admin-form-grid">
+              <div>
+                <label for="mcqOption0">Option A</label>
+                <input id="mcqOption0" required>
+              </div>
+              <div>
+                <label for="mcqOption1">Option B</label>
+                <input id="mcqOption1" required>
+              </div>
+              <div>
+                <label for="mcqOption2">Option C</label>
+                <input id="mcqOption2" required>
+              </div>
+              <div>
+                <label for="mcqOption3">Option D</label>
+                <input id="mcqOption3" required>
+              </div>
+            </div>
+
+            <div>
+              <label for="mcqAnswer">Correct Answer</label>
+              <select id="mcqAnswer" required>
+                <option value="0">Option A</option>
+                <option value="1">Option B</option>
+                <option value="2">Option C</option>
+                <option value="3">Option D</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="mcqExplanation">Explanation</label>
+              <textarea id="mcqExplanation" placeholder="Explain the correct answer"></textarea>
+            </div>
+
+            <div class="admin-actions">
+              <button class="btn" id="saveMcq" type="submit">Save Question</button>
+              <button class="btn btn-secondary" id="cancelEdit" type="button" hidden>Cancel Edit</button>
+            </div>
           </form>
 
-          <p id="adminMessage" aria-live="polite"></p>
+          <h3>Saved Questions</h3>
+          <div id="adminMcqList"></div>
+        </section>
 
-          <div id="adminDashboard" hidden>
-            <div class="admin-toolbar">
-              <h2>Content dashboard</h2>
-              <button id="adminLogout" class="btn btn-outline-dark" type="button">Sign out</button>
+        <!-- WEBSITE CONTENT -->
+        <section class="admin-tab-panel" id="adminContentPanel" hidden>
+          <h3>Website Content</h3>
+
+          <form id="adminContentForm" class="admin-content-form">
+            <div>
+              <label for="contentAdminName">Administrator Name</label>
+              <input id="contentAdminName" type="text">
             </div>
 
-            <h3>Question manager</h3>
-            <form id="mcqForm">
-              <label for="mcqSubject">Subject</label>
-              <select id="mcqSubject" required>
-                <option>Biology</option>
-                <option>Chemistry</option>
-                <option>Physics</option>
-                <option>English</option>
-                <option>Logical Reasoning</option>
-              </select>
-
-              <label for="mcqChapter">Chapter</label>
-              <input id="mcqChapter" required>
-
-              <label for="mcqQuestion">Question</label>
-              <textarea id="mcqQuestion" required></textarea>
-
-              <div class="option-fields">
-                <label>Option A<input id="mcqOption0" required></label>
-                <label>Option B<input id="mcqOption1" required></label>
-                <label>Option C<input id="mcqOption2" required></label>
-                <label>Option D<input id="mcqOption3" required></label>
-              </div>
-
-              <label for="mcqAnswer">Correct option</label>
-              <select id="mcqAnswer">
-                <option value="0">A</option>
-                <option value="1">B</option>
-                <option value="2">C</option>
-                <option value="3">D</option>
-              </select>
-
-              <label for="mcqExplanation">Explanation</label>
-              <textarea id="mcqExplanation"></textarea>
-
-              <div class="admin-actions">
-                <button class="btn btn-gold" type="submit" id="saveMcq">Save question</button>
-                <button class="btn btn-outline-dark" type="button" id="cancelEdit" hidden>Cancel edit</button>
-              </div>
-            </form>
-
-            <p id="adminStatus" aria-live="polite"></p>
-            <div id="adminMcqList"></div>
-
-            <div id="adminExtraTools">
-              <h3>Website content</h3>
-
-              <label>Public display name<input id="contentAdminName"></label>
-              <label>Profile photo URL<input id="contentAdminPhoto" type="url" placeholder="https://..."></label>
-              <label>Welcome message<textarea id="contentWelcome"></textarea></label>
-              <label>WhatsApp community URL<input id="contentWhatsapp" type="url" placeholder="https://chat.whatsapp.com/..."></label>
-              <label>Poster image URL<input id="contentPoster" type="url" placeholder="https://..."></label>
-              <label>Advertisement image URL<input id="contentAd" type="url" placeholder="https://..."></label>
-
-              <button id="saveSiteContent" class="btn btn-dark" type="button">Save website content</button>
-
-              <h3>Contributor access</h3>
-              <label>Contributor email<input id="contributorEmail" type="email"></label>
-              <button id="addContributor" class="btn btn-outline-dark" type="button">Authorize contributor</button>
-              <div id="contributorsList"></div>
+            <div>
+              <label for="contentAdminPhoto">Profile Photo URL</label>
+              <input id="contentAdminPhoto" type="url" placeholder="https://...">
             </div>
+
+            <div>
+              <label for="contentWelcome">Welcome Message</label>
+              <textarea id="contentWelcome"></textarea>
+            </div>
+
+            <div>
+              <label for="contentWhatsapp">WhatsApp Community Link</label>
+              <input id="contentWhatsapp" type="url" placeholder="https://chat.whatsapp.com/...">
+            </div>
+
+            <div>
+              <label for="contentPosterTitle">Announcement Title</label>
+              <input id="contentPosterTitle" type="text">
+            </div>
+
+            <div>
+              <label for="contentPoster">Announcement Poster URL</label>
+              <input id="contentPoster" type="url" placeholder="https://...">
+            </div>
+
+            <div>
+              <label for="contentAnnouncement">Announcement Message</label>
+              <textarea id="contentAnnouncement"></textarea>
+            </div>
+
+            <div>
+              <label for="contentAdTitle">Advertisement Title</label>
+              <input id="contentAdTitle" type="text">
+            </div>
+
+            <div>
+              <label for="contentAd">Advertisement Image URL</label>
+              <input id="contentAd" type="url" placeholder="https://...">
+            </div>
+
+            <button class="btn" id="saveSiteContent" type="submit">Publish Website Content</button>
+          </form>
+        </section>
+
+        <!-- CONTRIBUTORS -->
+        <section class="admin-tab-panel" id="adminContributorsPanel" hidden>
+          <h3>Contributor Management</h3>
+
+          <div class="contributor-form">
+            <label for="contributorEmail">Contributor Email</label>
+            <input id="contributorEmail" type="email" placeholder="student@example.com">
+            <button class="btn" id="addContributor" type="button">Add Contributor</button>
           </div>
-        </div>
+
+          <div id="contributorsList"></div>
+        </section>
+
       </div>
     </section>
+
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <a class="footer-brand" href="#home">CHEMPHYBIO MDCAT</a>
-      <p>© <span id="currentYear"></span> CHEMPHYBIO MDCAT. <span data-i18n="footerText">Free learning. Focused preparation.</span></p>
-      <a href="#admin" class="footer-admin">Admin access ↗</a>
+  <!-- DEDICATED TEST ENVIRONMENT -->
+  <section id="testEnvironment" class="test-environment" hidden>
+
+    <header class="test-header">
+      <div class="test-brand">
+        <span class="test-brand-mark">C</span>
+        <div>
+          <strong>CHEMPHYBIO MDCAT</strong>
+          <small id="testSubjectTitle">Examination</small>
+        </div>
+      </div>
+
+      <div class="test-timer-box">
+        <span>TIME LEFT</span>
+        <strong id="testTimer">00:00</strong>
+      </div>
+
+      <button class="btn btn-danger" id="exitTest" type="button">Exit Test</button>
+    </header>
+
+    <div class="test-main">
+
+      <div class="test-progress-row">
+        <span id="testProgressText">Question 1 of 180</span>
+        <span id="testAnsweredText">Answered: 0</span>
+      </div>
+
+      <div class="test-progress-track">
+        <div id="testProgressBar"></div>
+      </div>
+
+      <div class="test-layout">
+
+        <section class="test-question-panel">
+          <div class="question-topline">
+            <span id="testQuestionNumber">QUESTION 01</span>
+            <span id="testQuestionChapter">Chapter</span>
+          </div>
+
+          <h2 id="testQuestionText">Question will appear here.</h2>
+
+          <div id="testOptions" class="test-options"></div>
+
+          <div class="test-navigation">
+            <button class="btn btn-secondary" id="testPrevious" type="button">← Previous</button>
+            <button class="btn btn-secondary" id="testSkip" type="button">Skip</button>
+            <button class="btn" id="testNext" type="button">Next →</button>
+          </div>
+
+          <div class="review-action">
+            <button class="btn btn-secondary" id="markForReview" type="button">☆ Mark for Review</button>
+            <button class="btn btn-danger" id="submitTest" type="button">Submit Test</button>
+          </div>
+        </section>
+
+        <aside class="test-question-navigator">
+          <h3>Question Navigator</h3>
+
+          <div class="navigator-legend">
+            <span><i class="legend-answered"></i> Answered</span>
+            <span><i class="legend-review"></i> Review</span>
+            <span><i class="legend-unanswered"></i> Unanswered</span>
+          </div>
+
+          <div id="questionNavigator" class="question-navigator"></div>
+        </aside>
+
+      </div>
     </div>
+  </section>
+
+  <!-- TEST RESULT -->
+  <section id="testResultScreen" class="test-result-screen" hidden>
+    <div class="test-result-card">
+      <span class="section-kicker">EXAMINATION COMPLETED</span>
+      <h1>Your Test Result</h1>
+
+      <div class="result-score-circle">
+        <strong id="resultPercentage">0%</strong>
+        <span>Percentage</span>
+      </div>
+
+      <div class="result-summary-grid">
+        <article>
+          <span>Total Questions</span>
+          <strong id="resultTotal">0</strong>
+        </article>
+        <article>
+          <span>Correct</span>
+          <strong id="resultCorrect">0</strong>
+        </article>
+        <article>
+          <span>Wrong</span>
+          <strong id="resultWrong">0</strong>
+        </article>
+        <article>
+          <span>Unattempted</span>
+          <strong id="resultUnattempted">0</strong>
+        </article>
+      </div>
+
+      <p id="resultMessage"></p>
+
+      <div class="result-actions">
+        <button class="btn" id="reviewAnswers" type="button">Review Answers</button>
+        <button class="btn btn-secondary" id="backToWebsite" type="button">Back to Website</button>
+      </div>
+
+      <div id="resultAnswerReview" hidden></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <strong>CHEMPHYBIO MDCAT</strong>
+    <p>Free learning. Smart practice. Better preparation.</p>
+    <p>© <span id="currentYear">2026</span> CHEMPHYBIO MDCAT. All rights reserved.</p>
+    <a href="#home">Back to Top ↑</a>
   </footer>
+
 </body>
 </html>
