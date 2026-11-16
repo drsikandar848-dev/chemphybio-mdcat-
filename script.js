@@ -23,7 +23,7 @@ import {
    Apna pehle wala admin UID yahan rakhein.
 ========================================= */
 
-const ADMIN_UID = "PASTE_YOUR_EXISTING_ADMIN_UID_HERE";
+const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1";
 
 /* =========================================
    COLLECTIONS
