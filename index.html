@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -494,6 +495,10 @@
             <span>Contributors</span>
             <strong id="adminTotalContributors">0</strong>
           </article>
+          <article>
+            <span>Total Students</span>
+            <strong id="adminTotalStudents">0</strong>
+          </article>
         </div>
 
         <!-- ADMIN NAVIGATION -->
@@ -501,6 +506,7 @@
           <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
           <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
           <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
+          <button type="button" class="admin-tab" data-admin-tab="students">Students</button>
         </div>
 
         <!-- QUESTIONS MANAGER -->
@@ -582,14 +588,21 @@
           <h3>Website Content</h3>
 
           <form id="adminContentForm" class="admin-content-form">
+
             <div>
               <label for="contentAdminName">Administrator Name</label>
               <input id="contentAdminName" type="text">
             </div>
 
             <div>
-              <label for="contentAdminPhoto">Profile Photo URL</label>
-              <input id="contentAdminPhoto" type="url" placeholder="https://...">
+              <label for="contentAdminPhoto">Administrator Profile Photo</label>
+              <input
+                id="contentAdminPhoto"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              >
+              <small>Choose an image from your Gallery. Maximum 5 MB.</small>
+              <p id="contentAdminPhotoStatus" class="status-message" aria-live="polite"></p>
             </div>
 
             <div>
@@ -608,8 +621,14 @@
             </div>
 
             <div>
-              <label for="contentPoster">Announcement Poster URL</label>
-              <input id="contentPoster" type="url" placeholder="https://...">
+              <label for="contentPoster">Announcement Poster</label>
+              <input
+                id="contentPoster"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              >
+              <small>Choose your announcement poster from Gallery. Maximum 5 MB.</small>
+              <p id="contentPosterStatus" class="status-message" aria-live="polite"></p>
             </div>
 
             <div>
@@ -623,8 +642,14 @@
             </div>
 
             <div>
-              <label for="contentAd">Advertisement Image URL</label>
-              <input id="contentAd" type="url" placeholder="https://...">
+              <label for="contentAd">Advertisement Image</label>
+              <input
+                id="contentAd"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+              >
+              <small>Choose your advertisement image from Gallery. Maximum 5 MB.</small>
+              <p id="contentAdStatus" class="status-message" aria-live="polite"></p>
             </div>
 
             <button class="btn" id="saveSiteContent" type="submit">Publish Website Content</button>
@@ -642,6 +667,23 @@
           </div>
 
           <div id="contributorsList"></div>
+        </section>
+
+        <!-- STUDENTS MANAGEMENT -->
+        <section class="admin-tab-panel" id="adminStudentsPanel" hidden>
+          <h3>Student Management</h3>
+
+          <div class="admin-students-toolbar">
+            <p>View students who have created a saved learning profile.</p>
+
+            <button class="btn btn-secondary" id="refreshStudents" type="button">
+              Refresh Students
+            </button>
+          </div>
+
+          <div id="adminStudentsList">
+            <p>Student records will appear here.</p>
+          </div>
         </section>
 
       </div>
