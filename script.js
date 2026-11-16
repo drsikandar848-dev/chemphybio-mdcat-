@@ -1,4 +1,3 @@
-
 import { auth, db } from "./firebase-config.js";
 
 import {
@@ -16,108 +15,43 @@ import {
   doc,
   setDoc,
   getDoc,
-  serverTimestamp,
-  query,
-  orderBy
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-/* =====================================================
-   CHEMPHYBIO MDCAT — MAIN SCRIPT
-   Replace the ADMIN_UID placeholder with your own UID.
-===================================================== */
+/* =========================================
+   IMPORTANT: APNA PURANA ADMIN UID YAHAN LAGAO
+========================================= */
 
-const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1";
+const ADMIN_UID = "PASTE_YOUR_EXISTING_ADMIN_UID_HERE";
+
+/* =========================================
+   COLLECTIONS
+========================================= */
 
 const QUESTIONS_COLLECTION = "questions";
 const CONTENT_COLLECTION = "siteContent";
 const CONTRIBUTORS_COLLECTION = "contributors";
 
-const $ = (id) => document.getElementById(id);
+/* =========================================
+   APP STATE
+========================================= */
 
-let currentUser = null;
-let isAdmin = false;
 let allQuestions = [];
 let currentQuiz = [];
 let currentQuestionIndex = 0;
-let selectedAnswers = [];
-let testTimer = null;
-let secondsRemaining = 0;
+let currentScore = 0;
+let selectedSubject = "";
 let editingQuestionId = null;
+let currentUser = null;
+let siteContent = {};
+let currentLanguage = localStorage.getItem("chempyLanguage") || "en";
 
-/* =====================================================
-   SAMPLE QUESTIONS — USED WHEN FIRESTORE HAS NO DATA
-===================================================== */
+/* =========================================
+   HELPERS
+========================================= */
 
-const sampleQuestions = [
-  {
-    subject: "Biology",
-    chapter: "Cell Biology",
-    question: "Which organelle is known as the powerhouse of the cell?",
-    options: ["Nucleus", "Ribosome", "Mitochondrion", "Golgi body"],
-    answer: 2,
-    explanation: "Mitochondria produce most of the ATP used by the cell."
-  },
-  {
-    subject: "Biology",
-    chapter: "Cell Biology",
-    question: "What is the basic structural and functional unit of life?",
-    options: ["Tissue", "Cell", "Organ", "Organ system"],
-    answer: 1,
-    explanation: "The cell is the basic structural and functional unit of life."
-  },
-  {
-    subject: "Biology",
-    chapter: "Genetics",
-    question: "Which molecule carries hereditary information?",
-    options: ["Protein", "Lipid", "DNA", "Glucose"],
-    answer: 2,
-    explanation: "DNA stores hereditary information in most organisms."
-  },
-  {
-    subject: "Chemistry",
-    chapter: "Periodic Table",
-    question: "What is the chemical symbol of sodium?",
-    options: ["S", "So", "Na", "N"],
-    answer: 2,
-    explanation: "The chemical symbol of sodium is Na."
-  },
-  {
-    subject: "Physics",
-    chapter: "Motion",
-    question: "What is the SI unit of force?",
-    options: ["Joule", "Newton", "Watt", "Pascal"],
-    answer: 1,
-    explanation: "Force is measured in newtons."
-  },
-  {
-    subject: "English",
-    chapter: "Vocabulary",
-    question: "Choose the synonym of 'Rapid'.",
-    options: ["Slow", "Quick", "Weak", "Late"],
-    answer: 1,
-    explanation: "Rapid means fast or quick."
-  },
-  {
-    subject: "Logical Reasoning",
-    chapter: "Patterns",
-    question: "What comes next: 2, 4, 6, 8, ...?",
-    options: ["9", "10", "11", "12"],
-    answer: 1,
-    explanation: "The sequence increases by 2."
-  }
-];
-
-/* =====================================================
-   GENERAL HELPERS
-===================================================== */
-
-function showMessage(id, message, type = "info") {
-  const element = $(id);
-  if (!element) return;
-
-  element.textContent = message;
-  element.dataset.type = type;
-}
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
 
 function escapeHTML(value = "") {
   return String(value).replace(/[&<>"']/g, char => ({
@@ -129,242 +63,218 @@ function escapeHTML(value = "") {
   })[char]);
 }
 
+function showMessage(element, message, type = "info") {
+  if (!element) return;
+
+  element.textContent = message;
+  element.style.color =
+    type === "success" ? "#42c99a" :
+    type === "error" ? "#ff7272" :
+    "#9aacc1";
+}
+
 function shuffle(array) {
-  return [...array].sort(() => Math.random() - 0.5);
+  const copy = [...array];
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy;
 }
 
-function normalizeQuestion(data, id = null) {
-  return {
-    id,
-    subject: data.subject || "Biology",
-    chapter: data.chapter || "General",
-    question: data.question || "",
-    options: Array.isArray(data.options) ? data.options : [],
-    answer: Number(data.answer),
-    explanation: data.explanation || ""
+function normalizeSubject(subject = "") {
+  const value = subject.toLowerCase().trim();
+
+  const subjects = {
+    biology: "Biology",
+    chemistry: "Chemistry",
+    physics: "Physics",
+    english: "English",
+    "logical reasoning": "Logical Reasoning",
+    logic: "Logical Reasoning"
   };
+
+  return subjects[value] || subject;
 }
 
-/* =====================================================
-   LANGUAGE SWITCH
-===================================================== */
+/* =========================================
+   LANGUAGE SYSTEM
+========================================= */
 
 const translations = {
   en: {
-    welcome: "Welcome to CHEMPHYBIO MDCAT",
-    start: "Start Quiz",
-    next: "Next Question",
-    submit: "Submit Test",
+    home: "Home",
+    subjects: "Subjects",
+    practice: "Practice",
+    mockTests: "Mock Tests",
+    updates: "Updates",
+    about: "About",
+    contact: "Contact",
+    adminAccess: "Admin access",
+    startPractice: "Start Practice",
+    startTest: "Start Mock Test",
+    dailyChallenge: "Daily Challenge",
+    latestUpdates: "Latest MDCAT Updates",
+    biology: "Biology",
+    chemistry: "Chemistry",
+    physics: "Physics",
+    english: "English",
+    logicalReasoning: "Logical Reasoning",
+    noQuestions: "No questions are available for this subject yet.",
+    question: "Question",
+    next: "Next",
+    finish: "Finish",
+    retry: "Try Again",
     correct: "Correct",
     incorrect: "Incorrect",
-    noQuestions: "No questions available."
+    yourScore: "Your Score",
+    selectSubject: "Select Subject",
+    allSubjects: "All Subjects",
+    chooseSubject: "Choose a subject",
+    availableQuestions: "Available Questions",
+    login: "Login",
+    logout: "Logout",
+    email: "Email",
+    password: "Password",
+    welcome: "Welcome",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    edit: "Edit",
+    loading: "Loading...",
+    noUpdates: "No updates have been published yet.",
+    calculatorNote: "This calculator uses example weights. Confirm the official admission formula before relying on the result.",
+    loginError: "Login failed. Please check your details.",
+    adminOnly: "This account is not authorized as an administrator.",
+    saved: "Saved successfully.",
+    deleted: "Deleted successfully.",
+    error: "Something went wrong. Please try again."
   },
+
   ur: {
-    welcome: "CHEMPHYBIO MDCAT میں خوش آمدید",
-    start: "کوئز شروع کریں",
-    next: "اگلا سوال",
-    submit: "ٹیسٹ جمع کریں",
+    home: "ہوم",
+    subjects: "مضامین",
+    practice: "مشق",
+    mockTests: "مکمل ٹیسٹ",
+    updates: "تازہ اپڈیٹس",
+    about: "ہمارے بارے میں",
+    contact: "رابطہ",
+    adminAccess: "ایڈمن لاگ اِن",
+    startPractice: "مشق شروع کریں",
+    startTest: "ٹیسٹ شروع کریں",
+    dailyChallenge: "آج کا چیلنج",
+    latestUpdates: "تازہ MDCAT اپڈیٹس",
+    biology: "بائیولوجی",
+    chemistry: "کیمسٹری",
+    physics: "فزکس",
+    english: "انگلش",
+    logicalReasoning: "لاجیکل ریزننگ",
+    noQuestions: "اس مضمون کے لیے ابھی سوالات موجود نہیں ہیں۔",
+    question: "سوال",
+    next: "اگلا",
+    finish: "مکمل کریں",
+    retry: "دوبارہ کوشش کریں",
     correct: "درست",
     incorrect: "غلط",
-    noQuestions: "فی الحال کوئی سوال موجود نہیں۔"
+    yourScore: "آپ کا اسکور",
+    selectSubject: "مضمون منتخب کریں",
+    allSubjects: "تمام مضامین",
+    chooseSubject: "مضمون منتخب کریں",
+    availableQuestions: "دستیاب سوالات",
+    login: "لاگ اِن",
+    logout: "لاگ آؤٹ",
+    email: "ای میل",
+    password: "پاس ورڈ",
+    welcome: "خوش آمدید",
+    save: "محفوظ کریں",
+    cancel: "منسوخ",
+    delete: "حذف کریں",
+    edit: "ترمیم",
+    loading: "لوڈ ہو رہا ہے...",
+    noUpdates: "ابھی کوئی اپڈیٹ شائع نہیں ہوئی۔",
+    calculatorNote: "یہ کیلکولیٹر مثال کے وزن استعمال کرتا ہے۔ نتیجے پر انحصار کرنے سے پہلے سرکاری داخلہ فارمولا ضرور چیک کریں۔",
+    loginError: "لاگ اِن نہیں ہو سکا۔ اپنی معلومات چیک کریں۔",
+    adminOnly: "یہ اکاؤنٹ ایڈمن کے طور پر مجاز نہیں ہے۔",
+    saved: "کامیابی سے محفوظ ہوگیا۔",
+    deleted: "کامیابی سے حذف ہوگیا۔",
+    error: "کوئی مسئلہ پیش آیا۔ دوبارہ کوشش کریں۔"
   }
 };
 
-let currentLanguage = localStorage.getItem("chempyLanguage") || "en";
+function t(key) {
+  return translations[currentLanguage]?.[key] ||
+         translations.en[key] ||
+         key;
+}
 
 function applyLanguage() {
   document.documentElement.lang = currentLanguage;
+  document.body.classList.toggle("lang-ur", currentLanguage === "ur");
 
-  document.querySelectorAll("[data-en][data-ur]").forEach(element => {
-    element.textContent =
-      element.dataset[currentLanguage] || element.dataset.en;
+  $$("[data-i18n]").forEach(element => {
+    const key = element.dataset.i18n;
+    const translated = t(key);
+
+    if (translated !== key) {
+      element.textContent = translated;
+    }
   });
 
-  document.body.classList.toggle("urdu-mode", currentLanguage === "ur");
+  const languageButton = $("#languageToggle");
+
+  if (languageButton) {
+    languageButton.textContent =
+      currentLanguage === "en" ? "اردو" : "English";
+  }
+
+  localStorage.setItem("chempyLanguage", currentLanguage);
 }
 
 function setupLanguage() {
-  const button = $("languageToggle");
-  if (!button) return;
+  const languageButton = $("#languageToggle");
 
-  button.addEventListener("click", () => {
-    currentLanguage = currentLanguage === "en" ? "ur" : "en";
-    localStorage.setItem("chempyLanguage", currentLanguage);
-    applyLanguage();
-  });
+  if (languageButton) {
+    languageButton.addEventListener("click", () => {
+      currentLanguage = currentLanguage === "en" ? "ur" : "en";
+      applyLanguage();
+    });
+  }
 
   applyLanguage();
 }
 
-/* =====================================================
+/* =========================================
    LOAD QUESTIONS FROM FIRESTORE
-===================================================== */
+========================================= */
 
 async function loadQuestions() {
   try {
     const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
 
-    const firebaseQuestions = snapshot.docs.map(item =>
-      normalizeQuestion(item.data(), item.id)
-    );
+    allQuestions = snapshot.docs.map(questionDoc => ({
+      id: questionDoc.id,
+      ...questionDoc.data(),
+      subject: normalizeSubject(questionDoc.data().subject)
+    }));
 
-    allQuestions = [...sampleQuestions];
+    updateSubjectCounts();
+    updateQuestionStats();
 
-    firebaseQuestions.forEach(question => {
-      const existingIndex = allQuestions.findIndex(item =>
-        item.question === question.question
-      );
+    console.log("Questions loaded:", allQuestions.length);
 
-      if (existingIndex >= 0) {
-        allQuestions[existingIndex] = question;
-      } else {
-        allQuestions.push(question);
-      }
-    });
-
-    renderQuestionLists();
-    return allQuestions;
   } catch (error) {
     console.error("Question loading error:", error);
-    allQuestions = [...sampleQuestions];
-    renderQuestionLists();
-    return allQuestions;
+
+    allQuestions = [];
+
+    updateSubjectCounts();
+    updateQuestionStats();
   }
 }
 
-function renderQuestionLists() {
-  const list = $("adminMcqList");
-  if (!list) return;
-
-  const firebaseOnly = allQuestions.filter(question => question.id);
-
-  if (!firebaseOnly.length) {
-    list.textContent = "No saved Firebase questions yet.";
-    return;
-  }
-
-  list.innerHTML = firebaseOnly.map(question => `
-    <div class="admin-question-item">
-      <strong>${escapeHTML(question.subject)}</strong>
-      <small>${escapeHTML(question.chapter)}</small>
-      <p>${escapeHTML(question.question)}</p>
-      <button type="button" data-edit="${escapeHTML(question.id)}">Edit</button>
-      <button type="button" data-delete="${escapeHTML(question.id)}">Delete</button>
-    </div>
-  `).join("");
-
-  list.querySelectorAll("[data-edit]").forEach(button => {
-    button.addEventListener("click", () => {
-      editQuestion(button.dataset.edit);
-    });
-  });
-
-  list.querySelectorAll("[data-delete]").forEach(button => {
-    button.addEventListener("click", () => {
-      removeQuestion(button.dataset.delete);
-    });
-  });
-}
-
-/* =====================================================
-   QUICK QUIZ
-===================================================== */
-
-function startQuickQuiz(subject = "All") {
-  const available = subject === "All"
-    ? allQuestions
-    : allQuestions.filter(q => q.subject === subject);
-
-  if (!available.length) {
-    alert(translations[currentLanguage].noQuestions);
-    return;
-  }
-
-  currentQuiz = shuffle(available).slice(0, Math.min(10, available.length));
-  currentQuestionIndex = 0;
-  selectedAnswers = [];
-
-  const area = $("quizArea");
-  if (area) area.hidden = false;
-
-  renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-  const area = $("quizArea");
-  if (!area) return;
-
-  const question = currentQuiz[currentQuestionIndex];
-  if (!question) return;
-
-  area.innerHTML = `
-    <div class="quiz-question">
-      <p>Question ${currentQuestionIndex + 1} of ${currentQuiz.length}</p>
-      <h3>${escapeHTML(question.question)}</h3>
-
-      <div class="quiz-options">
-        ${question.options.map((option, index) => `
-          <label>
-            <input type="radio" name="quizAnswer" value="${index}">
-            ${escapeHTML(option)}
-          </label>
-        `).join("")}
-      </div>
-
-      <button type="button" id="quizNext">
-        ${currentQuestionIndex === currentQuiz.length - 1
-          ? "Finish Quiz"
-          : "Next Question"}
-      </button>
-    </div>
-  `;
-
-  area.querySelector("#quizNext").addEventListener("click", () => {
-    const selected = area.querySelector('input[name="quizAnswer"]:checked');
-
-    if (!selected) {
-      alert("Please select an answer.");
-      return;
-    }
-
-    selectedAnswers[currentQuestionIndex] = Number(selected.value);
-
-    if (currentQuestionIndex < currentQuiz.length - 1) {
-      currentQuestionIndex++;
-      renderQuizQuestion();
-    } else {
-      showQuizResult();
-    }
-  });
-}
-
-function showQuizResult() {
-  const correct = currentQuiz.reduce((total, question, index) => {
-    return total + (
-      selectedAnswers[index] === question.answer ? 1 : 0
-    );
-  }, 0);
-
-  const area = $("quizArea");
-  if (!area) return;
-
-  area.innerHTML = `
-    <div class="quiz-result">
-      <h2>Quiz Completed!</h2>
-      <h3>${correct} / ${currentQuiz.length}</h3>
-      <p>Your score: ${Math.round(correct / currentQuiz.length * 100)}%</p>
-      <button type="button" id="restartQuiz">Try Again</button>
-    </div>
-  `;
-
-  $("restartQuiz").addEventListener("click", () => startQuickQuiz());
-}
-
-/* =====================================================
-   FULL TEST
-===================================================== */
-
-function getFullTestQuestions(count = 100) {
+function updateSubjectCounts() {
   const subjects = [
     "Biology",
     "Chemistry",
@@ -373,524 +283,866 @@ function getFullTestQuestions(count = 100) {
     "Logical Reasoning"
   ];
 
-  const result = [];
-
   subjects.forEach(subject => {
-    const subjectQuestions = shuffle(
-      allQuestions.filter(q => q.subject === subject)
+    const count = allQuestions.filter(
+      question => normalizeSubject(question.subject) === subject
+    ).length;
+
+    const counter = document.querySelector(
+      `[data-count-for="${subject}"]`
     );
 
-    result.push(...subjectQuestions);
+    if (counter) {
+      counter.textContent = `${count} MCQs`;
+    }
   });
-
-  return shuffle(result).slice(0, Math.min(count, result.length));
 }
 
-function startFullTest() {
-  const countInput = $("testQuestionCount");
-  const count = countInput ? Number(countInput.value) : 100;
+function updateQuestionStats() {
+  const total = allQuestions.length;
 
-  currentQuiz = getFullTestQuestions(count);
+  const totalElement = $("#totalMcqs");
 
-  if (!currentQuiz.length) {
-    alert("No questions available for this test.");
+  if (totalElement) {
+    totalElement.textContent = total;
+  }
+
+  const subjectCount = new Set(
+    allQuestions.map(q => q.subject)
+  ).size;
+
+  const subjectElement = $("#totalSubjects");
+
+  if (subjectElement) {
+    subjectElement.textContent = subjectCount;
+  }
+}
+
+/* =========================================
+   QUIZ SYSTEM
+========================================= */
+
+function startQuiz(subject, limit = 10) {
+  selectedSubject = subject;
+
+  let available = allQuestions.filter(question => {
+    return subject === "All" ||
+      normalizeSubject(question.subject) === normalizeSubject(subject);
+  });
+
+  if (!available.length) {
+    const area = $("#quizArea");
+
+    if (area) {
+      area.textContent = t("noQuestions");
+    }
+
     return;
   }
 
+  currentQuiz = shuffle(available).slice(0, Math.min(limit, available.length));
   currentQuestionIndex = 0;
-  selectedAnswers = [];
+  currentScore = 0;
 
   renderQuizQuestion();
 }
 
-function submitFullTest() {
-  showQuizResult();
-  if (testTimer) clearInterval(testTimer);
+function renderQuizQuestion() {
+  const area = $("#quizArea");
+  if (!area) return;
+
+  const question = currentQuiz[currentQuestionIndex];
+
+  if (!question) {
+    renderQuizResult();
+    return;
+  }
+
+  const options = Array.isArray(question.options)
+    ? question.options
+    : [];
+
+  area.innerHTML = `
+    <div class="quiz-question">
+      <p class="section-kicker">
+        ${escapeHTML(question.subject || "")}
+      </p>
+
+      <p>
+        ${t("question")} ${currentQuestionIndex + 1}
+        / ${currentQuiz.length}
+      </p>
+
+      <h4>${escapeHTML(question.question || "")}</h4>
+
+      <div class="quiz-options">
+        ${options.map((option, index) => `
+          <button class="quiz-option" data-option="${index}">
+            ${escapeHTML(option)}
+          </button>
+        `).join("")}
+      </div>
+
+      <p class="quiz-feedback" id="quizFeedback"></p>
+
+      <button class="btn" id="nextQuestion" hidden>
+        ${currentQuestionIndex === currentQuiz.length - 1 ? t("finish") : t("next")}
+      </button>
+    </div>
+  `;
+
+  $$(".quiz-option").forEach(button => {
+    button.addEventListener("click", () => {
+      answerQuestion(Number(button.dataset.option));
+    });
+  });
+
+  $("#nextQuestion")?.addEventListener("click", () => {
+    currentQuestionIndex++;
+
+    if (currentQuestionIndex >= currentQuiz.length) {
+      renderQuizResult();
+    } else {
+      renderQuizQuestion();
+    }
+  });
 }
 
-/* =====================================================
-   ADMIN LOGIN
-===================================================== */
+function answerQuestion(selectedAnswer) {
+  const question = currentQuiz[currentQuestionIndex];
+  const buttons = $$(".quiz-option");
 
-function setupAdminLogin() {
-  const form = $("adminLoginForm");
-  if (!form) return;
+  buttons.forEach(button => {
+    button.disabled = true;
 
-  form.addEventListener("submit", async event => {
-    event.preventDefault();
+    const optionIndex = Number(button.dataset.option);
 
-    const email = $("adminEmail")?.value.trim();
-    const password = $("adminPassword")?.value;
+    if (optionIndex === Number(question.answer)) {
+      button.classList.add("correct");
+    }
 
-    if (!email || !password) {
-      showMessage("adminMessage", "Enter email and password.", "error");
+    if (
+      optionIndex === selectedAnswer &&
+      selectedAnswer !== Number(question.answer)
+    ) {
+      button.classList.add("incorrect");
+    }
+  });
+
+  const isCorrect = selectedAnswer === Number(question.answer);
+
+  if (isCorrect) {
+    currentScore++;
+  }
+
+  const feedback = $("#quizFeedback");
+
+  if (feedback) {
+    feedback.textContent = isCorrect
+      ? `${t("correct")}!`
+      : `${t("incorrect")}. ${question.explanation || ""}`;
+  }
+
+  const nextButton = $("#nextQuestion");
+
+  if (nextButton) {
+    nextButton.hidden = false;
+  }
+}
+
+function renderQuizResult() {
+  const area = $("#quizArea");
+  if (!area) return;
+
+  const percentage = currentQuiz.length
+    ? Math.round((currentScore / currentQuiz.length) * 100)
+    : 0;
+
+  area.innerHTML = `
+    <div class="quiz-result">
+      <p class="section-kicker">${t("yourScore")}</p>
+      <h3>${currentScore} / ${currentQuiz.length}</h3>
+      <p>${percentage}%</p>
+      <button class="btn" id="retryQuiz">${t("retry")}</button>
+    </div>
+  `;
+
+  $("#retryQuiz")?.addEventListener("click", () => {
+    startQuiz(selectedSubject || "All");
+  });
+}
+
+/* =========================================
+   SUBJECT CARDS + QUICK PRACTICE
+========================================= */
+
+function setupPractice() {
+  $$("[data-subject]").forEach(button => {
+    button.addEventListener("click", () => {
+      const subject = normalizeSubject(button.dataset.subject);
+
+      const select = $("#subjectSelect");
+
+      if (select) {
+        select.value = subject;
+      }
+
+      startQuiz(subject);
+
+      $("#quizArea")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
+  });
+
+  $("#quickQuizStart")?.addEventListener("click", () => {
+    const subject = $("#subjectSelect")?.value || "All";
+    startQuiz(normalizeSubject(subject));
+  });
+}
+
+/* =========================================
+   FULL MOCK TEST
+========================================= */
+
+function setupMockTest() {
+  $("#startFullTest")?.addEventListener("click", () => {
+    const requested = Number($("#testQuestionCount")?.value || 50);
+
+    if (!allQuestions.length) {
+      const area = $("#quizArea");
+
+      if (area) {
+        area.textContent = t("noQuestions");
+      }
+
       return;
     }
 
-    if (!ADMIN_UID || ADMIN_UID === "PASTE_YOUR_ADMIN_UID_HERE") {
-      showMessage("adminMessage", "Admin UID has not been configured.", "error");
+    const actualCount = Math.min(
+      Math.max(1, requested),
+      allQuestions.length
+    );
+
+    startQuiz("All", actualCount);
+
+    $("#quizArea")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  });
+}
+
+/* =========================================
+   AGGREGATE CALCULATOR
+========================================= */
+
+function setupCalculator() {
+  const calculateButton = $("#calculateAggregate");
+  if (!calculateButton) return;
+
+  calculateButton.addEventListener("click", () => {
+    const matric = Number($("#matricMarks")?.value);
+    const fsc = Number($("#fscMarks")?.value);
+    const mdcat = Number($("#mdcatMarks")?.value);
+
+    const matricTotal = Number($("#matricTotal")?.value || 1100);
+    const fscTotal = Number($("#fscTotal")?.value || 1200);
+    const mdcatTotal = Number($("#mdcatTotal")?.value || 180);
+
+    const result = $("#calculatorResult");
+
+    if (
+      !result ||
+      !matricTotal ||
+      !fscTotal ||
+      !mdcatTotal ||
+      matric < 0 ||
+      fsc < 0 ||
+      mdcat < 0 ||
+      matric > matricTotal ||
+      fsc > fscTotal ||
+      mdcat > mdcatTotal
+    ) {
+      if (result) result.textContent = "Please enter valid marks.";
+      return;
+    }
+
+    // Example weights only: verify the official formula.
+    const aggregate =
+      (matric / matricTotal) * 10 +
+      (fsc / fscTotal) * 40 +
+      (mdcat / mdcatTotal) * 50;
+
+    result.innerHTML = `
+      <div class="result-panel">
+        <p>${t("yourScore")}</p>
+        <strong>${aggregate.toFixed(2)}%</strong>
+        <small>${t("calculatorNote")}</small>
+      </div>
+    `;
+  });
+}
+
+/* =========================================
+   PUBLIC WEBSITE CONTENT
+========================================= */
+
+async function loadPublicContent() {
+  try {
+    const contentRef = doc(db, CONTENT_COLLECTION, "main");
+    const snapshot = await getDoc(contentRef);
+
+    if (!snapshot.exists()) return;
+
+    siteContent = snapshot.data();
+
+    const publicName = $("#adminPublicName");
+    const publicPhoto = $("#adminPublicPhoto");
+    const whatsapp = $("#whatsappCommunity");
+
+    if (publicName && siteContent.adminName) {
+      publicName.textContent = siteContent.adminName;
+    }
+
+    if (publicPhoto && siteContent.adminPhoto) {
+      publicPhoto.src = siteContent.adminPhoto;
+      publicPhoto.hidden = false;
+    }
+
+    if (whatsapp && siteContent.whatsapp) {
+      whatsapp.href = siteContent.whatsapp;
+      whatsapp.target = "_blank";
+      whatsapp.rel = "noopener noreferrer";
+    }
+
+    if (siteContent.welcomeMessage) {
+      const welcome = $("#heroWelcome") || $("#welcomeMessage");
+
+      if (welcome) {
+        welcome.textContent = siteContent.welcomeMessage;
+      }
+    }
+
+    const posterCard = $("#posterCard");
+    const posterImage = $("#posterImage");
+
+    if (posterImage && siteContent.poster) {
+      posterImage.src = siteContent.poster;
+      if (posterCard) posterCard.hidden = false;
+    }
+
+    const adCard = $("#advertisementCard");
+    const adImage = $("#advertisementImage");
+
+    if (adImage && siteContent.advertisement) {
+      adImage.src = siteContent.advertisement;
+      if (adCard) adCard.hidden = false;
+    }
+
+    renderUpdates(siteContent.updates);
+
+  } catch (error) {
+    console.error("Public content error:", error);
+  }
+}
+
+function renderUpdates(updates) {
+  const container = $("#updatesList");
+  if (!container) return;
+
+  if (!Array.isArray(updates) || !updates.length) {
+    return;
+  }
+
+  container.innerHTML = updates.map(update => `
+    <article class="update-card">
+      <h3>${escapeHTML(update.title || "")}</h3>
+      <p>${escapeHTML(update.description || update.text || "")}</p>
+      ${update.url ? `
+        <a href="${escapeHTML(update.url)}"
+           target="_blank"
+           rel="noopener noreferrer">
+          Read more
+        </a>
+      ` : ""}
+    </article>
+  `).join("");
+}
+
+/* =========================================
+   ADMIN AUTHENTICATION
+========================================= */
+
+function setAdminVisibility(isAdmin) {
+  const login = $("#adminLogin");
+  const dashboard = $("#adminDashboard");
+
+  if (login) login.hidden = isAdmin;
+  if (dashboard) dashboard.hidden = !isAdmin;
+}
+
+function setupAdminLogin() {
+  $("#adminLoginForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const email = $("#adminEmail")?.value.trim();
+    const password = $("#adminPassword")?.value;
+    const message = $("#adminMessage");
+
+    if (!email || !password) {
+      showMessage(message, "Enter your email and password.", "error");
       return;
     }
 
     try {
-      showMessage("adminMessage", "Signing in...");
+      await signInWithEmailAndPassword(auth, email, password);
+      showMessage(message, "Login successful.", "success");
 
-      const result = await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      console.error("Login error:", error);
+      showMessage(message, t("loginError"), "error");
+    }
+  });
 
-      if (result.user.uid !== ADMIN_UID) {
-        await signOut(auth);
-        showMessage("adminMessage", "This account is not the authorized admin.", "error");
-        return;
-      }
-
-      showMessage("adminMessage", "Login successful!", "success");
+  $("#adminLogout")?.addEventListener("click", async () => {
+    try {
+      await signOut(auth);
+      showMessage($("#adminMessage"), "Logged out.", "success");
     } catch (error) {
       console.error(error);
-      showMessage("adminMessage", authErrorMessage(error.code), "error");
     }
   });
-}
 
-function authErrorMessage(code) {
-  const messages = {
-    "auth/invalid-credential": "Email or password is incorrect.",
-    "auth/user-not-found": "No account found with this email.",
-    "auth/wrong-password": "Incorrect password.",
-    "auth/invalid-email": "Please enter a valid email.",
-    "auth/too-many-requests": "Too many attempts. Please try later.",
-    "auth/network-request-failed": "Check your internet connection."
-  };
-
-  return messages[code] || `Login failed: ${code || "Unknown error"}`;
-}
-
-function setupAuthListener() {
   onAuthStateChanged(auth, async user => {
     currentUser = user;
-    isAdmin = Boolean(user && user.uid === ADMIN_UID);
 
-    const loginForm = $("adminLoginForm");
-    const dashboard = $("adminDashboard");
+    const isAdmin = Boolean(
+      user &&
+      ADMIN_UID !== "PASTE_YOUR_EXISTING_ADMIN_UID_HERE" &&
+      user.uid === ADMIN_UID
+    );
+
+    setAdminVisibility(isAdmin);
+
+    if (user && !isAdmin) {
+      await signOut(auth);
+      showMessage($("#adminMessage"), t("adminOnly"), "error");
+      return;
+    }
 
     if (isAdmin) {
-      if (loginForm) loginForm.hidden = true;
-      if (dashboard) dashboard.hidden = false;
       await loadAdminContent();
-    } else {
-      if (loginForm) loginForm.hidden = false;
-      if (dashboard) dashboard.hidden = true;
+      await loadAdminQuestions();
+      await loadContributors();
     }
   });
 }
 
-/* =====================================================
-   ADMIN MCQ ADD / EDIT / DELETE
-===================================================== */
+/* =========================================
+   ADMIN QUESTION MANAGER
+========================================= */
 
-function setupMCQForm() {
-  const form = $("mcqForm");
-  if (!form) return;
+function getQuestionFormData() {
+  return {
+    subject: normalizeSubject($("#mcqSubject")?.value || ""),
+    chapter: $("#mcqChapter")?.value.trim() || "",
+    question: $("#mcqQuestion")?.value.trim() || "",
+    options: [
+      $("#mcqOption0")?.value.trim() || "",
+      $("#mcqOption1")?.value.trim() || "",
+      $("#mcqOption2")?.value.trim() || "",
+      $("#mcqOption3")?.value.trim() || ""
+    ],
+    answer: Number($("#mcqAnswer")?.value),
+    explanation: $("#mcqExplanation")?.value.trim() || ""
+  };
+}
 
-  form.addEventListener("submit", async event => {
+function validateQuestion(data) {
+  return Boolean(
+    data.subject &&
+    data.chapter &&
+    data.question &&
+    data.options.every(Boolean) &&
+    data.answer >= 0 &&
+    data.answer <= 3
+  );
+}
+
+function setupQuestionForm() {
+  $("#mcqForm")?.addEventListener("submit", async event => {
     event.preventDefault();
 
-    if (!isAdmin) {
-      showMessage("adminStatus", "Admin access required.", "error");
+    if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+
+    const data = getQuestionFormData();
+
+    if (!validateQuestion(data)) {
+      showMessage($("#adminStatus"), "Please complete all question fields.", "error");
       return;
     }
-
-    const subject = $("mcqSubject")?.value;
-    const question = $("mcqQuestion")?.value.trim();
-
-    const options = [0, 1, 2, 3].map(index =>
-      $(`mcqOption${index}`)?.value.trim() || ""
-    );
-
-    const answer = Number($("mcqAnswer")?.value);
-    const explanation = $("mcqExplanation")?.value.trim() || "";
-
-    if (!subject || !question || options.some(option => !option)) {
-      showMessage("adminStatus", "Complete all question fields.", "error");
-      return;
-    }
-
-    if (!Number.isInteger(answer) || answer < 0 || answer > 3) {
-      showMessage("adminStatus", "Select a valid correct answer.", "error");
-      return;
-    }
-
-    const chapter = $("mcqChapter")?.value.trim() || "General";
-
-    const questionData = {
-      subject,
-      chapter,
-      question,
-      options,
-      answer,
-      explanation,
-      updatedAt: serverTimestamp()
-    };
 
     try {
       if (editingQuestionId) {
         await updateDoc(
           doc(db, QUESTIONS_COLLECTION, editingQuestionId),
-          questionData
+          {
+            ...data,
+            updatedAt: serverTimestamp()
+          }
         );
-        editingQuestionId = null;
       } else {
-        questionData.createdAt = serverTimestamp();
-        await addDoc(collection(db, QUESTIONS_COLLECTION), questionData);
+        await addDoc(collection(db, QUESTIONS_COLLECTION), {
+          ...data,
+          createdAt: serverTimestamp()
+        });
       }
 
-      form.reset();
-      showMessage("adminStatus", "Question saved successfully!", "success");
+      $("#mcqForm").reset();
+      editingQuestionId = null;
+
+      const saveButton = $("#saveMcq");
+      if (saveButton) saveButton.textContent = "Save MCQ";
+
+      showMessage($("#adminStatus"), t("saved"), "success");
+
       await loadQuestions();
+      await loadAdminQuestions();
+
     } catch (error) {
-      console.error(error);
-      showMessage("adminStatus", `Save failed: ${error.message}`, "error");
+      console.error("MCQ save error:", error);
+      showMessage($("#adminStatus"), t("error"), "error");
     }
+  });
+
+  $("#cancelEdit")?.addEventListener("click", () => {
+    editingQuestionId = null;
+    $("#mcqForm")?.reset();
+
+    const saveButton = $("#saveMcq");
+    if (saveButton) saveButton.textContent = "Save MCQ";
   });
 }
 
-async function editQuestion(id) {
-  if (!isAdmin) return;
+async function loadAdminQuestions() {
+  const container = $("#adminMcqList");
+  if (!container) return;
 
-  const question = allQuestions.find(item => item.id === id);
-  if (!question) return;
+  try {
+    const snapshot = await getDocs(collection(db, QUESTIONS_COLLECTION));
 
+    if (!snapshot.docs.length) {
+      container.textContent = "No MCQs found.";
+      return;
+    }
+
+    container.innerHTML = snapshot.docs.map(questionDoc => {
+      const question = questionDoc.data();
+
+      return `
+        <div class="admin-item">
+          <strong>${escapeHTML(question.subject || "")}</strong>
+          <p>${escapeHTML(question.question || "")}</p>
+          <button class="btn edit-question"
+                  data-id="${escapeHTML(questionDoc.id)}">
+            Edit
+          </button>
+          <button class="btn btn-danger delete-question"
+                  data-id="${escapeHTML(questionDoc.id)}">
+            Delete
+          </button>
+        </div>
+      `;
+    }).join("");
+
+    $$(".edit-question").forEach(button => {
+      button.addEventListener("click", () => {
+        editQuestion(button.dataset.id, snapshot.docs);
+      });
+    });
+
+    $$(".delete-question").forEach(button => {
+      button.addEventListener("click", async () => {
+        await removeQuestion(button.dataset.id);
+      });
+    });
+
+  } catch (error) {
+    console.error("Admin question list error:", error);
+    container.textContent = "Could not load questions.";
+  }
+}
+
+function editQuestion(id, documents) {
+  const selected = documents.find(item => item.id === id);
+  if (!selected) return;
+
+  const data = selected.data();
   editingQuestionId = id;
 
-  if ($("mcqSubject")) $("mcqSubject").value = question.subject;
-  if ($("mcqQuestion")) $("mcqQuestion").value = question.question;
-  if ($("mcqAnswer")) $("mcqAnswer").value = String(question.answer);
-  if ($("mcqExplanation")) $("mcqExplanation").value = question.explanation;
-  if ($("mcqChapter")) $("mcqChapter").value = question.chapter;
+  $("#mcqSubject").value = normalizeSubject(data.subject || "");
+  $("#mcqChapter").value = data.chapter || "";
+  $("#mcqQuestion").value = data.question || "";
 
-  question.options.forEach((option, index) => {
-    const input = $(`mcqOption${index}`);
-    if (input) input.value = option;
+  (data.options || []).forEach((option, index) => {
+    const field = $(`#mcqOption${index}`);
+    if (field) field.value = option;
   });
 
-  $("mcqForm")?.scrollIntoView({ behavior: "smooth" });
+  $("#mcqAnswer").value = String(data.answer ?? 0);
+  $("#mcqExplanation").value = data.explanation || "";
+
+  const saveButton = $("#saveMcq");
+  if (saveButton) saveButton.textContent = "Update MCQ";
+
+  $("#mcqForm")?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 }
 
 async function removeQuestion(id) {
-  if (!isAdmin) return;
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
 
   if (!confirm("Are you sure you want to delete this question?")) return;
 
   try {
     await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
-    showMessage("adminStatus", "Question deleted.", "success");
+
+    showMessage($("#adminStatus"), t("deleted"), "success");
+
     await loadQuestions();
+    await loadAdminQuestions();
+
   } catch (error) {
-    console.error(error);
-    showMessage("adminStatus", `Delete failed: ${error.message}`, "error");
+    console.error("Delete question error:", error);
+    showMessage($("#adminStatus"), t("error"), "error");
   }
 }
 
-/* =====================================================
-   ADMIN CONTENT: PROFILE, POSTERS, ADS, WHATSAPP
-   Images must be hosted on GitHub or another public
-   image host because Firebase Storage is not enabled.
-===================================================== */
+/* =========================================
+   ADMIN WEBSITE CONTENT
+========================================= */
 
-function createAdminExtraTools() {
-  if (!isAdmin || $("adminExtraTools")) return;
+async function loadAdminContent() {
+  try {
+    const snapshot = await getDoc(
+      doc(db, CONTENT_COLLECTION, "main")
+    );
 
-  const dashboard = $("adminDashboard");
-  if (!dashboard) return;
+    if (!snapshot.exists()) return;
 
-  const section = document.createElement("section");
-  section.id = "adminExtraTools";
-  section.className = "admin-extra-tools";
+    const data = snapshot.data();
 
-  section.innerHTML = `
-    <hr>
-    <h2>Website Content Manager</h2>
+    if ($("#contentAdminName")) {
+      $("#contentAdminName").value = data.adminName || "";
+    }
 
-    <form id="siteContentForm">
-      <label>Admin name</label>
-      <input id="siteAdminName" type="text" placeholder="Admin name">
+    if ($("#contentAdminPhoto")) {
+      $("#contentAdminPhoto").value = data.adminPhoto || "";
+    }
 
-      <label>Admin photo URL</label>
-      <input id="siteAdminPhoto" type="url" placeholder="https://...">
+    if ($("#contentWelcome")) {
+      $("#contentWelcome").value = data.welcomeMessage || "";
+    }
 
-      <label>Welcome message</label>
-      <textarea id="siteWelcome"></textarea>
+    if ($("#contentWhatsapp")) {
+      $("#contentWhatsapp").value = data.whatsapp || "";
+    }
 
-      <label>WhatsApp community URL</label>
-      <input id="siteWhatsApp" type="url" placeholder="https://chat.whatsapp.com/...">
+    if ($("#contentPoster")) {
+      $("#contentPoster").value = data.poster || "";
+    }
 
-      <label>Poster image URL</label>
-      <input id="sitePoster" type="url" placeholder="https://...">
+    if ($("#contentAd")) {
+      $("#contentAd").value = data.advertisement || "";
+    }
 
-      <label>Advertisement image URL</label>
-      <input id="siteAd" type="url" placeholder="https://...">
+  } catch (error) {
+    console.error("Admin content loading error:", error);
+  }
+}
 
-      <button type="submit">Save Website Content</button>
-    </form>
+function setupContentForm() {
+  $("#saveSiteContent")?.addEventListener("click", async () => {
+    if (!currentUser || currentUser.uid !== ADMIN_UID) return;
 
-    <hr>
-    <h3>Contributor Access List</h3>
-    <form id="contributorForm">
-      <input id="contributorEmail" type="email" placeholder="Contributor email" required>
-      <button type="submit">Authorize Contributor Email</button>
-    </form>
-    <div id="contributorList"></div>
+    const data = {
+      adminName: $("#contentAdminName")?.value.trim() || "",
+      adminPhoto: $("#contentAdminPhoto")?.value.trim() || "",
+      welcomeMessage: $("#contentWelcome")?.value.trim() || "",
+      whatsapp: $("#contentWhatsapp")?.value.trim() || "",
+      poster: $("#contentPoster")?.value.trim() || "",
+      advertisement: $("#contentAd")?.value.trim() || "",
+      updatedAt: serverTimestamp()
+    };
 
-    <button type="button" id="adminLogout">Logout</button>
-  `;
+    try {
+      await setDoc(
+        doc(db, CONTENT_COLLECTION, "main"),
+        data,
+        { merge: true }
+      );
 
-  dashboard.appendChild(section);
+      showMessage($("#adminStatus"), t("saved"), "success");
 
-  $("siteContentForm").addEventListener("submit", saveSiteContent);
-  $("contributorForm").addEventListener("submit", addContributor);
+      await loadPublicContent();
 
-  $("adminLogout").addEventListener("click", async () => {
-    await signOut(auth);
+    } catch (error) {
+      console.error("Content save error:", error);
+      showMessage($("#adminStatus"), t("error"), "error");
+    }
   });
 }
 
-async function loadAdminContent() {
-  createAdminExtraTools();
-
-  try {
-    const contentRef = doc(db, CONTENT_COLLECTION, "main");
-    const snapshot = await getDoc(contentRef);
-
-    if (snapshot.exists()) {
-      const data = snapshot.data();
-
-      if ($("siteAdminName")) $("siteAdminName").value = data.adminName || "";
-      if ($("siteAdminPhoto")) $("siteAdminPhoto").value = data.adminPhoto || "";
-      if ($("siteWelcome")) $("siteWelcome").value = data.welcome || "";
-      if ($("siteWhatsApp")) $("siteWhatsApp").value = data.whatsapp || "";
-      if ($("sitePoster")) $("sitePoster").value = data.poster || "";
-      if ($("siteAd")) $("siteAd").value = data.ad || "";
-
-      renderPublicContent(data);
-    }
-
-    await loadContributors();
-  } catch (error) {
-    console.error("Content loading error:", error);
-  }
-}
-
-async function saveSiteContent(event) {
-  event.preventDefault();
-  if (!isAdmin) return;
-
-  const data = {
-    adminName: $("siteAdminName").value.trim(),
-    adminPhoto: $("siteAdminPhoto").value.trim(),
-    welcome: $("siteWelcome").value.trim(),
-    whatsapp: $("siteWhatsApp").value.trim(),
-    poster: $("sitePoster").value.trim(),
-    ad: $("siteAd").value.trim(),
-    updatedAt: serverTimestamp()
-  };
-
-  try {
-    await setDoc(doc(db, CONTENT_COLLECTION, "main"), data, { merge: true });
-    renderPublicContent(data);
-    alert("Website content saved.");
-  } catch (error) {
-    console.error(error);
-    alert("Could not save content: " + error.message);
-  }
-}
-
-function renderPublicContent(data) {
-  const welcome = $("welcomeMessage");
-  if (welcome) welcome.textContent = data.welcome || "";
-
-  const name = $("adminPublicName");
-  if (name) name.textContent = data.adminName || "";
-
-  const photo = $("adminPublicPhoto");
-  if (photo && data.adminPhoto) photo.src = data.adminPhoto;
-
-  const whatsapp = $("whatsappCommunity");
-  if (whatsapp) {
-    whatsapp.href = data.whatsapp || "#";
-    whatsapp.hidden = !data.whatsapp;
-  }
-
-  const poster = $("posterImage");
-  if (poster && data.poster) poster.src = data.poster;
-
-  const ad = $("advertisementImage");
-  if (ad && data.ad) ad.src = data.ad;
-}
-
-/* =====================================================
-   CONTRIBUTORS
-   This authorizes an email in Firestore. It does NOT
-   create a Firebase Authentication account or send an
-   invitation email. Security rules must enforce roles.
-===================================================== */
-
-async function addContributor(event) {
-  event.preventDefault();
-  if (!isAdmin) return;
-
-  const email = $("contributorEmail").value.trim().toLowerCase();
-  if (!email) return;
-
-  try {
-    await setDoc(doc(db, CONTRIBUTORS_COLLECTION, email), {
-      email,
-      role: "contributor",
-      active: true,
-      addedAt: serverTimestamp()
-    });
-
-    $("contributorEmail").value = "";
-    await loadContributors();
-    alert("Contributor email authorized.");
-  } catch (error) {
-    console.error(error);
-    alert("Could not authorize contributor: " + error.message);
-  }
-}
+/* =========================================
+   CONTRIBUTOR MANAGEMENT
+========================================= */
 
 async function loadContributors() {
-  if (!isAdmin) return;
-
-  const container = $("contributorList");
+  const container = $("#contributorsList");
   if (!container) return;
 
   try {
-    const snapshot = await getDocs(collection(db, CONTRIBUTORS_COLLECTION));
+    const snapshot = await getDocs(
+      collection(db, CONTRIBUTORS_COLLECTION)
+    );
+
+    if (!snapshot.docs.length) {
+      container.textContent = "No contributors added.";
+      return;
+    }
 
     container.innerHTML = snapshot.docs.map(item => `
-      <div>
-        ${escapeHTML(item.data().email || item.id)}
-        <button type="button" data-remove-contributor="${escapeHTML(item.id)}">
+      <div class="admin-item">
+        <span>${escapeHTML(item.id)}</span>
+        <button class="btn btn-danger remove-contributor"
+                data-email="${escapeHTML(item.id)}">
           Remove
         </button>
       </div>
     `).join("");
 
-    container.querySelectorAll("[data-remove-contributor]").forEach(button => {
+    $$(".remove-contributor").forEach(button => {
       button.addEventListener("click", async () => {
-        if (!confirm("Remove this contributor?")) return;
-
-        await deleteDoc(
-          doc(db, CONTRIBUTORS_COLLECTION, button.dataset.removeContributor)
-        );
-
-        await loadContributors();
+        await removeContributor(button.dataset.email);
       });
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("Contributor loading error:", error);
+    container.textContent = "Could not load contributors.";
   }
 }
 
-/* =====================================================
-   MDCAT AGGREGATE CALCULATOR
-   Default weights are editable below. Confirm the
-   official formula for the relevant admission year.
-===================================================== */
+function setupContributors() {
+  $("#addContributor")?.addEventListener("click", async () => {
+    if (!currentUser || currentUser.uid !== ADMIN_UID) return;
 
-function setupAggregateCalculator() {
-  const button = $("calculateAggregate");
-  if (!button) return;
+    const email = $("#contributorEmail")?.value.trim().toLowerCase();
 
-  button.addEventListener("click", () => {
-    const matric = Number($("matricMarks")?.value);
-    const fsc = Number($("fscMarks")?.value);
-    const mdcat = Number($("mdcatMarks")?.value);
-
-    const matricTotal = Number($("matricTotal")?.value);
-    const fscTotal = Number($("fscTotal")?.value);
-    const mdcatTotal = Number($("mdcatTotal")?.value);
-
-    if (
-      !matricTotal || !fscTotal || !mdcatTotal ||
-      matric < 0 || matric > matricTotal ||
-      fsc < 0 || fsc > fscTotal ||
-      mdcat < 0 || mdcat > mdcatTotal
-    ) {
-      alert("Please enter valid marks and total marks.");
+    if (!email || !email.includes("@")) {
+      showMessage($("#adminStatus"), "Enter a valid email address.", "error");
       return;
     }
 
-    // Example weights only — update according to official policy.
-    const aggregate =
-      (matric / matricTotal * 100 * 0.10) +
-      (fsc / fscTotal * 100 * 0.40) +
-      (mdcat / mdcatTotal * 100 * 0.50);
+    try {
+      await setDoc(
+        doc(db, CONTRIBUTORS_COLLECTION, email),
+        {
+          email,
+          addedAt: serverTimestamp()
+        }
+      );
 
-    const result = $("aggregateResult");
-    if (result) {
-      result.textContent = `Aggregate: ${aggregate.toFixed(2)}%`;
+      $("#contributorEmail").value = "";
+
+      showMessage($("#adminStatus"), "Contributor added.", "success");
+
+      await loadContributors();
+
+    } catch (error) {
+      console.error("Contributor add error:", error);
+      showMessage($("#adminStatus"), t("error"), "error");
     }
   });
 }
 
-/* =====================================================
-   FULL TEST BUTTONS AND SUBJECT SELECTOR
-===================================================== */
+async function removeContributor(email) {
+  if (!currentUser || currentUser.uid !== ADMIN_UID) return;
 
-function setupQuizButtons() {
-  document.querySelectorAll("[data-subject]").forEach(button => {
-    button.addEventListener("click", () => {
-      startQuickQuiz(button.dataset.subject);
-    });
-  });
+  if (!confirm("Remove this contributor?")) return;
 
-  const startButton = $("startFullTest");
-  if (startButton) {
-    startButton.addEventListener("click", startFullTest);
-  }
+  try {
+    await deleteDoc(doc(db, CONTRIBUTORS_COLLECTION, email));
 
-  const subjectSelect = $("subjectSelect");
-  if (subjectSelect) {
-    subjectSelect.addEventListener("change", () => {
-      startQuickQuiz(subjectSelect.value || "All");
-    });
+    showMessage($("#adminStatus"), t("deleted"), "success");
+
+    await loadContributors();
+
+  } catch (error) {
+    console.error("Contributor removal error:", error);
+    showMessage($("#adminStatus"), t("error"), "error");
   }
 }
 
-/* =====================================================
-   MOBILE MENU
-===================================================== */
+/* =========================================
+   MOBILE NAVIGATION
+========================================= */
 
 function setupMobileMenu() {
-  const button = $("menuToggle");
-  const menu = $("navLinks");
+  const toggle = $(".menu-toggle");
+  const nav = $(".nav-links");
 
-  if (!button || !menu) return;
+  if (!toggle || !nav) return;
 
-  button.addEventListener("click", () => {
-    menu.classList.toggle("active");
+  toggle.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("open");
+
+    nav.classList.toggle("active", isOpen);
+    toggle.setAttribute("aria-expanded", String(isOpen));
+  });
+
+  $$(".nav-links a").forEach(link => {
+    link.addEventListener("click", () => {
+      nav.classList.remove("open", "active");
+      toggle.setAttribute("aria-expanded", "false");
+    });
   });
 }
 
-/* =====================================================
-   START WEBSITE
-===================================================== */
+/* =========================================
+   FOOTER YEAR
+========================================= */
+
+function setupFooter() {
+  const year = $("#currentYear");
+
+  if (year) {
+    year.textContent = new Date().getFullYear();
+  }
+}
+
+/* =========================================
+   INITIALIZE WEBSITE
+========================================= */
 
 async function initializeWebsite() {
   setupLanguage();
+  setupPractice();
+  setupMockTest();
+  setupCalculator();
   setupAdminLogin();
-  setupMCQForm();
-  setupQuizButtons();
-  setupAggregateCalculator();
+  setupQuestionForm();
+  setupContentForm();
+  setupContributors();
   setupMobileMenu();
+  setupFooter();
 
   await loadQuestions();
-
-  setupAuthListener();
-
-  console.log("CHEMPHYBIO MDCAT initialized.");
+  await loadPublicContent();
 }
 
-initializeWebsite().catch(error => {
-  console.error("Website initialization failed:", error);
-});
+initializeWebsite();
