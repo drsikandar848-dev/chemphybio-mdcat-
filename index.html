@@ -596,6 +596,57 @@
           <div id="studentTestHistory" class="student-history">
             <p>Your completed tests will appear here.</p>
           </div>
+          <!-- STUDENT PREMIUM MEMBERSHIP -->
+<div class="student-history-section" id="studentPremiumMembership">
+
+  <h3>Premium Membership</h3>
+
+  <p>Unlock exclusive MDCAT preparation.</p>
+
+  <div id="studentPremiumStatus">
+    Checking membership...
+  </div>
+
+  <div id="studentPremiumPackage">
+    Loading Premium Plans...
+  </div>
+
+  <div id="studentPremiumPaymentDetails"></div>
+
+  <form id="premiumPaymentForm" hidden>
+
+    <label for="premiumPaymentMethod">
+      Select Payment Method
+    </label>
+
+    <select id="premiumPaymentMethod" required>
+      <option value="">Choose payment method</option>
+      <option value="Easypaisa">Easypaisa</option>
+      <option value="JazzCash">JazzCash</option>
+    </select>
+
+    <label for="premiumTransactionId">
+      Transaction ID
+    </label>
+
+    <input
+      id="premiumTransactionId"
+      type="text"
+      placeholder="Enter transaction ID"
+      required
+    >
+
+    <button class="btn" type="submit" id="submitPremiumPayment">
+      Submit Payment Request
+    </button>
+
+  </form>
+
+  <div id="premiumPaymentStatus"
+       class="status-message"
+       aria-live="polite"></div>
+
+</div>
         </div>
       </div>
     </section>
