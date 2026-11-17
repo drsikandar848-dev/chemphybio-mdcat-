@@ -552,6 +552,7 @@ if ($("currentYear")) {
 $("startFullTest")?.addEventListener("click", () => {
   const subject = $("testSubject")?.value || "All";
   const count = Number($("testQuestionCount")?.value || 10);
+   const chapter = $("testChapter")?.value || "";
   const chapter = $("testChapter")?.value || "";
 
   startFullTest(subject, count, chapter);
