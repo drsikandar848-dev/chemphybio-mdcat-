@@ -1470,6 +1470,7 @@ document.querySelectorAll("[data-admin-tab]").forEach(button => {
    ADMIN MCQ MANAGER
 ========================================================= */
 
+
 $("mcqForm")?.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -1478,6 +1479,7 @@ $("mcqForm")?.addEventListener("submit", async event => {
   const question = $("mcqQuestion")?.value.trim();
   const subject = $("mcqSubject")?.value;
   const chapter = $("mcqChapter")?.value.trim();
+  const accessType = $("mcqAccessType")?.value || "free";
 
   const options = [
     $("mcqOption0")?.value.trim(),
@@ -1488,10 +1490,12 @@ $("mcqForm")?.addEventListener("submit", async event => {
 
   const answer = Number($("mcqAnswer")?.value);
   const explanation = $("mcqExplanation")?.value.trim();
+  const editingId = $("editingQuestionId")?.value;
 
   if (
     !question ||
     !subject ||
+    !chapter ||
     options.some(option => !option) ||
     !Number.isInteger(answer) ||
     answer < 0 ||
@@ -1501,35 +1505,54 @@ $("mcqForm")?.addEventListener("submit", async event => {
     return;
   }
 
-  const questionData = {
-    question,
-    subject,
-    chapter,
-    options,
-    answer,
-    explanation,
-    updatedAt: serverTimestamp()
-  };
-
-  const editingId = $("editingQuestionId")?.value;
-
   try {
+    if (editingId && accessType === "premium") {
+      showMessage(
+        "adminStatus",
+        "Premium editing will be enabled in the next step.",
+        true
+      );
+      return;
+    }
+
+    const questionData = {
+      question,
+      subject,
+      chapter,
+      options,
+      answer,
+      explanation
+    };
+
     if (editingId) {
       await updateDoc(
         doc(db, QUESTIONS_COLLECTION, editingId),
-        questionData
+        {
+          ...questionData,
+          updatedAt: serverTimestamp()
+        }
       );
 
-      showMessage("adminStatus", "Question updated successfully.");
+      showMessage("adminStatus", "Free question updated successfully.");
+
+    } else if (accessType === "premium") {
+
+      await savePremiumSystemQuestion(questionData, "premium");
+
+      showMessage("adminStatus", "Premium question added successfully.");
+
     } else {
-      questionData.createdAt = serverTimestamp();
 
       await addDoc(
         collection(db, QUESTIONS_COLLECTION),
-        questionData
+        {
+          ...questionData,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }
       );
 
-      showMessage("adminStatus", "New question added successfully.");
+      showMessage("adminStatus", "Free question added successfully.");
     }
 
     $("mcqForm").reset();
@@ -1542,18 +1565,22 @@ $("mcqForm")?.addEventListener("submit", async event => {
       $("saveMcq").textContent = "Save Question";
     }
 
-    if ($("cancelEdit")) {
-      $("cancelEdit").setAttribute("hidden", "");
-    }
+    $("cancelEdit")?.setAttribute("hidden", "");
 
     await loadQuestions();
     renderAdminMcqList();
 
   } catch (error) {
     console.error("MCQ save error:", error);
-    showMessage("adminStatus", "Could not save question. Check permissions.", true);
+
+    showMessage(
+      "adminStatus",
+      error.message || "Could not save question.",
+      true
+    );
   }
 });
+
 
 /* =========================================================
    RENDER ADMIN MCQ LIST
