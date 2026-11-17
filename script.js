@@ -30,6 +30,7 @@ import {
 import {
   savePremiumSystemQuestion,
   loadPremiumSystemQuestions,
+   loadStudentPremiumQuestions,
   deletePremiumSystemQuestion,
   createMembershipPackage,
   loadMembershipPackages,
