@@ -2158,3 +2158,113 @@ input[type="file"]::file-selector-button {
     letter-spacing: 1.5px;
   }
 }
+/* ==========================================
+   CHEMPHYBIO — FUTURISTIC 3D ATMOSPHERE
+========================================== */
+
+body {
+  background:
+    radial-gradient(ellipse at 15% 10%, rgba(0,150,255,.19), transparent 35%),
+    radial-gradient(ellipse at 85% 25%, rgba(0,220,255,.11), transparent 32%),
+    radial-gradient(ellipse at 50% 75%, rgba(30,80,160,.13), transparent 40%),
+    #050e1b;
+  background-attachment: fixed;
+}
+
+/* Subtle futuristic grid */
+main {
+  position: relative;
+  isolation: isolate;
+}
+
+main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .16;
+  background-image:
+    linear-gradient(rgba(82,214,238,.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82,214,238,.12) 1px, transparent 1px);
+  background-size: 45px 45px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+/* Premium 3D hero */
+.hero-section {
+  background:
+    radial-gradient(circle at 80% 25%, rgba(0,174,255,.23), transparent 30%),
+    linear-gradient(125deg, #102b4b, #071426 65%, #0c2440);
+  border: 1px solid rgba(82,214,238,.35);
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.45),
+    0 0 35px rgba(0,150,255,.10),
+    inset 0 1px rgba(255,255,255,.08);
+  transform: translateZ(0);
+}
+
+/* 3D floating science core */
+.hero-core {
+  background:
+    radial-gradient(circle at 32% 25%, #3478a9, #102d50 55%, #061426);
+  box-shadow:
+    0 0 35px rgba(82,214,238,.35),
+    0 0 90px rgba(57,142,232,.25),
+    inset -12px -15px 25px rgba(0,0,0,.45),
+    inset 8px 8px 20px rgba(255,255,255,.12);
+  animation: coreFloat 5s ease-in-out infinite;
+}
+
+@keyframes coreFloat {
+  0%,100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+/* 3D orbit animation */
+.hero-orbit {
+  animation: orbitRotate 22s linear infinite;
+}
+
+@keyframes orbitRotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Glass science cards */
+.subject-card,
+.feature-card,
+.practice-panel,
+.mock-panel,
+.calculator-panel,
+.about-panel,
+.community-panel {
+  background:
+    linear-gradient(145deg, rgba(23,54,84,.92), rgba(7,23,42,.96));
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 15px 35px rgba(0,0,0,.22),
+    inset 0 1px rgba(255,255,255,.055);
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+
+.subject-card:hover {
+  transform: perspective(900px) translateY(-7px) rotateX(2deg);
+  border-color: rgba(82,214,238,.65);
+  box-shadow:
+    0 22px 45px rgba(0,0,0,.35),
+    0 0 25px rgba(82,214,238,.13);
+}
+
+/* Premium glowing headings */
+.section-heading h2,
+.section-title {
+  text-shadow: 0 0 22px rgba(82,214,238,.12);
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .hero-core,
+  .hero-orbit {
+    animation: none !important;
+  }
+}
