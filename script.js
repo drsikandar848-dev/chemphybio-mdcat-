@@ -589,7 +589,6 @@ $("startFullTest")?.addEventListener("click", () => {
 
   startFullTest(subject, count, chapter);
 });
-});
 
 function startFullTest(subject, count, chapter = "") {
   let available = [...allQuestions];
