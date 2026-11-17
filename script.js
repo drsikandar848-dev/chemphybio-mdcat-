@@ -1518,6 +1518,57 @@ async function loadStudentPremiumPage() {
   }
 }
 
+
+$("premiumPaymentForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const packageId = $("selectedPremiumPackage")?.value;
+  const paymentMethod = $("premiumPaymentMethod")?.value;
+  const transactionId = $("premiumTransactionId")?.value.trim();
+  const submitButton = $("submitPremiumPayment");
+
+  if (!packageId || !paymentMethod || !transactionId) {
+    showMessage(
+      "premiumPaymentStatus",
+      "Please select a plan and enter all payment details.",
+      true
+    );
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = "Submitting...";
+
+  try {
+    await submitPremiumPayment({
+      packageId,
+      paymentMethod,
+      transactionId
+    });
+
+    showMessage(
+      "premiumPaymentStatus",
+      "Payment request submitted. Your request is pending admin verification."
+    );
+
+    $("premiumTransactionId").value = "";
+    $("premiumPaymentForm").hidden = true;
+
+  } catch (error) {
+    console.error("Premium payment submission error:", error);
+
+    showMessage(
+      "premiumPaymentStatus",
+      error.message || "Payment request could not be submitted.",
+      true
+    );
+
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit Payment Request";
+  }
+});
+
 /* =========================================================
    SUBJECT PERFORMANCE
 ========================================================= */
