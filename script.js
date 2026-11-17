@@ -1697,10 +1697,16 @@ async function loadSiteContent() {
       $("adminPublicName").textContent =
         siteContent.adminName || "CHEMPHYBIO MDCAT";
     }
+if ($("adminPublicPhoto")) {
+  const adminPhoto = siteContent.adminPhoto;
 
-    if ($("adminPublicPhoto") && siteContent.adminPhoto) {
-      $("adminPublicPhoto").src = siteContent.adminPhoto;
-    }
+  if (adminPhoto) {
+    $("adminPublicPhoto").src = adminPhoto;
+    $("adminPublicPhoto").hidden = false;
+  } else {
+    $("adminPublicPhoto").hidden = true;
+  }
+}
 
     if ($("welcomeMessage")) {
       $("welcomeMessage").textContent =
