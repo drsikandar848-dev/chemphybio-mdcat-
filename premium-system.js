@@ -125,6 +125,35 @@ export async function loadPremiumSystemQuestions() {
   }));
 }
 
+export async function loadStudentPremiumQuestions() {
+  requireLogin();
+
+  const membership = await checkPremiumMembership();
+
+  if (!membership.active) {
+    return {
+      active: false,
+      questions: [],
+      reason: membership.reason
+    };
+  }
+
+  const snapshot = await getDocs(
+    collection(db, PREMIUM_QUESTIONS)
+  );
+
+  const questions = snapshot.docs.map(item => ({
+    id: item.id,
+    ...item.data()
+  }));
+
+  return {
+    active: true,
+    questions,
+    reason: "Membership active."
+  };
+}
+
 
 /* =====================================================
    3. DELETE PREMIUM QUESTION
