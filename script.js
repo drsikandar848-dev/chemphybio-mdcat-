@@ -1733,6 +1733,7 @@ $("cancelEdit")?.addEventListener("click", () => {
    DELETE QUESTION
 ========================================================= */
 
+
 async function deleteQuestion(id) {
   if (!isAdmin()) return;
 
@@ -1741,16 +1742,32 @@ async function deleteQuestion(id) {
   }
 
   try {
-    await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
+    const isPremium = allPremiumQuestions.some(
+      item => item.id === id
+    );
 
-    showMessage("adminStatus", "Question deleted.");
+    if (isPremium) {
+      await deletePremiumSystemQuestion(id);
+    } else {
+      await deleteDoc(doc(db, QUESTIONS_COLLECTION, id));
+    }
+
+    showMessage("adminStatus", "Question deleted successfully.");
+
+    const premiumQuestions = await loadPremiumSystemQuestions();
+    allPremiumQuestions = premiumQuestions;
 
     await loadQuestions();
     renderAdminMcqList();
 
   } catch (error) {
     console.error("Question deletion error:", error);
-    showMessage("adminStatus", "Could not delete question.", true);
+
+    showMessage(
+      "adminStatus",
+      error.message || "Could not delete question.",
+      true
+    );
   }
 }
 
