@@ -27,7 +27,21 @@ import {
   orderBy,
   limit
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
+import {
+  savePremiumSystemQuestion,
+  loadPremiumSystemQuestions,
+  deletePremiumSystemQuestion,
+  createMembershipPackage,
+  loadMembershipPackages,
+  submitPremiumPayment,
+  approvePremiumPayment,
+  rejectPremiumPayment,
+  checkPremiumMembership,
+  deactivatePremiumMember,
+  savePremiumPaymentSettings,
+  loadPremiumPaymentSettings,
+  loadPaymentRequests
+} from "./premium-system.js";
 /* =========================================================
    ADMIN SETTINGS
    Replace this placeholder privately with your existing UID.
