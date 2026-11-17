@@ -75,6 +75,7 @@ let currentUser = null;
 let allQuestions = [];
 let allPremiumQuestions = [];
 let allPaymentRequests = [];
+let studentPremiumPackages = [];
 let siteContent = {};
 
 let currentQuiz = [];
