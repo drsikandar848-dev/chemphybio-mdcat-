@@ -1396,11 +1396,11 @@ document.querySelectorAll("[data-admin-tab]").forEach(button => {
     });
 
     const panels = {
-      questions: "adminQuestionsPanel",
-      content: "adminContentPanel",
-      contributors: "adminContributorsPanel",
-      students: "adminStudentsPanel"
-   payments: "adminPaymentsPanel" };
+  questions: "adminQuestionsPanel",
+  content: "adminContentPanel",
+  contributors: "adminContributorsPanel",
+  students: "adminStudentsPanel"
+};
 
     Object.entries(panels).forEach(([name, id]) => {
       const panel = $(id);
