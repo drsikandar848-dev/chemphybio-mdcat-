@@ -581,7 +581,6 @@ function updateChapterOptions() {
 
 $("testSubject")?.addEventListener("change", updateChapterOptions);
 
-updateChapterOptions();
 $("startFullTest")?.addEventListener("click", () => {
   const subject = $("testSubject")?.value || "All";
   const count = Number($("testQuestionCount")?.value || 10);
