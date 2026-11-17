@@ -548,7 +548,40 @@ if ($("currentYear")) {
 /* =========================================================
    TEST SETUP
 ========================================================= */
+function updateChapterOptions() {
+  const subject = $("testSubject")?.value || "All";
+  const chapterBox = $("chapterSelection");
+  const chapterSelect = $("testChapter");
 
+  if (!chapterBox || !chapterSelect) return;
+
+  chapterSelect.innerHTML = '<option value="">Choose a chapter</option>';
+
+  if (subject === "All") {
+    chapterBox.hidden = true;
+    return;
+  }
+
+  const chapters = [...new Set(
+    allQuestions
+      .filter(q => q.subject === subject)
+      .map(q => (q.chapter || "").trim())
+      .filter(Boolean)
+  )].sort();
+
+  chapterBox.hidden = false;
+
+  chapters.forEach(chapter => {
+    const option = document.createElement("option");
+    option.value = chapter;
+    option.textContent = chapter;
+    chapterSelect.appendChild(option);
+  });
+}
+
+$("testSubject")?.addEventListener("change", updateChapterOptions);
+
+updateChapterOptions();
 $("startFullTest")?.addEventListener("click", () => {
   const subject = $("testSubject")?.value || "All";
   const count = Number($("testQuestionCount")?.value || 10);
