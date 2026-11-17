@@ -1,6 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+<style>
+/* CHEMPHYBIO — ISOLATED ADMIN FLAG */
+.cb-admin-flag {
+  position: fixed;
+  right: 12px;
+  top: 42%;
+  z-index: 9999;
+  width: 112px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.cb-admin-flag summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.cb-admin-flag summary::-webkit-details-marker {
+  display: none;
+}
+
+.cb-flag-pole {
+  width: 4px;
+  height: 85px;
+  border-radius: 5px;
+  background: linear-gradient(90deg,#8b929d,#ffffff,#626b78);
+  box-shadow: 0 0 12px #46cfff;
+}
+
+.cb-flag-cloth {
+  width: 104px;
+  min-height: 57px;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.5;
+  border: 1px solid rgba(112,225,255,.8);
+  border-radius: 3px 10px 10px 3px;
+  background: linear-gradient(115deg,#071426,#123c72,#087c9c);
+  box-shadow: 0 0 18px #087c9c88,
+              inset 0 0 16px #ffffff22;
+  transform-origin: left center;
+  animation: cbFlagWave 2.5s ease-in-out infinite;
+}
+
+.cb-flag-hint {
+  color: #b9edff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.cb-admin-flag[open] .cb-flag-cloth {
+  animation-play-state: paused;
+}
+
+.cb-admin-flag-info {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 230px;
+  margin-top: 12px;
+  padding: 17px;
+  border: 1px solid #35cfff88;
+  border-radius: 15px;
+  color: #fff;
+  background: linear-gradient(145deg,#071426,#12345a);
+  box-shadow: 0 12px 35px #0009,0 0 18px #168dcb55;
+}
+
+.cb-admin-flag-info h3 {
+  margin: 0 0 10px;
+  color: #62dfff;
+}
+
+.cb-admin-flag-info p {
+  margin: 7px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@keyframes cbFlagWave {
+  0%,100% { transform: perspective(250px) rotateY(-8deg) skewY(0deg); }
+  50% { transform: perspective(250px) rotateY(13deg) skewY(2deg); }
+}
+
+@media(max-width:600px) {
+  .cb-admin-flag {
+    right: 5px;
+    top: 38%;
+    transform: scale(.82);
+    transform-origin: right center;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .cb-flag-cloth { animation: none; }
+}
+</style>
+
+  <head> 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#071426">
@@ -103,6 +211,24 @@
         <div class="hero-core">C+</div>
       </div>
     </section>
+
+<!-- CHEMPHYBIO ADMIN FLAG -->
+<details class="cb-admin-flag">
+  <summary aria-label="About the administrator">
+    <span class="cb-flag-pole"></span>
+    <span class="cb-flag-cloth">
+      CHEMPHYBIO<br>MDCAT
+    </span>
+    <span class="cb-flag-hint">ABOUT ADMIN</span>
+  </summary>
+
+  <div class="cb-admin-flag-info">
+    <h3>DR SIKANDAR</h3>
+    <p><strong>MDCAT Score:</strong> 166</p>
+    <p>Still hoping for a fair opportunity.</p>
+    <p>InshaAllah, MBBS next year.</p>
+  </div>
+</details>
 
     <!-- STATS -->
     <section class="stats-strip">
