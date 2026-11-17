@@ -1480,6 +1480,7 @@ document.querySelectorAll("[data-admin-tab]").forEach(button => {
 ========================================================= */
 
 
+
 $("mcqForm")?.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -1514,44 +1515,45 @@ $("mcqForm")?.addEventListener("submit", async event => {
     return;
   }
 
+  const questionData = {
+    question,
+    subject,
+    chapter,
+    options,
+    answer,
+    explanation
+  };
+
   try {
-    if (editingId && accessType === "premium") {
-      showMessage(
-        "adminStatus",
-        "Premium editing will be enabled in the next step.",
-        true
-      );
-      return;
-    }
-
-    const questionData = {
-      question,
-      subject,
-      chapter,
-      options,
-      answer,
-      explanation
-    };
-
     if (editingId) {
-      await updateDoc(
-        doc(db, QUESTIONS_COLLECTION, editingId),
-        {
-          ...questionData,
-          updatedAt: serverTimestamp()
-        }
+      const isPremium = allPremiumQuestions.some(
+        item => item.id === editingId
       );
 
-      showMessage("adminStatus", "Free question updated successfully.");
+      if (isPremium) {
+        await savePremiumSystemQuestion(
+          questionData,
+          "premium",
+          editingId
+        );
+      } else {
+        await updateDoc(
+          doc(db, QUESTIONS_COLLECTION, editingId),
+          {
+            ...questionData,
+            updatedAt: serverTimestamp()
+          }
+        );
+      }
+
+      showMessage("adminStatus", "Question updated successfully.");
 
     } else if (accessType === "premium") {
-
       await savePremiumSystemQuestion(questionData, "premium");
 
       showMessage("adminStatus", "Premium question added successfully.");
 
     } else {
-
       await addDoc(
         collection(db, QUESTIONS_COLLECTION),
         {
@@ -1575,6 +1577,9 @@ $("mcqForm")?.addEventListener("submit", async event => {
     }
 
     $("cancelEdit")?.setAttribute("hidden", "");
+
+    const premiumQuestions = await loadPremiumSystemQuestions();
+    allPremiumQuestions = premiumQuestions;
 
     await loadQuestions();
     renderAdminMcqList();
