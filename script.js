@@ -592,7 +592,7 @@ $("startFullTest")?.addEventListener("click", () => {
 });
 });
 
-function startFullTest(subject, count) {
+function startFullTest(subject, count, chapter = "") {
   let available = [...allQuestions];
 
   if (subject !== "All" && subject !== "Full MDCAT") {
@@ -600,7 +600,11 @@ function startFullTest(subject, count) {
       question => question.subject === subject
     );
   }
-
+if (chapter) {
+  available = available.filter(
+    question => (question.chapter || "").trim() === chapter
+  );
+}
   if (!available.length) {
     showMessage(
       "mockStatus",
