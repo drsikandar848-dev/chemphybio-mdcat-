@@ -1298,7 +1298,7 @@ async function loadStudentDashboard(user) {
     }, { merge: true });
 
     await refreshStudentDashboard(user.uid);
-
+await loadStudentPremiumPage();
   } catch (error) {
     console.error("Student dashboard error:", error);
     showMessage(
