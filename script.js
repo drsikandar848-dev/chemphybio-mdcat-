@@ -1416,16 +1416,24 @@ function renderStudentTestHistory() {
    ADMIN DASHBOARD
 ========================================================= */
 
+
 async function loadAdminData() {
   if (!isAdmin()) return;
 
   try {
-    await Promise.all([
+    const [
+      premiumQuestions
+    ] = await Promise.all([
+      loadPremiumSystemQuestions(),
       loadQuestions(),
       loadSiteContent(),
       loadContributors(),
       loadStudents()
     ]);
+
+    allPremiumQuestions = premiumQuestions;
+
+    renderAdminMcqList();
 
     showMessage("adminStatus", "Admin dashboard loaded.");
 
