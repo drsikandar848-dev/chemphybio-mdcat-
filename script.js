@@ -1382,6 +1382,142 @@ async function refreshStudentDashboard(uid) {
   }
 }
 
+
+async function loadStudentPremiumPage() {
+  const packageContainer = $("studentPremiumPackage");
+  const paymentDetails = $("studentPremiumPaymentDetails");
+  const statusContainer = $("studentPremiumStatus");
+  const paymentForm = $("premiumPaymentForm");
+
+  if (!packageContainer || !paymentDetails ||
+      !statusContainer || !paymentForm) {
+    console.error("Premium membership HTML elements missing.");
+    return;
+  }
+
+  packageContainer.textContent = "Loading Premium Plans...";
+  paymentDetails.replaceChildren();
+  paymentForm.hidden = true;
+
+  try {
+    const [membership, packages, settings] = await Promise.all([
+      checkPremiumMembership(),
+      loadMembershipPackages(),
+      loadPremiumPaymentSettings()
+    ]);
+
+    if (membership.active) {
+      statusContainer.textContent =
+        `Your Premium Membership is active. Plan: ${membership.packageName}. Expires: ${
+          membership.expiresAt
+            ? membership.expiresAt.toLocaleDateString()
+            : "N/A"
+        }`;
+
+      packageContainer.textContent =
+        "You already have an active Premium Membership.";
+
+      return;
+    }
+
+    statusContainer.textContent =
+      "You do not currently have an active Premium Membership.";
+
+    if (!packages.length) {
+      packageContainer.textContent =
+        "No Premium Plans are currently available.";
+      return;
+    }
+
+    packageContainer.replaceChildren();
+
+    packages.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "premium-plan-card";
+
+      const heading = document.createElement("h4");
+      heading.textContent = item.name || "Premium Plan";
+
+      const price = document.createElement("p");
+      price.textContent = `Price: Rs. ${item.price}`;
+
+      const duration = document.createElement("p");
+      duration.textContent =
+        `Duration: ${item.durationDays} days`;
+
+      const description = document.createElement("p");
+      description.textContent = item.description || "";
+
+      const selectButton = document.createElement("button");
+      selectButton.type = "button";
+      selectButton.className = "btn";
+      selectButton.textContent = "Select This Plan";
+
+      selectButton.addEventListener("click", () => {
+        $("selectedPremiumPackage").value = item.id;
+        paymentForm.hidden = false;
+
+        if (settings) {
+          const method = $("premiumPaymentMethod");
+          method.replaceChildren();
+
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = "Choose payment method";
+          method.appendChild(placeholder);
+
+          if (settings.easypaisaNumber) {
+            const option = document.createElement("option");
+            option.value = "Easypaisa";
+            option.textContent = "Easypaisa";
+            method.appendChild(option);
+          }
+
+          if (settings.jazzcashNumber) {
+            const option = document.createElement("option");
+            option.value = "JazzCash";
+            option.textContent = "JazzCash";
+            method.appendChild(option);
+          }
+
+          paymentDetails.textContent =
+            `${settings.instructions || ""}\n` +
+            (settings.easypaisaNumber
+              ? `Easypaisa: ${settings.easypaisaTitle || ""} - ${settings.easypaisaNumber}\n`
+              : "") +
+            (settings.jazzcashNumber
+              ? `JazzCash: ${settings.jazzcashTitle || ""} - ${settings.jazzcashNumber}`
+              : "");
+        }
+
+        paymentForm.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      });
+
+      card.append(
+        heading,
+        price,
+        duration,
+        description,
+        selectButton
+      );
+
+      packageContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Premium page loading error:", error);
+
+    statusContainer.textContent =
+      "Premium Plans could not load. Please try again.";
+
+    packageContainer.textContent =
+      error.message || "Please check your connection and Firestore permissions.";
+  }
+}
+
 /* =========================================================
    SUBJECT PERFORMANCE
 ========================================================= */
