@@ -1488,17 +1488,7 @@ function renderStudentTestHistory() {
 /* =========================================================
    ADMIN DASHBOARD
 ========================================================= */
-
-
-
-async function loadAdminData() {
-  if (!isAdmin()) return;
-
-  try {
-    const [
-      premiumQuestions,
-      paymentRequests
-    ] 
+// LOAD ADMIN DASHBOARD DATA
 async function loadAdminData() {
   if (!isAdmin()) return;
 
@@ -1519,21 +1509,30 @@ async function loadAdminData() {
       loadPaymentRequests()
     ]);
 
-    allPremiumQuestions = premiumQuestions;
-    allPaymentRequests = paymentRequests;
+    // Store premium questions and payment requests
+    allPremiumQuestions = premiumQuestions || [];
+    allPaymentRequests = paymentRequests || [];
 
+    // Refresh admin lists
     renderAdminMcqList();
     renderAdminPaymentRequests();
 
-    showMessage("adminStatus", "Admin dashboard loaded.");
+    // Success message
+    showMessage(
+      "adminStatus",
+      "Admin dashboard loaded successfully."
+    );
 
   } catch (error) {
     console.error("Admin loading error:", error);
-    showMessage("adminStatus", "Some admin data could not load.", true);
+
+    showMessage(
+      "adminStatus",
+      "Some admin data could not load. Please try again.",
+      true
+    );
   }
-}
-
-
+                                                 }
 /* =========================================================
    ADMIN TAB NAVIGATION
 ========================================================= */
