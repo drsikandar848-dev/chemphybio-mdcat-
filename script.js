@@ -1498,6 +1498,18 @@ async function loadAdminData() {
     const [
       premiumQuestions,
       paymentRequests
+    ] 
+async function loadAdminData() {
+  if (!isAdmin()) return;
+
+  try {
+    const [
+      premiumQuestions,
+      questionsResult,
+      contentResult,
+      contributorsResult,
+      studentsResult,
+      paymentRequests
     ] = await Promise.all([
       loadPremiumSystemQuestions(),
       loadQuestions(),
@@ -1520,6 +1532,7 @@ async function loadAdminData() {
     showMessage("adminStatus", "Some admin data could not load.", true);
   }
 }
+
 
 /* =========================================================
    ADMIN TAB NAVIGATION
