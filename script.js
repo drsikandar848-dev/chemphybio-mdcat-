@@ -1459,7 +1459,8 @@ document.querySelectorAll("[data-admin-tab]").forEach(button => {
   questions: "adminQuestionsPanel",
   content: "adminContentPanel",
   contributors: "adminContributorsPanel",
-  students: "adminStudentsPanel"
+  students: "adminStudentsPanel",
+  payments: "adminPaymentSettingsPanel"
 };
 
     Object.entries(panels).forEach(([name, id]) => {
