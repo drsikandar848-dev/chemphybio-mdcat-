@@ -704,34 +704,37 @@
           <form id="mcqForm">
             <input type="hidden" id="editingQuestionId">
 
-            <div class="admin-form-grid">
-              <div>
-                <label for="mcqSubject">Subject</label>
-                <select id="mcqSubject" required>
-                  <option value="Biology">Biology</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Physics">Physics</option>
-                  <option value="English">English</option>
-                  <option value="Logical Reasoning">Logical Reasoning</option>
-                </select>
-              </div>
+            
+<div class="admin-form-grid">
+  <div>
+    <label for="mcqSubject">Subject</label>
+    <select id="mcqSubject" required>
+      <option value="Biology">Biology</option>
+      <option value="Chemistry">Chemistry</option>
+      <option value="Physics">Physics</option>
+      <option value="English">English</option>
+      <option value="Logical Reasoning">Logical Reasoning</option>
+    </select>
+  </div>
 
-              <div>
-                <label for="mcqChapter">Chapter</label>
-                <input id="mcqChapter" type="text" required placeholder="Chapter name">
-              </div>
-            </div>
-<label for="mcqChapter">Chapter</label>
-<input id="mcqChapter" type="text" required placeholder="Chapter name">
-</div>
+  <div>
+    <label for="mcqChapter">Chapter</label>
+    <input id="mcqChapter" type="text" required placeholder="Chapter name">
+  </div>
 </div>
 
 <div>
-<label for="mcqQuestion">Question</label>
-            <div>
-              <label for="mcqQuestion">Question</label>
-              <textarea id="mcqQuestion" required placeholder="Write your MCQ question"></textarea>
-            </div>
+  <label for="mcqAccessType">Question Access</label>
+  <select id="mcqAccessType" required>
+    <option value="free">Free Question</option>
+    <option value="premium">Premium Question</option>
+  </select>
+</div>
+
+<div>
+  <label for="mcqQuestion">Question</label>
+  <textarea id="mcqQuestion" required placeholder="Write your MCQ question"></textarea>
+</div>
 
             <div class="admin-form-grid">
               <div>
