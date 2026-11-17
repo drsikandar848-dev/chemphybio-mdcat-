@@ -646,8 +646,49 @@
           <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
           <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
           <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
-          <button type="button" class="admin-tab" data-admin-tab="students">Students</button>
+          <button type="button" class="admin-tab" data-admin-tab="students">Students</button> 
+          
+<button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
+
         </div>
+
+<!-- PAYMENT SETTINGS -->
+<section class="admin-tab-panel" id="adminPaymentsPanel">
+  <h3>Premium Payment Settings</h3>
+  <p>Manage Easypaisa and JazzCash payment instructions.</p>
+
+  <div class="admin-form-grid">
+    <div>
+      <label for="epAccountTitle">Easypaisa Account Title</label>
+      <input id="epAccountTitle" type="text" placeholder="Account holder name">
+    </div>
+    <div>
+      <label for="epNumber">Easypaisa Number</label>
+      <input id="epNumber" type="tel" placeholder="03XXXXXXXXX">
+    </div>
+    <div>
+      <label for="jcAccountTitle">JazzCash Account Title</label>
+      <input id="jcAccountTitle" type="text" placeholder="Account holder name">
+    </div>
+    <div>
+      <label for="jcNumber">JazzCash Number</label>
+      <input id="jcNumber" type="tel" placeholder="03XXXXXXXXX">
+    </div>
+  </div>
+
+  <div>
+    <label for="paymentInstructions">Payment Instructions</label>
+    <textarea id="paymentInstructions" placeholder="Enter payment instructions for students"></textarea>
+  </div>
+
+  <p>Premium Price: <strong>Rs. 99</strong></p>
+  <p>Access Duration: <strong>90 Days</strong></p>
+
+  <button class="btn" id="savePaymentSettings" type="button">
+    Save Payment Settings
+  </button>
+  <div id="paymentSettingsStatus" class="admin-message" aria-live="polite"></div>
+</section>
 
         <!-- QUESTIONS MANAGER -->
         <section class="admin-tab-panel active" id="adminQuestionsPanel">
