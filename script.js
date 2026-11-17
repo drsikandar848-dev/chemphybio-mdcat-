@@ -1595,31 +1595,53 @@ $("mcqForm")?.addEventListener("submit", async event => {
    RENDER ADMIN MCQ LIST
 ========================================================= */
 
+
 function renderAdminMcqList() {
   const container = $("adminMcqList");
   if (!container) return;
 
-  if (!allQuestions.length) {
+  const adminQuestions = [
+    ...allQuestions.map(question => ({
+      ...question,
+      accessType: "free"
+    })),
+    ...allPremiumQuestions.map(question => ({
+      ...question,
+      accessType: "premium"
+    }))
+  ];
+
+  if (!adminQuestions.length) {
     container.innerHTML = "<p>No questions found.</p>";
     return;
   }
 
-  container.innerHTML = allQuestions.map(question => `
+  container.innerHTML = adminQuestions.map(question => `
     <div class="admin-mcq-item">
       <div>
         <strong>${escapeHTML(question.subject || "Subject")}</strong>
+
         <p>${escapeHTML(question.question)}</p>
+
         <small>${escapeHTML(question.chapter || "")}</small>
+
+        <small>
+          | ${question.accessType === "premium"
+            ? "⭐ PREMIUM"
+            : "FREE"}
+        </small>
       </div>
 
       <div class="admin-mcq-actions">
         <button type="button"
-          data-edit-question="${escapeHTML(question.id)}">
+          data-edit-question="${escapeHTML(question.id)}"
+          data-question-type="${question.accessType}">
           Edit
         </button>
 
         <button type="button"
-          data-delete-question="${escapeHTML(question.id)}">
+          data-delete-question="${escapeHTML(question.id)}"
+          data-question-type="${question.accessType}">
           Delete
         </button>
       </div>
