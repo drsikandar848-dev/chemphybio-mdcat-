@@ -1665,11 +1665,23 @@ function renderAdminMcqList() {
    EDIT QUESTION
 ========================================================= */
 
+
 function editQuestion(id) {
-  const question = allQuestions.find(item => item.id === id);
+  const question =
+    allQuestions.find(item => item.id === id) ||
+    allPremiumQuestions.find(item => item.id === id);
+
   if (!question) return;
 
   $("editingQuestionId").value = question.id;
+
+  if ($("mcqAccessType")) {
+    $("mcqAccessType").value =
+      allPremiumQuestions.some(item => item.id === id)
+        ? "premium"
+        : "free";
+  }
+
   $("mcqQuestion").value = question.question || "";
   $("mcqSubject").value = question.subject || "";
   $("mcqChapter").value = question.chapter || "";
@@ -1680,7 +1692,6 @@ function editQuestion(id) {
   });
 
   $("mcqAnswer").value = String(question.answer);
-
   $("mcqExplanation").value = question.explanation || "";
 
   if ($("saveMcq")) {
