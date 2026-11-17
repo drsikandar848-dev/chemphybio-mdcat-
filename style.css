@@ -1940,7 +1940,13 @@ input[type="file"]::file-selector-button {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.admin-tab-panel[hidden] {
+  display: none !important;
+}
 
+.admin-tab-panel:not([hidden]) {
+  display: block;
+}
 @media (max-width: 600px) {
   #adminStudentsList .admin-item {
     flex-direction: column;
