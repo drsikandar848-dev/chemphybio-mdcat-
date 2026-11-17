@@ -1956,3 +1956,102 @@ input[type="file"]::file-selector-button {
     padding: 10px;
   }
 }
+/* =====================================================
+   CHEMPHYBIO — COMPACT PREMIUM LAYOUT
+   Existing design preserved
+===================================================== */
+
+/* Reduce overall vertical spacing */
+.section {
+  margin-top: 55px;
+  margin-bottom: 55px;
+}
+
+.admin-section {
+  margin-top: 55px;
+  margin-bottom: 55px;
+}
+
+/* Make hero banner more compact */
+.hero-section {
+  min-height: 410px;
+  margin-top: 25px;
+  margin-bottom: 22px;
+  padding-top: 45px;
+  padding-bottom: 45px;
+  border-radius: 24px;
+}
+
+.hero-visual {
+  min-height: 280px;
+}
+
+/* Reduce card heights and gaps */
+.subject-card {
+  min-height: 190px;
+  padding: 19px;
+}
+
+.section-heading {
+  margin-bottom: 20px;
+}
+
+.subject-grid,
+.updates-grid {
+  gap: 14px;
+}
+
+/* Compact panels */
+.feature-card,
+.practice-panel,
+.mock-panel,
+.calculator-panel,
+.about-panel,
+.community-panel,
+.student-login-panel,
+.student-dashboard {
+  padding: 23px;
+}
+
+/* Reduce footer spacing */
+.site-footer {
+  margin-top: 60px;
+  padding-top: 28px;
+  padding-bottom: 28px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 700px) {
+  .section,
+  .admin-section {
+    margin-top: 42px;
+    margin-bottom: 42px;
+  }
+
+  .hero-section {
+    min-height: auto;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  .hero-visual {
+    min-height: 220px;
+  }
+
+  .subject-card {
+    min-height: 175px;
+  }
+}
+
+@media (max-width: 450px) {
+  .feature-card,
+  .practice-panel,
+  .mock-panel,
+  .calculator-panel,
+  .about-panel,
+  .community-panel,
+  .student-login-panel,
+  .student-dashboard {
+    padding: 17px;
+  }
+}
