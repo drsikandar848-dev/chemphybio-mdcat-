@@ -1533,6 +1533,95 @@ async function loadAdminData() {
     );
   }
  }
+// RENDER ADMIN PAYMENT REQUESTS
+function renderAdminPaymentRequests() {
+  const container = $("adminPaymentRequestsList");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  if (!allPaymentRequests.length) {
+    container.textContent = "No payment requests found.";
+    return;
+  }
+
+  allPaymentRequests.forEach(payment => {
+    const card = document.createElement("div");
+    card.className = "admin-payment-card";
+
+    const details = document.createElement("p");
+
+    details.textContent =
+      `Email: ${payment.email || "N/A"} | ` +
+      `Package: ${payment.packageName || "N/A"} | ` +
+      `Amount: Rs. ${payment.amount ?? "N/A"} | ` +
+      `Method: ${payment.paymentMethod || "N/A"} | ` +
+      `Transaction ID: ${payment.transactionId || "N/A"} | ` +
+      `Status: ${payment.status || "N/A"}`;
+
+    card.appendChild(details);
+
+    if (payment.status === "pending") {
+      const approve = document.createElement("button");
+      approve.className = "btn";
+      approve.type = "button";
+      approve.textContent = "Approve";
+
+      approve.addEventListener("click", async () => {
+        approve.disabled = true;
+
+        try {
+          await approvePremiumPayment(payment.id);
+          allPaymentRequests = await loadPaymentRequests();
+          renderAdminPaymentRequests();
+
+          showMessage(
+            "paymentRequestsStatus",
+            "Payment approved successfully."
+          );
+        } catch (error) {
+          approve.disabled = false;
+          showMessage(
+            "paymentRequestsStatus",
+            error.message || "Approval failed.",
+            true
+          );
+        }
+      });
+
+      const reject = document.createElement("button");
+      reject.className = "btn btn-secondary";
+      reject.type = "button";
+      reject.textContent = "Reject";
+
+      reject.addEventListener("click", async () => {
+        reject.disabled = true;
+
+        try {
+          await rejectPremiumPayment(payment.id);
+          allPaymentRequests = await loadPaymentRequests();
+          renderAdminPaymentRequests();
+
+          showMessage(
+            "paymentRequestsStatus",
+            "Payment rejected."
+          );
+        } catch (error) {
+          reject.disabled = false;
+          showMessage(
+            "paymentRequestsStatus",
+            error.message || "Rejection failed.",
+            true
+          );
+        }
+      });
+
+      card.append(approve, reject);
+    }
+
+    container.appendChild(card);
+  });
+                                     }
 /* =========================================================
    ADMIN TAB NAVIGATION
 ========================================================= */
