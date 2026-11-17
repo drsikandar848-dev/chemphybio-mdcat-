@@ -72,6 +72,7 @@ const STUDENTS_COLLECTION = "studentProgress";
 
 let currentUser = null;
 let allQuestions = [];
+let allPremiumQuestions = [];
 let siteContent = {};
 
 let currentQuiz = [];
