@@ -2261,6 +2261,7 @@ document.querySelectorAll("[data-admin-tab]").forEach(button => {
   content: "adminContentPanel",
   contributors: "adminContributorsPanel",
   students: "adminStudentsPanel",
+  plans: "adminPlansPanel",
   payments: "adminPaymentsPanel"
 };
 
