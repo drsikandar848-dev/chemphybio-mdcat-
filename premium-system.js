@@ -255,6 +255,7 @@ export async function loadPaymentRequests() {
    7. STUDENT — SUBMIT MANUAL PAYMENT REQUEST
 ===================================================== */
 
+
 export async function submitPremiumPayment({
   packageId,
   paymentMethod,
@@ -265,30 +266,42 @@ export async function submitPremiumPayment({
   const packageRef = doc(db, PACKAGES, packageId);
   const packageSnapshot = await getDoc(packageRef);
 
-  if (!packageSnapshot.exists() ||
-      packageSnapshot.data().active !== true) {
+  if (
+    !packageSnapshot.exists() ||
+    packageSnapshot.data().active !== true
+  ) {
     throw new Error("This package is unavailable.");
   }
 
   const selectedPackage = packageSnapshot.data();
 
+  const packageName = String(
+    selectedPackage.name || "Premium Plan"
+  );
+
+  const amount = Number(selectedPackage.price);
+
+  if (!Number.isFinite(amount)) {
+    throw new Error("Invalid package price.");
+  }
+
+  const method = String(paymentMethod || "").trim();
+  const transaction = String(transactionId || "").trim();
+
+  if (!method || !transaction) {
+    throw new Error("Enter your payment details.");
+  }
+
   const paymentData = {
-    email,
-    packageId,
-    packageName: selectedPackage.name,
-    amount: Number(selectedPackage.price),
-    paymentMethod: String(paymentMethod || "").trim(),
-    transactionId: String(transactionId || "").trim(),
+    email: String(email),
+    packageId: String(packageId),
+    packageName,
+    amount,
+    paymentMethod: method,
+    transactionId: transaction,
     status: "pending",
     createdAt: serverTimestamp()
   };
-
-  if (
-    !paymentData.paymentMethod ||
-    !paymentData.transactionId
-  ) {
-    throw new Error("Enter your payment details.");
-  }
 
   const result = await addDoc(
     collection(db, PAYMENTS),
