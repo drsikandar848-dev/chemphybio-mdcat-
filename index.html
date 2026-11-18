@@ -709,347 +709,317 @@
         <p id="adminLoginMessage" class="status-message" aria-live="polite"></p>
       </div>
 
-      <!-- ADMIN DASHBOARD -->
-      <div class="admin-dashboard" id="adminDashboard" hidden>
+    
+<!-- ADMIN DASHBOARD START -->
+<div class="admin-dashboard" id="adminDashboard" hidden>
 
-        <div class="admin-topbar">
-          <div class="admin-profile">
-            <img id="adminProfilePhoto" src="" alt="Administrator profile">
-            <div>
-              <span class="section-kicker">CONTROL CENTRE</span>
-              <h3 id="adminDisplayName">Administrator</h3>
-            </div>
-          </div>
-          <button class="btn btn-secondary" id="adminLogout" type="button">Logout</button>
-        </div>
-
-        <div id="adminStatus" class="admin-message" aria-live="polite"></div>
-
-        <div class="admin-overview">
-          <article>
-            <span>Total MCQs</span>
-            <strong id="adminTotalQuestions">0</strong>
-          </article>
-          <article>
-            <span>Contributors</span>
-            <strong id="adminTotalContributors">0</strong>
-          </article>
-          <article>
-            <span>Total Students</span>
-            <strong id="adminTotalStudents">0</strong>
-          </article>
-        </div>
-
-        <!-- ADMIN NAVIGATION -->
-<div class="admin-tabs">
-  <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
-  <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
-  <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
-  <button type="button" class="admin-tab" data-admin-tab="students">Students</button>
-
-  <!-- NEW PREMIUM PLANS BUTTON -->
-  <button type="button" class="admin-tab" data-admin-tab="plans">Premium Plans</button>
-
-  <button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
-</div>
-          
-<button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
-
-        </div>
-
-<!-- PAYMENT SETTINGS -->
-<section class="admin-tab-panel" id="adminPaymentsPanel" hidden>
-  <h3>Premium Payment Settings</h3>
-  <!-- PREMIUM PLANS MANAGER -->
-<section class="admin-tab-panel" id="adminPlansPanel" hidden>
-
-  <h3>Premium Plans Management</h3>
-  <p>Create and manage student membership packages.</p>
-
-  <form id="membershipPlanForm">
-
-    <input type="hidden" id="membershipPlanId">
-
-    <label for="membershipPlanName">Plan Name</label>
-    <input id="membershipPlanName" required
-      placeholder="e.g. Premium Monthly">
-
-    <label for="membershipPlanPrice">Price (Rs.)</label>
-    <input id="membershipPlanPrice" type="number"
-      min="0" required placeholder="e.g. 299">
-
-    <label for="membershipPlanDuration">Duration (Days)</label>
-    <input id="membershipPlanDuration" type="number"
-      min="1" required placeholder="e.g. 30">
-
-    <label for="membershipPlanDescription">Description</label>
-    <textarea id="membershipPlanDescription"
-      placeholder="Describe this plan"></textarea>
-
-    <label for="membershipPlanFeatures">Plan Features</label>
-    <textarea id="membershipPlanFeatures"
-      placeholder="One feature per line"></textarea>
-
-    <label>
-      <input type="checkbox" id="membershipPlanActive" checked>
-      Active Plan
-    </label>
-
-    <button class="btn" type="submit" id="saveMembershipPlan">
-      Save Premium Plan
-    </button>
-
-    <button class="btn btn-secondary" type="button"
-      id="cancelMembershipPlan" hidden>
-      Cancel Edit
-    </button>
-
-  </form>
-
-  <div id="membershipPlansStatus" class="admin-message"></div>
-
-  <h3>Existing Premium Plans</h3>
-
-  <div id="adminMembershipPlansList">
-    Loading plans...
-  </div>
-
-</section>
-  <p>Manage Easypaisa and JazzCash payment instructions.</p>
-
-  <div class="admin-form-grid">
-    <div>
-      <label for="epAccountTitle">Easypaisa Account Title</label>
-      <input id="epAccountTitle" type="text" placeholder="Account holder name">
-    </div>
-    <div>
-      <label for="epNumber">Easypaisa Number</label>
-      <input id="epNumber" type="tel" placeholder="03XXXXXXXXX">
-    </div>
-    <div>
-      <label for="jcAccountTitle">JazzCash Account Title</label>
-      <input id="jcAccountTitle" type="text" placeholder="Account holder name">
-    </div>
-    <div>
-      <label for="jcNumber">JazzCash Number</label>
-      <input id="jcNumber" type="tel" placeholder="03XXXXXXXXX">
-    </div>
-  </div>
-
-  <div>
-    <label for="paymentInstructions">Payment Instructions</label>
-    <textarea id="paymentInstructions" placeholder="Enter payment instructions for students"></textarea>
-  </div>
-
-  <p>Premium Price: <strong>Rs. 99</strong></p>
-  <p>Access Duration: <strong>90 Days</strong></p>
-
-  <button class="btn" id="savePaymentSettings" type="button">
-    Save Payment Settings
-  </button>
-  <div id="paymentSettingsStatus" class="admin-message" aria-live="polite"></div>
-  <div class="admin-payment-requests">
-  <h3>Student Payment Requests</h3>
-  <p>Review student payments and manage premium access.</p>
-
-  <div id="paymentRequestsStatus"
-       class="admin-message"
-       aria-live="polite"></div>
-
-  <div id="adminPaymentRequestsList">
-    Loading payment requests...
-  </div>
-  </div>
-
-</section>
-
-        <!-- QUESTIONS MANAGER -->
-        <section class="admin-tab-panel active" id="adminQuestionsPanel">
-          <h3>Question Manager</h3>
-
-          <form id="mcqForm">
-            <input type="hidden" id="editingQuestionId">
-
-            
-<div class="admin-form-grid">
-  <div>
-    <label for="mcqSubject">Subject</label>
-    <select id="mcqSubject" required>
-      <option value="Biology">Biology</option>
-      <option value="Chemistry">Chemistry</option>
-      <option value="Physics">Physics</option>
-      <option value="English">English</option>
-      <option value="Logical Reasoning">Logical Reasoning</option>
-    </select>
-  </div>
-
-  <div>
-    <label for="mcqChapter">Chapter</label>
-    <input id="mcqChapter" type="text" required placeholder="Chapter name">
-  </div>
-</div>
-
-<div>
-  <label for="mcqAccessType">Question Access</label>
-  <select id="mcqAccessType" required>
-    <option value="free">Free Question</option>
-    <option value="premium">Premium Question</option>
-  </select>
-</div>
-
-<div>
-  <label for="mcqQuestion">Question</label>
-  <textarea id="mcqQuestion" required placeholder="Write your MCQ question"></textarea>
-</div>
-
-            <div class="admin-form-grid">
-              <div>
-                <label for="mcqOption0">Option A</label>
-                <input id="mcqOption0" required>
-              </div>
-              <div>
-                <label for="mcqOption1">Option B</label>
-                <input id="mcqOption1" required>
-              </div>
-              <div>
-                <label for="mcqOption2">Option C</label>
-                <input id="mcqOption2" required>
-              </div>
-              <div>
-                <label for="mcqOption3">Option D</label>
-                <input id="mcqOption3" required>
-              </div>
-            </div>
-
-            <div>
-              <label for="mcqAnswer">Correct Answer</label>
-              <select id="mcqAnswer" required>
-                <option value="0">Option A</option>
-                <option value="1">Option B</option>
-                <option value="2">Option C</option>
-                <option value="3">Option D</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="mcqExplanation">Explanation</label>
-              <textarea id="mcqExplanation" placeholder="Explain the correct answer"></textarea>
-            </div>
-
-            <div class="admin-actions">
-              <button class="btn" id="saveMcq" type="submit">Save Question</button>
-              <button class="btn btn-secondary" id="cancelEdit" type="button" hidden>Cancel Edit</button>
-            </div>
-          </form>
-
-          <h3>Saved Questions</h3>
-          <div id="adminMcqList"></div>
-        </section>
-
-        <!-- WEBSITE CONTENT -->
-        <section class="admin-tab-panel" id="adminContentPanel" hidden>
-          <h3>Website Content</h3>
-
-          <form id="adminContentForm" class="admin-content-form">
-
-            <div>
-              <label for="contentAdminName">Administrator Name</label>
-              <input id="contentAdminName" type="text">
-            </div>
-
-            <div>
-              <label for="contentAdminPhotoFile">Administrator Profile Photo</label>
-              <input
-                id="contentAdminPhotoFile"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-              >
-              <small>Choose an image from your Gallery. Maximum 5 MB.</small>
-              <p id="adminPhotoUploadStatus" class="status-message" aria-live="polite"></p>
-            </div>
-
-            <div>
-              <label for="contentWelcome">Welcome Message</label>
-              <textarea id="contentWelcome"></textarea>
-            </div>
-
-            <div>
-              <label for="contentWhatsapp">WhatsApp Community Link</label>
-              <input id="contentWhatsapp" type="url" placeholder="https://chat.whatsapp.com/...">
-            </div>
-
-            <div>
-              <label for="contentPosterTitle">Announcement Title</label>
-              <input id="contentPosterTitle" type="text">
-            </div>
-
-            <div>
-              <label for="contentPosterFile">Announcement Poster</label>
-              <input
-                id="contentPosterFile"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-              >
-              <small>Choose your announcement poster from Gallery. Maximum 5 MB.</small>
-              <p id="posterUploadStatus" class="status-message" aria-live="polite"></p>
-            </div>
-
-            <div>
-              <label for="contentAnnouncement">Announcement Message</label>
-              <textarea id="contentAnnouncement"></textarea>
-            </div>
-
-            <div>
-              <label for="contentAdTitle">Advertisement Title</label>
-              <input id="contentAdTitle" type="text">
-            </div>
-
-            <div>
-              <label for="contentAdFile">Advertisement Image</label>
-              <input
-                id="contentAdFile"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-              >
-              <small>Choose your advertisement image from Gallery. Maximum 5 MB.</small>
-              <p id="adUploadStatus" class="status-message" aria-live="polite"></p>
-            </div>
-
-            <button class="btn" id="saveSiteContent" type="submit">Publish Website Content</button>
-          </form>
-        </section>
-
-        <!-- CONTRIBUTORS -->
-        <section class="admin-tab-panel" id="adminContributorsPanel" hidden>
-          <h3>Contributor Management</h3>
-
-          <div class="contributor-form">
-            <label for="contributorEmail">Contributor Email</label>
-            <input id="contributorEmail" type="email" placeholder="student@example.com">
-            <button class="btn" id="addContributor" type="button">Add Contributor</button>
-          </div>
-
-          <div id="contributorsList"></div>
-        </section>
-
-        <!-- STUDENTS MANAGEMENT -->
-        <section class="admin-tab-panel" id="adminStudentsPanel" hidden>
-          <h3>Student Management</h3>
-
-          <div class="admin-students-toolbar">
-            <p>View students who have created a saved learning profile.</p>
-
-            <button class="btn btn-secondary" id="refreshStudents" type="button">
-              Refresh Students
-            </button>
-          </div>
-
-          <div id="adminStudentsList">
-            <p>Student records will appear here.</p>
-          </div>
-        </section>
-
+  <div class="admin-topbar">
+    <div class="admin-profile">
+      <img id="adminProfilePhoto" src="" alt="Administrator profile">
+      <div>
+        <span class="section-kicker">CONTROL CENTRE</span>
+        <h3 id="adminDisplayName">Administrator</h3>
       </div>
+    </div>
+    <button class="btn btn-secondary" id="adminLogout" type="button">Logout</button>
+  </div>
+
+  <div id="adminStatus" class="admin-message" aria-live="polite"></div>
+
+  <div class="admin-overview">
+    <article>
+      <span>Total MCQs</span>
+      <strong id="adminTotalQuestions">0</strong>
+    </article>
+    <article>
+      <span>Contributors</span>
+      <strong id="adminTotalContributors">0</strong>
+    </article>
+    <article>
+      <span>Total Students</span>
+      <strong id="adminTotalStudents">0</strong>
+    </article>
+  </div>
+
+  <!-- ADMIN NAVIGATION -->
+  <div class="admin-tabs">
+    <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
+    <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
+    <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
+    <button type="button" class="admin-tab" data-admin-tab="students">Students</button>
+    <button type="button" class="admin-tab" data-admin-tab="plans">Premium Plans</button>
+    <button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
+  </div>
+
+  <!-- QUESTIONS MANAGER -->
+  <section class="admin-tab-panel active" id="adminQuestionsPanel">
+    <h3>Question Manager</h3>
+
+    <form id="mcqForm">
+      <input type="hidden" id="editingQuestionId">
+
+      <div class="admin-form-grid">
+        <div>
+          <label for="mcqSubject">Subject</label>
+          <select id="mcqSubject" required>
+            <option value="Biology">Biology</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Physics">Physics</option>
+            <option value="English">English</option>
+            <option value="Logical Reasoning">Logical Reasoning</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="mcqChapter">Chapter</label>
+          <input id="mcqChapter" type="text" required placeholder="Chapter name">
+        </div>
+      </div>
+
+      <div>
+        <label for="mcqAccessType">Question Access Type</label>
+        <select id="mcqAccessType" required>
+          <option value="free">Free Question</option>
+          <option value="premium">Premium Question</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="mcqQuestion">Question</label>
+        <textarea id="mcqQuestion" required placeholder="Write your MCQ question"></textarea>
+      </div>
+
+      <div class="admin-form-grid">
+        <div>
+          <label for="mcqOption0">Option A</label>
+          <input id="mcqOption0" required>
+        </div>
+        <div>
+          <label for="mcqOption1">Option B</label>
+          <input id="mcqOption1" required>
+        </div>
+        <div>
+          <label for="mcqOption2">Option C</label>
+          <input id="mcqOption2" required>
+        </div>
+        <div>
+          <label for="mcqOption3">Option D</label>
+          <input id="mcqOption3" required>
+        </div>
+      </div>
+
+      <div>
+        <label for="mcqAnswer">Correct Answer</label>
+        <select id="mcqAnswer" required>
+          <option value="0">Option A</option>
+          <option value="1">Option B</option>
+          <option value="2">Option C</option>
+          <option value="3">Option D</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="mcqExplanation">Explanation</label>
+        <textarea id="mcqExplanation" placeholder="Explain the correct answer"></textarea>
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn" id="saveMcq" type="submit">Save Question</button>
+        <button class="btn btn-secondary" id="cancelEdit" type="button" hidden>Cancel Edit</button>
+      </div>
+    </form>
+
+    <h3>Saved Questions</h3>
+    <div id="adminMcqList"></div>
+  </section>
+
+  <!-- WEBSITE CONTENT -->
+  <section class="admin-tab-panel" id="adminContentPanel" hidden>
+    <h3>Website Content</h3>
+
+    <form id="adminContentForm" class="admin-content-form">
+
+      <div>
+        <label for="contentAdminName">Administrator Name</label>
+        <input id="contentAdminName" type="text">
+      </div>
+
+      <div>
+        <label for="contentAdminPhotoFile">Administrator Profile Photo</label>
+        <input id="contentAdminPhotoFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <small>Choose an image from your Gallery. Maximum 5 MB.</small>
+        <p id="adminPhotoUploadStatus" class="status-message" aria-live="polite"></p>
+      </div>
+
+      <div>
+        <label for="contentWelcome">Welcome Message</label>
+        <textarea id="contentWelcome"></textarea>
+      </div>
+
+      <div>
+        <label for="contentWhatsapp">WhatsApp Community Link</label>
+        <input id="contentWhatsapp" type="url" placeholder="https://chat.whatsapp.com/...">
+      </div>
+
+      <div>
+        <label for="contentPosterTitle">Announcement Title</label>
+        <input id="contentPosterTitle" type="text">
+      </div>
+
+      <div>
+        <label for="contentPosterFile">Announcement Poster</label>
+        <input id="contentPosterFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <small>Choose your announcement poster from Gallery. Maximum 5 MB.</small>
+        <p id="posterUploadStatus" class="status-message" aria-live="polite"></p>
+      </div>
+
+      <div>
+        <label for="contentAnnouncement">Announcement Message</label>
+        <textarea id="contentAnnouncement"></textarea>
+      </div>
+
+      <div>
+        <label for="contentAdTitle">Advertisement Title</label>
+        <input id="contentAdTitle" type="text">
+      </div>
+
+      <div>
+        <label for="contentAdFile">Advertisement Image</label>
+        <input id="contentAdFile" type="file" accept="image/jpeg,image/png,image/webp">
+        <small>Choose your advertisement image from Gallery. Maximum 5 MB.</small>
+        <p id="adUploadStatus" class="status-message" aria-live="polite"></p>
+      </div>
+
+      <button class="btn" id="saveSiteContent" type="submit">Publish Website Content</button>
+    </form>
+  </section>
+
+  <!-- CONTRIBUTORS -->
+  <section class="admin-tab-panel" id="adminContributorsPanel" hidden>
+    <h3>Contributor Management</h3>
+
+    <div class="contributor-form">
+      <label for="contributorEmail">Contributor Email</label>
+      <input id="contributorEmail" type="email" placeholder="student@example.com">
+      <button class="btn" id="addContributor" type="button">Add Contributor</button>
+    </div>
+
+    <div id="contributorsList"></div>
+  </section>
+
+  <!-- STUDENTS -->
+  <section class="admin-tab-panel" id="adminStudentsPanel" hidden>
+    <h3>Student Management</h3>
+
+    <div class="admin-students-toolbar">
+      <p>View students who have created a saved learning profile.</p>
+      <button class="btn btn-secondary" id="refreshStudents" type="button">
+        Refresh Students
+      </button>
+    </div>
+
+    <div id="adminStudentsList">
+      <p>Student records will appear here.</p>
+    </div>
+  </section>
+
+  <!-- PREMIUM PLANS -->
+  <section class="admin-tab-panel" id="adminPlansPanel" hidden>
+    <h3>Premium Plans Management</h3>
+    <p>Create and manage student membership packages.</p>
+
+    <form id="membershipPlanForm">
+
+      <input type="hidden" id="membershipPlanId">
+
+      <label for="membershipPlanName">Plan Name</label>
+      <input id="membershipPlanName" required placeholder="e.g. Premium Monthly">
+
+      <label for="membershipPlanPrice">Price (Rs.)</label>
+      <input id="membershipPlanPrice" type="number" min="0" required placeholder="e.g. 299">
+
+      <label for="membershipPlanDuration">Duration (Days)</label>
+      <input id="membershipPlanDuration" type="number" min="1" required placeholder="e.g. 30">
+
+      <label for="membershipPlanDescription">Description</label>
+      <textarea id="membershipPlanDescription" placeholder="Describe this plan"></textarea>
+
+      <label for="membershipPlanFeatures">Plan Features</label>
+      <textarea id="membershipPlanFeatures" placeholder="One feature per line"></textarea>
+
+      <label>
+        <input type="checkbox" id="membershipPlanActive" checked>
+        Active Plan
+      </label>
+
+      <button class="btn" type="submit" id="saveMembershipPlan">Save Premium Plan</button>
+
+      <button class="btn btn-secondary" type="button" id="cancelMembershipPlan" hidden>
+        Cancel Edit
+      </button>
+    </form>
+
+    <div id="membershipPlansStatus" class="admin-message"></div>
+
+    <h3>Existing Premium Plans</h3>
+    <div id="adminMembershipPlansList">
+      Loading plans...
+    </div>
+  </section>
+
+  <!-- PAYMENT SETTINGS -->
+  <section class="admin-tab-panel" id="adminPaymentsPanel" hidden>
+    <h3>Premium Payment Settings</h3>
+
+    <form id="paymentSettingsForm">
+
+      <div>
+        <label for="epAccountTitle">Easypaisa Account Title</label>
+        <input id="epAccountTitle" type="text" placeholder="Account holder name">
+      </div>
+
+      <div>
+        <label for="epNumber">Easypaisa Number</label>
+        <input id="epNumber" type="tel" placeholder="03XXXXXXXXX">
+      </div>
+
+      <div>
+        <label for="jcAccountTitle">JazzCash Account Title</label>
+        <input id="jcAccountTitle" type="text" placeholder="Account holder name">
+      </div>
+
+      <div>
+        <label for="jcNumber">JazzCash Number</label>
+        <input id="jcNumber" type="tel" placeholder="03XXXXXXXXX">
+      </div>
+
+      <div>
+        <label for="paymentInstructions">Payment Instructions</label>
+        <textarea id="paymentInstructions" placeholder="Enter payment instructions for students"></textarea>
+      </div>
+
+      <button class="btn" id="savePaymentSettings" type="submit">
+        Save Payment Settings
+      </button>
+    </form>
+
+    <div id="paymentSettingsStatus" class="admin-message" aria-live="polite"></div>
+
+    <div class="admin-payment-requests">
+      <h3>Student Payment Requests</h3>
+      <p>Review student payment requests and manage premium access.</p>
+
+      <div id="paymentRequestsStatus" class="admin-message" aria-live="polite"></div>
+
+      <div id="adminPaymentRequestsList">
+        Loading payment requests...
+      </div>
+    </div>
+  </section>
+
+</div>
+<!-- ADMIN DASHBOARD END -->
+
     </section>
 
   </main>
