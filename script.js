@@ -2245,6 +2245,51 @@ $("premiumPaymentForm")?.addEventListener("submit", async event => {
 });
 
 /* =========================================================
+   PREMIUM PAYMENT FORM SUBMISSION
+========================================================= */
+
+const premiumPaymentForm = document.getElementById("premiumPaymentForm");
+
+if (premiumPaymentForm) {
+  premiumPaymentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const packageId = document.getElementById("selectedPremiumPackage").value;
+    const paymentMethod = document.getElementById("premiumPaymentMethod").value;
+    const transactionId = document.getElementById("premiumTransactionId").value.trim();
+
+    const status = document.getElementById("premiumPaymentStatus");
+    const submitButton = document.getElementById("submitPremiumPayment");
+
+    if (!packageId || !paymentMethod || !transactionId) {
+      status.textContent = "Please complete all payment details.";
+      return;
+    }
+
+    try {
+      submitButton.disabled = true;
+      status.textContent = "Submitting your payment request...";
+
+      await submitPremiumPayment({
+        packageId,
+        paymentMethod,
+        transactionId
+      });
+
+      status.textContent = "Payment request submitted successfully. Please wait for admin approval.";
+      premiumPaymentForm.reset();
+      document.getElementById("selectedPremiumPackage").value = packageId;
+
+    } catch (error) {
+      console.error("Payment submission error:", error);
+      status.textContent = error.message || "Payment request failed. Please try again.";
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+}
+
+/* =========================================================
    ADMIN TAB NAVIGATION
 ========================================================= */
 
