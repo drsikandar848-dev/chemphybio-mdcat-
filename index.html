@@ -736,11 +736,17 @@
         </div>
 
         <!-- ADMIN NAVIGATION -->
-        <div class="admin-tabs">
-          <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
-          <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
-          <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
-          <button type="button" class="admin-tab" data-admin-tab="students">Students</button> 
+<div class="admin-tabs">
+  <button type="button" class="admin-tab active" data-admin-tab="questions">Questions</button>
+  <button type="button" class="admin-tab" data-admin-tab="content">Website Content</button>
+  <button type="button" class="admin-tab" data-admin-tab="contributors">Contributors</button>
+  <button type="button" class="admin-tab" data-admin-tab="students">Students</button>
+
+  <!-- NEW PREMIUM PLANS BUTTON -->
+  <button type="button" class="admin-tab" data-admin-tab="plans">Premium Plans</button>
+
+  <button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
+</div>
           
 <button type="button" class="admin-tab" data-admin-tab="payments">Payment Settings</button>
 
@@ -749,6 +755,61 @@
 <!-- PAYMENT SETTINGS -->
 <section class="admin-tab-panel" id="adminPaymentsPanel" hidden>
   <h3>Premium Payment Settings</h3>
+  <!-- PREMIUM PLANS MANAGER -->
+<section class="admin-tab-panel" id="adminPlansPanel" hidden>
+
+  <h3>Premium Plans Management</h3>
+  <p>Create and manage student membership packages.</p>
+
+  <form id="membershipPlanForm">
+
+    <input type="hidden" id="membershipPlanId">
+
+    <label for="membershipPlanName">Plan Name</label>
+    <input id="membershipPlanName" required
+      placeholder="e.g. Premium Monthly">
+
+    <label for="membershipPlanPrice">Price (Rs.)</label>
+    <input id="membershipPlanPrice" type="number"
+      min="0" required placeholder="e.g. 299">
+
+    <label for="membershipPlanDuration">Duration (Days)</label>
+    <input id="membershipPlanDuration" type="number"
+      min="1" required placeholder="e.g. 30">
+
+    <label for="membershipPlanDescription">Description</label>
+    <textarea id="membershipPlanDescription"
+      placeholder="Describe this plan"></textarea>
+
+    <label for="membershipPlanFeatures">Plan Features</label>
+    <textarea id="membershipPlanFeatures"
+      placeholder="One feature per line"></textarea>
+
+    <label>
+      <input type="checkbox" id="membershipPlanActive" checked>
+      Active Plan
+    </label>
+
+    <button class="btn" type="submit" id="saveMembershipPlan">
+      Save Premium Plan
+    </button>
+
+    <button class="btn btn-secondary" type="button"
+      id="cancelMembershipPlan" hidden>
+      Cancel Edit
+    </button>
+
+  </form>
+
+  <div id="membershipPlansStatus" class="admin-message"></div>
+
+  <h3>Existing Premium Plans</h3>
+
+  <div id="adminMembershipPlansList">
+    Loading plans...
+  </div>
+
+</section>
   <p>Manage Easypaisa and JazzCash payment instructions.</p>
 
   <div class="admin-form-grid">
