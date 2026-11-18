@@ -1398,62 +1398,6 @@ async function refreshStudentDashboard(uid) {
 }
 
 
-("p");
-      price.textContent = `Price: Rs. ${item.price}`;
-
-      const duration = document.createElement("p");
-      duration.textContent =
-        `Duration: ${item.durationDays} days`;
-
-      const description = document.createElement("p");
-      description.textContent = item.description || "";
-
-      const selectButton = document.createElement("button");
-      selectButton.type = "button";
-      selectButton.className = "btn";
-      selectButton.textContent = "Select This Plan";
-
-      selectButton.addEventListener("click", () => {
-        $("selectedPremiumPackage").value = item.id;
-        paymentForm.hidden = false;
-
-        if (settings) {
-          const method = $("premiumPaymentMethod");
-          method.replaceChildren();
-
-          const placeholder = document.createElement("option");
-          placeholder.value = "";
-          placeholder.textContent = "Choose payment method";
-          method.appendChild(placeholder);
-
-          if (settings.easypaisaNumber) {
-            const option = document.createElement("option");
-            option.value = "Easypaisa";
-            option.textContent = "Easypaisa";
-            method.appendChild(option);
-          }
-
-          if (settings.jazzcashNumber) {
-            const option = document.createElement("option");
-            option.value = "JazzCash";
-            option.textContent = "JazzCash";
-            method.appendChild(option);
-          }
-
-          paymentDetails.textContent =
-            `${settings.instructions || ""}\n` +
-            (settings.easypaisaNumber
-              ? `Easypaisa: ${settings.easypaisaTitle || ""} - ${settings.easypaisaNumber}\n`
-              : "") +
-            (settings.jazzcashNumber
-              ? `JazzCash: ${settings.jazzcashTitle || ""} - ${settings.jazzcashNumber}`
-              : "");
-        }
-
-        paymentForm.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-    
 
       async function loadStudentPremiumPage() {
   const packageContainer = $("studentPremiumPackage");
