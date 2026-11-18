@@ -347,7 +347,14 @@ export async function approvePremiumPayment(requestId) {
   }
 
   const selectedPackage = packageSnapshot.data();
-  const durationDays = Number(selectedPackage.durationDays);
+
+const packageName = String(
+  selectedPackage.name ||
+  payment.packageName ||
+  "Premium Plan"
+).trim() || "Premium Plan";
+
+const durationDays = Number(selectedPackage.durationDays);
 
   if (!Number.isInteger(durationDays) || durationDays < 1) {
     throw new Error("Invalid membership duration.");
@@ -379,7 +386,7 @@ export async function approvePremiumPayment(requestId) {
     email,
     active: true,
     packageId: payment.packageId,
-    packageName: selectedPackage.name,
+    packageName,
     expiresAt: Timestamp.fromDate(expiryDate),
     approvedAt: serverTimestamp(),
     approvedBy: currentEmail()
