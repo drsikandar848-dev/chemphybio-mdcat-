@@ -1695,15 +1695,17 @@ async function loadAdminData() {
       loadPaymentRequests()
     ]);
 
-    // Store premium questions and payment requests
     allPremiumQuestions = premiumQuestions || [];
     allPaymentRequests = paymentRequests || [];
 
-    // Refresh admin lists
+    await Promise.all([
+      loadAdminMembershipPlans(),
+      loadAdminPaymentSettings()
+    ]);
+
     renderAdminMcqList();
     renderAdminPaymentRequests();
 
-    // Success message
     showMessage(
       "adminStatus",
       "Admin dashboard loaded successfully."
@@ -1714,11 +1716,11 @@ async function loadAdminData() {
 
     showMessage(
       "adminStatus",
-      "Some admin data could not load. Please try again.",
+      error.message || "Some admin data could not load.",
       true
     );
   }
- }
+}
 // RENDER ADMIN PAYMENT REQUESTS
 function renderAdminPaymentRequests() {
   const container = $("adminPaymentRequestsList");
