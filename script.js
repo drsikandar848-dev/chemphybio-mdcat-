@@ -662,7 +662,89 @@ if (chapter) {
 }
 
 // PREMIUM STUDENT TEST
+
+// PREMIUM STUDENT TEST
+const ALLOWED_PREMIUM_COUNTS = [
+  10, 20, 30, 40, 50, 60, 70, 80, 100
+];
+
 $("startPremiumTest")?.addEventListener("click", async () => {
+  const status = $("premiumMembershipStatus");
+  const button = $("startPremiumTest");
+
+  if (!currentUser) {
+    if (status) status.textContent = "Please sign in with Google first.";
+    return;
+  }
+
+  const count = Number($("premiumQuestionCount")?.value);
+
+  if (!ALLOWED_PREMIUM_COUNTS.includes(count)) {
+    if (status) status.textContent = "Please select a valid question count.";
+    return;
+  }
+
+  if (button) button.disabled = true;
+  if (status) status.textContent = "Checking premium membership...";
+
+  try {
+    const result = await loadStudentPremiumQuestions();
+
+    if (!result.active) {
+      if (status) {
+        status.textContent = result.reason || "Active membership required.";
+      }
+      return;
+    }
+
+    const available = (result.questions || []).filter(question =>
+      question.question &&
+      Array.isArray(question.options) &&
+      question.options.length === 4 &&
+      Number.isInteger(Number(question.answer)) &&
+      Number(question.answer) >= 0 &&
+      Number(question.answer) <= 3
+    );
+
+    if (available.length < count) {
+      if (status) {
+        status.textContent =
+          `You selected ${count} MCQs, but only ${available.length} valid premium questions are available. Please select a smaller test.`;
+      }
+      return;
+    }
+
+    testQuestions = shuffleArray(available).slice(0, count);
+
+    testAnswers = new Array(count).fill(null);
+    testReview = new Array(count).fill(false);
+
+    testCurrentIndex = 0;
+    testSecondsRemaining = count * 60;
+    testStartedAt = Date.now();
+    activeTestSubject = "Premium";
+    testFinished = false;
+    latestTestResult = null;
+
+    $("mainWebsite")?.setAttribute("hidden", "");
+    $("testResultScreen")?.setAttribute("hidden", "");
+    $("testEnvironment")?.removeAttribute("hidden");
+
+    renderTestQuestion();
+    startTestTimer();
+
+  } catch (error) {
+    console.error("Premium test error:", error);
+
+    if (status) {
+      status.textContent =
+        "Could not load premium questions. Please try again.";
+    }
+  } finally {
+    if (button) button.disabled = false;
+  }
+});
+
   const status = $("premiumMembershipStatus");
   const button = $("startPremiumTest");
 
