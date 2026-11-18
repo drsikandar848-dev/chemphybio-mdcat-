@@ -1394,62 +1394,7 @@ async function refreshStudentDashboard(uid) {
 }
 
 
-async function loadStudentPremiumPage() {
-  const packageContainer = $("studentPremiumPackage");
-  const paymentDetails = $("studentPremiumPaymentDetails");
-  const statusContainer = $("studentPremiumStatus");
-  const paymentForm = $("premiumPaymentForm");
-
-  if (!packageContainer || !paymentDetails ||
-      !statusContainer || !paymentForm) {
-    console.error("Premium membership HTML elements missing.");
-    return;
-  }
-
-  packageContainer.textContent = "Loading Premium Plans...";
-  paymentDetails.replaceChildren();
-  paymentForm.hidden = true;
-
-  try {
-    const [membership, packages, settings] = await Promise.all([
-      checkPremiumMembership(),
-      loadMembershipPackages(),
-      loadPremiumPaymentSettings()
-    ]);
-
-    if (membership.active) {
-      statusContainer.textContent =
-        `Your Premium Membership is active. Plan: ${membership.packageName}. Expires: ${
-          membership.expiresAt
-            ? membership.expiresAt.toLocaleDateString()
-            : "N/A"
-        }`;
-
-      packageContainer.textContent =
-        "You already have an active Premium Membership.";
-
-      return;
-    }
-
-    statusContainer.textContent =
-      "You do not currently have an active Premium Membership.";
-
-    if (!packages.length) {
-      packageContainer.textContent =
-        "No Premium Plans are currently available.";
-      return;
-    }
-
-    packageContainer.replaceChildren();
-
-    packages.forEach(item => {
-      const card = document.createElement("div");
-      card.className = "premium-plan-card";
-
-      const heading = document.createElement("h4");
-      heading.textContent = item.name || "Premium Plan";
-
-      const price = document.createElement("p");
+("p");
       price.textContent = `Price: Rs. ${item.price}`;
 
       const duration = document.createElement("p");
@@ -1504,6 +1449,150 @@ async function loadStudentPremiumPage() {
         paymentForm.scrollIntoView({
           behavior: "smooth",
           block: "center"
+    
+
+      async function loadStudentPremiumPage() {
+  const packageContainer = $("studentPremiumPackage");
+  const paymentDetails = $("studentPremiumPaymentDetails");
+  const statusContainer = $("studentPremiumStatus");
+  const paymentForm = $("premiumPaymentForm");
+
+  if (!packageContainer || !paymentDetails ||
+      !statusContainer || !paymentForm) {
+    console.error("Premium membership HTML elements missing.");
+    return;
+  }
+
+  packageContainer.textContent = "Loading Premium Plans...";
+  paymentDetails.replaceChildren();
+  paymentForm.hidden = true;
+
+  try {
+    const [membership, packages, settings] = await Promise.all([
+      checkPremiumMembership(),
+      loadMembershipPackages(),
+      loadPremiumPaymentSettings()
+    ]);
+
+    if (membership.active) {
+      statusContainer.textContent =
+        `Your Premium Membership is active. Plan: ${membership.packageName}. Expires: ${
+          membership.expiresAt
+            ? membership.expiresAt.toLocaleDateString()
+            : "N/A"
+        }`;
+    } else {
+      statusContainer.textContent =
+        "You do not currently have an active Premium Membership.";
+    }
+
+    if (!packages.length) {
+      packageContainer.textContent =
+        "No Premium Plans are currently available.";
+      return;
+    }
+
+    packageContainer.replaceChildren();
+
+    packages.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "premium-plan-card";
+
+      const heading = document.createElement("h4");
+      heading.textContent = item.name || "Premium Plan";
+
+      const price = document.createElement("p");
+      price.textContent = `Price: Rs. ${item.price}`;
+
+      const duration = document.createElement("p");
+      duration.textContent =
+        `Duration: ${item.durationDays} days`;
+
+      const description = document.createElement("p");
+      description.textContent = item.description || "";
+
+      const features = document.createElement("ul");
+
+      const featureList = Array.isArray(item.features)
+        ? item.features
+        : [];
+
+      if (featureList.length) {
+        featureList.forEach(feature => {
+          const li = document.createElement("li");
+          li.textContent = feature;
+          features.appendChild(li);
+        });
+      } else {
+        const li = document.createElement("li");
+        li.textContent = "Premium MDCAT test access";
+        features.appendChild(li);
+      }
+
+      const selectButton = document.createElement("button");
+      selectButton.type = "button";
+      selectButton.className = "btn";
+      selectButton.textContent = "Select This Plan";
+
+      selectButton.addEventListener("click", () => {
+        const selectedPackage = $("selectedPremiumPackage");
+        const method = $("premiumPaymentMethod");
+
+        if (!selectedPackage || !method) {
+          showMessage(
+            "premiumPaymentStatus",
+            "Payment form elements are missing.",
+            true
+          );
+          return;
+        }
+
+        selectedPackage.value = item.id;
+        paymentForm.hidden = false;
+        paymentDetails.replaceChildren();
+
+        method.replaceChildren();
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Choose payment method";
+        method.appendChild(placeholder);
+
+        if (settings?.easypaisaNumber) {
+          const option = document.createElement("option");
+          option.value = "Easypaisa";
+          option.textContent = "Easypaisa";
+          method.appendChild(option);
+        }
+
+        if (settings?.jazzcashNumber) {
+          const option = document.createElement("option");
+          option.value = "JazzCash";
+          option.textContent = "JazzCash";
+          method.appendChild(option);
+        }
+
+        const instructions = document.createElement("p");
+        instructions.textContent = settings?.instructions || "";
+        paymentDetails.appendChild(instructions);
+
+        if (settings?.easypaisaNumber) {
+          const easypaisa = document.createElement("p");
+          easypaisa.textContent =
+            `Easypaisa: ${settings.easypaisaTitle || ""} - ${settings.easypaisaNumber}`;
+          paymentDetails.appendChild(easypaisa);
+        }
+
+        if (settings?.jazzcashNumber) {
+          const jazzcash = document.createElement("p");
+          jazzcash.textContent =
+            `JazzCash: ${settings.jazzcashTitle || ""} - ${settings.jazzcashNumber}`;
+          paymentDetails.appendChild(jazzcash);
+        }
+
+        paymentForm.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
         });
       });
 
@@ -1512,6 +1601,7 @@ async function loadStudentPremiumPage() {
         price,
         duration,
         description,
+        features,
         selectButton
       );
 
@@ -1527,58 +1617,7 @@ async function loadStudentPremiumPage() {
     packageContainer.textContent =
       error.message || "Please check your connection and Firestore permissions.";
   }
-}
-
-
-$("premiumPaymentForm")?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const packageId = $("selectedPremiumPackage")?.value;
-  const paymentMethod = $("premiumPaymentMethod")?.value;
-  const transactionId = $("premiumTransactionId")?.value.trim();
-  const submitButton = $("submitPremiumPayment");
-
-  if (!packageId || !paymentMethod || !transactionId) {
-    showMessage(
-      "premiumPaymentStatus",
-      "Please select a plan and enter all payment details.",
-      true
-    );
-    return;
-  }
-
-  submitButton.disabled = true;
-  submitButton.textContent = "Submitting...";
-
-  try {
-    await submitPremiumPayment({
-      packageId,
-      paymentMethod,
-      transactionId
-    });
-
-    showMessage(
-      "premiumPaymentStatus",
-      "Payment request submitted. Your request is pending admin verification."
-    );
-
-    $("premiumTransactionId").value = "";
-    $("premiumPaymentForm").hidden = true;
-
-  } catch (error) {
-    console.error("Premium payment submission error:", error);
-
-    showMessage(
-      "premiumPaymentStatus",
-      error.message || "Payment request could not be submitted.",
-      true
-    );
-
-  } finally {
-    submitButton.disabled = false;
-    submitButton.textContent = "Submit Payment Request";
-  }
-});
+        }
 
 /* =========================================================
    SUBJECT PERFORMANCE
