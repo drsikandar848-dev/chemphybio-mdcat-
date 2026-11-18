@@ -1,7 +1,6 @@
-
 /* =====================================================
    CHEMPHYBIO MDCAT — PREMIUM SYSTEM
-   Separate secure premium questions and memberships
+   Membership Plans + Premium Questions + Payments
 ===================================================== */
 
 import { auth, db } from "./firebase-config.js";
@@ -14,6 +13,7 @@ import {
   addDoc,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -23,9 +23,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 
-/* ---------------- COLLECTIONS ---------------- */
+/* ---------------- CONFIGURATION ---------------- */
+
+const ADMIN_UID = "JIiL8pKKWQbzNJuUR9mvrp0tGhr1";
 
 const PREMIUM_QUESTIONS = "premiumQuestions";
+const FREE_QUESTIONS = "questions";
 const PACKAGES = "membershipPackages";
 const MEMBERS = "premiumMembers";
 const PAYMENTS = "paymentRequests";
@@ -56,13 +59,68 @@ function requireEmail() {
   return email;
 }
 
+function requireAdmin() {
+  requireLogin();
+
+  if (auth.currentUser.uid !== ADMIN_UID) {
+    throw new Error("Admin permission required.");
+  }
+}
+
+function cleanFeatures(features) {
+  if (Array.isArray(features)) {
+    return features
+      .map(item => String(item).trim())
+      .filter(Boolean);
+  }
+
+  if (typeof features === "string") {
+    return features
+      .split("\n")
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function validatePackage(data) {
+  const name = String(data.name || "").trim();
+  const price = Number(data.price);
+  const durationDays = Number(data.durationDays);
+
+  if (!name) {
+    throw new Error("Enter a plan name.");
+  }
+
+  if (!Number.isFinite(price) || price < 0) {
+    throw new Error("Enter a valid plan price.");
+  }
+
+  if (!Number.isInteger(durationDays) || durationDays < 1) {
+    throw new Error("Enter a valid duration in days.");
+  }
+
+  return {
+    name,
+    price,
+    durationDays,
+    description: String(data.description || "").trim(),
+    features: cleanFeatures(data.features)
+  };
+}
+
 
 /* =====================================================
    1. SAVE MCQ — FREE OR PREMIUM
 ===================================================== */
 
-export async function savePremiumSystemQuestion(questionData, accessType = "free", questionId = null) {
-  requireLogin();
+export async function savePremiumSystemQuestion(
+  questionData,
+  accessType = "free",
+  questionId = null
+) {
+  requireAdmin();
 
   const question = {
     subject: String(questionData.subject || "").trim(),
@@ -80,6 +138,7 @@ export async function savePremiumSystemQuestion(questionData, accessType = "free
     !question.question ||
     !Array.isArray(question.options) ||
     question.options.length !== 4 ||
+    question.options.some(option => !String(option).trim()) ||
     !Number.isInteger(question.answer) ||
     question.answer < 0 ||
     question.answer > 3
@@ -90,10 +149,51 @@ export async function savePremiumSystemQuestion(questionData, accessType = "free
   const targetCollection =
     accessType === "premium"
       ? PREMIUM_QUESTIONS
-      : "questions";
+      : FREE_QUESTIONS;
 
   if (questionId) {
-    await updateDoc(doc(db, targetCollection, questionId), question);
+    const premiumRef = doc(db, PREMIUM_QUESTIONS, questionId);
+    const freeRef = doc(db, FREE_QUESTIONS, questionId);
+
+    const [premiumSnapshot, freeSnapshot] = await Promise.all([
+      getDoc(premiumRef),
+      getDoc(freeRef)
+    ]);
+
+    const oldSnapshot =
+      premiumSnapshot.exists() ? premiumSnapshot : freeSnapshot;
+
+    if (!oldSnapshot.exists()) {
+      throw new Error("Question not found.");
+    }
+
+    const oldCollection = premiumSnapshot.exists()
+      ? PREMIUM_QUESTIONS
+      : FREE_QUESTIONS;
+
+    const oldData = oldSnapshot.data();
+
+    const updatedQuestion = {
+      ...oldData,
+      ...question
+    };
+
+    if (oldCollection === targetCollection) {
+      await updateDoc(
+        doc(db, targetCollection, questionId),
+        question
+      );
+    } else {
+      await setDoc(
+        doc(db, targetCollection, questionId),
+        updatedQuestion
+      );
+
+      await deleteDoc(
+        doc(db, oldCollection, questionId)
+      );
+    }
+
     return questionId;
   }
 
@@ -109,11 +209,11 @@ export async function savePremiumSystemQuestion(questionData, accessType = "free
 
 
 /* =====================================================
-   2. LOAD PREMIUM QUESTIONS
+   2. LOAD PREMIUM QUESTIONS — ADMIN
 ===================================================== */
 
 export async function loadPremiumSystemQuestions() {
-  requireLogin();
+  requireAdmin();
 
   const snapshot = await getDocs(
     collection(db, PREMIUM_QUESTIONS)
@@ -124,6 +224,11 @@ export async function loadPremiumSystemQuestions() {
     ...item.data()
   }));
 }
+
+
+/* =====================================================
+   3. LOAD PREMIUM QUESTIONS — STUDENT
+===================================================== */
 
 export async function loadStudentPremiumQuestions() {
   requireLogin();
@@ -142,65 +247,58 @@ export async function loadStudentPremiumQuestions() {
     collection(db, PREMIUM_QUESTIONS)
   );
 
-  const questions = snapshot.docs.map(item => ({
-    id: item.id,
-    ...item.data()
-  }));
-
   return {
     active: true,
-    questions,
+    questions: snapshot.docs.map(item => ({
+      id: item.id,
+      ...item.data()
+    })),
     reason: "Membership active."
   };
 }
 
 
 /* =====================================================
-   3. DELETE PREMIUM QUESTION
+   4. DELETE PREMIUM QUESTION
 ===================================================== */
 
 export async function deletePremiumSystemQuestion(questionId) {
-  requireLogin();
+  requireAdmin();
 
-  const { deleteDoc } = await import(
-    "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js"
+  if (!questionId) {
+    throw new Error("Question ID is required.");
+  }
+
+  await deleteDoc(
+    doc(db, PREMIUM_QUESTIONS, questionId)
   );
-
-  await deleteDoc(doc(db, PREMIUM_QUESTIONS, questionId));
 }
 
 
 /* =====================================================
-   4. CREATE MEMBERSHIP PACKAGE
+   5. CREATE MEMBERSHIP PACKAGE
 ===================================================== */
 
 export async function createMembershipPackage({
   name,
   price,
   durationDays,
-  description = ""
+  description = "",
+  features = []
 }) {
-  requireLogin();
+  requireAdmin();
 
-  const packageData = {
-    name: String(name || "").trim(),
-    price: Number(price),
-    durationDays: Number(durationDays),
-    description: String(description).trim(),
-    active: true,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
+  const packageData = validatePackage({
+    name,
+    price,
+    durationDays,
+    description,
+    features
+  });
 
-  if (
-    !packageData.name ||
-    !Number.isFinite(packageData.price) ||
-    packageData.price < 0 ||
-    !Number.isInteger(packageData.durationDays) ||
-    packageData.durationDays < 1
-  ) {
-    throw new Error("Invalid package details.");
-  }
+  packageData.active = true;
+  packageData.createdAt = serverTimestamp();
+  packageData.updatedAt = serverTimestamp();
 
   const result = await addDoc(
     collection(db, PACKAGES),
@@ -212,16 +310,16 @@ export async function createMembershipPackage({
 
 
 /* =====================================================
-   5. LOAD ACTIVE PACKAGES
+   6. LOAD ACTIVE PACKAGES — STUDENTS
 ===================================================== */
 
 export async function loadMembershipPackages() {
-  const packageQuery = query(
-    collection(db, PACKAGES),
-    where("active", "==", true)
+  const snapshot = await getDocs(
+    query(
+      collection(db, PACKAGES),
+      where("active", "==", true)
+    )
   );
-
-  const snapshot = await getDocs(packageQuery);
 
   return snapshot.docs.map(item => ({
     id: item.id,
@@ -231,11 +329,111 @@ export async function loadMembershipPackages() {
 
 
 /* =====================================================
-   6. ADMIN — LOAD ALL PAYMENT REQUESTS
+   7. LOAD ALL PACKAGES — ADMIN
+===================================================== */
+
+export async function loadAllMembershipPackages() {
+  requireAdmin();
+
+  const snapshot = await getDocs(
+    collection(db, PACKAGES)
+  );
+
+  return snapshot.docs.map(item => ({
+    id: item.id,
+    ...item.data()
+  }));
+}
+
+
+/* =====================================================
+   8. UPDATE MEMBERSHIP PACKAGE
+===================================================== */
+
+export async function updateMembershipPackage(
+  packageId,
+  updates
+) {
+  requireAdmin();
+
+  if (!packageId) {
+    throw new Error("Package ID is required.");
+  }
+
+  const packageRef = doc(db, PACKAGES, packageId);
+  const snapshot = await getDoc(packageRef);
+
+  if (!snapshot.exists()) {
+    throw new Error("Membership package not found.");
+  }
+
+  const oldData = snapshot.data();
+
+  const updatedData = validatePackage({
+    ...oldData,
+    ...updates
+  });
+
+  updatedData.updatedAt = serverTimestamp();
+
+  await updateDoc(packageRef, updatedData);
+
+  return packageId;
+}
+
+
+/* =====================================================
+   9. ACTIVATE / DEACTIVATE PACKAGE
+===================================================== */
+
+export async function setMembershipPackageActive(
+  packageId,
+  active
+) {
+  requireAdmin();
+
+  if (!packageId) {
+    throw new Error("Package ID is required.");
+  }
+
+  await updateDoc(
+    doc(db, PACKAGES, packageId),
+    {
+      active: Boolean(active),
+      updatedAt: serverTimestamp()
+    }
+  );
+}
+
+
+/* =====================================================
+   10. DELETE MEMBERSHIP PACKAGE
+===================================================== */
+
+export async function deleteMembershipPackage(packageId) {
+  requireAdmin();
+
+  if (!packageId) {
+    throw new Error("Package ID is required.");
+  }
+
+  const packageRef = doc(db, PACKAGES, packageId);
+  const snapshot = await getDoc(packageRef);
+
+  if (!snapshot.exists()) {
+    throw new Error("Membership package not found.");
+  }
+
+  await deleteDoc(packageRef);
+}
+
+
+/* =====================================================
+   11. LOAD PAYMENT REQUESTS — ADMIN
 ===================================================== */
 
 export async function loadPaymentRequests() {
-  requireLogin();
+  requireAdmin();
 
   const snapshot = await getDocs(
     query(
@@ -252,9 +450,8 @@ export async function loadPaymentRequests() {
 
 
 /* =====================================================
-   7. STUDENT — SUBMIT MANUAL PAYMENT REQUEST
+   12. STUDENT — SUBMIT PAYMENT REQUEST
 ===================================================== */
-
 
 export async function submitPremiumPayment({
   packageId,
@@ -263,8 +460,20 @@ export async function submitPremiumPayment({
 }) {
   const email = requireEmail();
 
-  const packageRef = doc(db, PACKAGES, packageId);
-  const packageSnapshot = await getDoc(packageRef);
+  const method = String(paymentMethod || "").trim();
+  const transaction = String(transactionId || "").trim();
+
+  if (!packageId || !transaction) {
+    throw new Error("Enter all payment details.");
+  }
+
+  if (!["Easypaisa", "JazzCash"].includes(method)) {
+    throw new Error("Invalid payment method.");
+  }
+
+  const packageSnapshot = await getDoc(
+    doc(db, PACKAGES, packageId)
+  );
 
   if (
     !packageSnapshot.exists() ||
@@ -275,28 +484,12 @@ export async function submitPremiumPayment({
 
   const selectedPackage = packageSnapshot.data();
 
-  const packageName = String(
-    selectedPackage.name || "Premium Plan"
-  );
-
-  const amount = Number(selectedPackage.price);
-
-  if (!Number.isFinite(amount)) {
-    throw new Error("Invalid package price.");
-  }
-
-  const method = String(paymentMethod || "").trim();
-  const transaction = String(transactionId || "").trim();
-
-  if (!method || !transaction) {
-    throw new Error("Enter your payment details.");
-  }
-
   const paymentData = {
-    email: String(email),
-    packageId: String(packageId),
-    packageName,
-    amount,
+    email,
+    packageId,
+    packageName: String(selectedPackage.name || "Premium Plan"),
+    amount: Number(selectedPackage.price),
+    durationDays: Number(selectedPackage.durationDays),
     paymentMethod: method,
     transactionId: transaction,
     status: "pending",
@@ -313,11 +506,11 @@ export async function submitPremiumPayment({
 
 
 /* =====================================================
-   8. ADMIN — APPROVE PAYMENT AND ACTIVATE MEMBERSHIP
+   13. ADMIN — APPROVE PAYMENT
 ===================================================== */
 
 export async function approvePremiumPayment(requestId) {
-  requireLogin();
+  requireAdmin();
 
   const requestRef = doc(db, PAYMENTS, requestId);
   const requestSnapshot = await getDoc(requestRef);
@@ -332,7 +525,9 @@ export async function approvePremiumPayment(requestId) {
     throw new Error("This request has already been processed.");
   }
 
-  const email = String(payment.email || "").trim().toLowerCase();
+  const email = String(payment.email || "")
+    .trim()
+    .toLowerCase();
 
   if (!email || !payment.packageId) {
     throw new Error("Invalid payment request.");
@@ -342,19 +537,19 @@ export async function approvePremiumPayment(requestId) {
     doc(db, PACKAGES, payment.packageId)
   );
 
-  if (!packageSnapshot.exists()) {
-    throw new Error("Membership package not found.");
-  }
+  const selectedPackage = packageSnapshot.exists()
+    ? packageSnapshot.data()
+    : {};
 
-  const selectedPackage = packageSnapshot.data();
+  const packageName = String(
+    payment.packageName ||
+    selectedPackage.name ||
+    "Premium Plan"
+  );
 
-const packageName = String(
-  selectedPackage.name ||
-  payment.packageName ||
-  "Premium Plan"
-).trim() || "Premium Plan";
-
-const durationDays = Number(selectedPackage.durationDays);
+  const durationDays = Number(
+    payment.durationDays || selectedPackage.durationDays
+  );
 
   if (!Number.isInteger(durationDays) || durationDays < 1) {
     throw new Error("Invalid membership duration.");
@@ -364,7 +559,6 @@ const durationDays = Number(selectedPackage.durationDays);
   const memberSnapshot = await getDoc(memberRef);
 
   const now = new Date();
-
   let startDate = now;
 
   if (memberSnapshot.exists()) {
@@ -394,7 +588,8 @@ const durationDays = Number(selectedPackage.durationDays);
 
   batch.update(requestRef, {
     status: "approved",
-    approvedAt: serverTimestamp()
+    approvedAt: serverTimestamp(),
+    reviewedBy: currentEmail()
   });
 
   await batch.commit();
@@ -404,24 +599,33 @@ const durationDays = Number(selectedPackage.durationDays);
 
 
 /* =====================================================
-   9. ADMIN — REJECT PAYMENT
+   14. ADMIN — REJECT PAYMENT
 ===================================================== */
 
 export async function rejectPremiumPayment(requestId) {
-  requireLogin();
+  requireAdmin();
 
-  await updateDoc(
-    doc(db, PAYMENTS, requestId),
-    {
-      status: "rejected",
-      reviewedAt: serverTimestamp()
-    }
-  );
+  const requestRef = doc(db, PAYMENTS, requestId);
+  const snapshot = await getDoc(requestRef);
+
+  if (!snapshot.exists()) {
+    throw new Error("Payment request not found.");
+  }
+
+  if (snapshot.data().status !== "pending") {
+    throw new Error("This request has already been processed.");
+  }
+
+  await updateDoc(requestRef, {
+    status: "rejected",
+    reviewedAt: serverTimestamp(),
+    reviewedBy: currentEmail()
+  });
 }
 
 
 /* =====================================================
-   10. CHECK CURRENT STUDENT MEMBERSHIP
+   15. CHECK STUDENT MEMBERSHIP
 ===================================================== */
 
 export async function checkPremiumMembership() {
@@ -441,7 +645,8 @@ export async function checkPremiumMembership() {
   const member = snapshot.data();
   const expiry = member.expiresAt?.toDate?.();
 
-  const active = member.active === true &&
+  const active =
+    member.active === true &&
     expiry instanceof Date &&
     expiry > new Date();
 
@@ -450,17 +655,19 @@ export async function checkPremiumMembership() {
     email,
     packageName: member.packageName || "",
     expiresAt: expiry || null,
-    reason: active ? "Membership active." : "Membership expired."
+    reason: active
+      ? "Membership active."
+      : "Membership expired."
   };
 }
 
 
 /* =====================================================
-   11. ADMIN — DEACTIVATE MEMBERSHIP
+   16. ADMIN — DEACTIVATE MEMBERSHIP
 ===================================================== */
 
 export async function deactivatePremiumMember(email) {
-  requireLogin();
+  requireAdmin();
 
   const normalizedEmail = String(email || "")
     .trim()
@@ -470,18 +677,22 @@ export async function deactivatePremiumMember(email) {
     throw new Error("Enter a valid Gmail address.");
   }
 
-  await updateDoc(
-    doc(db, MEMBERS, normalizedEmail),
-    {
-      active: false,
-      deactivatedAt: serverTimestamp()
-    }
-  );
+  const memberRef = doc(db, MEMBERS, normalizedEmail);
+  const snapshot = await getDoc(memberRef);
+
+  if (!snapshot.exists()) {
+    throw new Error("Membership not found.");
+  }
+
+  await updateDoc(memberRef, {
+    active: false,
+    deactivatedAt: serverTimestamp()
+  });
 }
 
 
 /* =====================================================
-   12. SAVE PAYMENT ACCOUNT SETTINGS
+   17. SAVE PAYMENT ACCOUNT SETTINGS
 ===================================================== */
 
 export async function savePremiumPaymentSettings({
@@ -491,7 +702,7 @@ export async function savePremiumPaymentSettings({
   jazzcashNumber,
   instructions
 }) {
-  requireLogin();
+  requireAdmin();
 
   await setDoc(
     doc(db, PAYMENT_SETTINGS, "main"),
@@ -508,7 +719,7 @@ export async function savePremiumPaymentSettings({
 
 
 /* =====================================================
-   13. LOAD PAYMENT ACCOUNT SETTINGS
+   18. LOAD PAYMENT ACCOUNT SETTINGS
 ===================================================== */
 
 export async function loadPremiumPaymentSettings() {
@@ -517,4 +728,4 @@ export async function loadPremiumPaymentSettings() {
   );
 
   return snapshot.exists() ? snapshot.data() : null;
-}
+       }
