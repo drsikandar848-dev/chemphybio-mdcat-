@@ -1808,6 +1808,440 @@ function renderAdminPaymentRequests() {
     container.appendChild(card);
   });
                                      }
+
+/* =========================================================
+   MEMBERSHIP PLANS — ADMIN MANAGER
+========================================================= */
+
+async function loadAdminMembershipPlans() {
+  if (!isAdmin()) return;
+
+  try {
+    studentPremiumPackages = await loadAllMembershipPackages();
+    renderAdminMembershipPlans();
+  } catch (error) {
+    console.error("Membership plans loading error:", error);
+    showMessage(
+      "membershipPlansStatus",
+      error.message || "Could not load membership plans.",
+      true
+    );
+  }
+}
+
+function renderAdminMembershipPlans() {
+  const container = $("adminMembershipPlansList");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  if (!studentPremiumPackages.length) {
+    container.textContent = "No membership plans created yet.";
+    return;
+  }
+
+  studentPremiumPackages.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "premium-plan-card";
+
+    const heading = document.createElement("h4");
+    heading.textContent = item.name || "Premium Plan";
+
+    const details = document.createElement("p");
+    details.textContent =
+      `Rs. ${item.price} | ${item.durationDays} days`;
+
+    const description = document.createElement("p");
+    description.textContent = item.description || "";
+
+    const features = document.createElement("p");
+    features.textContent = Array.isArray(item.features)
+      ? item.features.join(" • ")
+      : "";
+
+    const status = document.createElement("p");
+    status.textContent = item.active
+      ? "Status: Active"
+      : "Status: Inactive";
+
+    const edit = document.createElement("button");
+    edit.type = "button";
+    edit.className = "btn";
+    edit.textContent = "Edit";
+
+    edit.addEventListener("click", () => {
+      $("membershipPlanId").value = item.id;
+      $("membershipPlanName").value = item.name || "";
+      $("membershipPlanPrice").value = item.price ?? "";
+      $("membershipPlanDuration").value = item.durationDays ?? "";
+      $("membershipPlanDescription").value =
+        item.description || "";
+
+      $("membershipPlanFeatures").value =
+        Array.isArray(item.features)
+          ? item.features.join("\n")
+          : "";
+
+      if ($("membershipPlanActive")) {
+        $("membershipPlanActive").checked = item.active === true;
+      }
+
+      $("saveMembershipPlan").textContent = "Update Plan";
+      $("cancelMembershipPlan")?.removeAttribute("hidden");
+
+      $("membershipPlanForm")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "btn btn-secondary";
+    toggle.textContent = item.active ? "Deactivate" : "Activate";
+
+    toggle.addEventListener("click", async () => {
+      toggle.disabled = true;
+
+      try {
+        await setMembershipPackageActive(
+          item.id,
+          !item.active
+        );
+
+        await loadAdminMembershipPlans();
+
+        showMessage(
+          "membershipPlansStatus",
+          "Plan status updated successfully."
+        );
+      } catch (error) {
+        toggle.disabled = false;
+        showMessage(
+          "membershipPlansStatus",
+          error.message || "Could not update plan.",
+          true
+        );
+      }
+    });
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "btn btn-secondary";
+    remove.textContent = "Delete";
+
+    remove.addEventListener("click", async () => {
+      if (!confirm(`Delete "${item.name}" plan?`)) return;
+
+      remove.disabled = true;
+
+      try {
+        await deleteMembershipPackage(item.id);
+        await loadAdminMembershipPlans();
+
+        showMessage(
+          "membershipPlansStatus",
+          "Membership plan deleted."
+        );
+      } catch (error) {
+        remove.disabled = false;
+        showMessage(
+          "membershipPlansStatus",
+          error.message || "Could not delete plan.",
+          true
+        );
+      }
+    });
+
+    card.append(
+      heading,
+      details,
+      description,
+      features,
+      status,
+      edit,
+      toggle,
+      remove
+    );
+
+    container.appendChild(card);
+  });
+}
+
+
+/* =========================================================
+   SAVE / UPDATE MEMBERSHIP PLAN
+========================================================= */
+
+$("membershipPlanForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!isAdmin()) return;
+
+  const button = $("saveMembershipPlan");
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Saving...";
+  }
+
+  try {
+    const packageId = $("membershipPlanId")?.value || "";
+
+    const planData = {
+      name: $("membershipPlanName")?.value.trim() || "",
+      price: Number($("membershipPlanPrice")?.value),
+      durationDays: Number($("membershipPlanDuration")?.value),
+      description:
+        $("membershipPlanDescription")?.value.trim() || "",
+      features:
+        $("membershipPlanFeatures")?.value || ""
+    };
+
+    if (
+      !planData.name ||
+      !Number.isFinite(planData.price) ||
+      planData.price < 0 ||
+      !Number.isInteger(planData.durationDays) ||
+      planData.durationDays < 1
+    ) {
+      throw new Error("Please enter valid plan details.");
+    }
+
+    const active = $("membershipPlanActive")
+      ? $("membershipPlanActive").checked
+      : true;
+
+    if (packageId) {
+      await updateMembershipPackage(packageId, planData);
+      await setMembershipPackageActive(packageId, active);
+    } else {
+      const newId = await createMembershipPackage(planData);
+
+      if (!active) {
+        await setMembershipPackageActive(newId, false);
+      }
+    }
+
+    resetMembershipPlanForm();
+    await loadAdminMembershipPlans();
+
+    showMessage(
+      "membershipPlansStatus",
+      "Membership plan saved successfully."
+    );
+
+  } catch (error) {
+    console.error("Plan saving error:", error);
+
+    showMessage(
+      "membershipPlansStatus",
+      error.message || "Could not save membership plan.",
+      true
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Save Plan";
+    }
+  }
+});
+
+
+function resetMembershipPlanForm() {
+  $("membershipPlanForm")?.reset();
+
+  if ($("membershipPlanId")) {
+    $("membershipPlanId").value = "";
+  }
+
+  if ($("membershipPlanActive")) {
+    $("membershipPlanActive").checked = true;
+  }
+
+  if ($("saveMembershipPlan")) {
+    $("saveMembershipPlan").textContent = "Save Plan";
+  }
+
+  $("cancelMembershipPlan")?.setAttribute("hidden", "");
+}
+
+$("cancelMembershipPlan")?.addEventListener(
+  "click",
+  resetMembershipPlanForm
+);
+
+
+/* =========================================================
+   ADMIN — PAYMENT ACCOUNT SETTINGS
+========================================================= */
+
+async function loadAdminPaymentSettings() {
+  if (!isAdmin()) return;
+
+  try {
+    const settings = await loadPremiumPaymentSettings();
+
+    if (!settings) return;
+
+    if ($("epAccountTitle")) {
+      $("epAccountTitle").value =
+        settings.easypaisaTitle || "";
+    }
+
+    if ($("epNumber")) {
+      $("epNumber").value =
+        settings.easypaisaNumber || "";
+    }
+
+    if ($("jcAccountTitle")) {
+      $("jcAccountTitle").value =
+        settings.jazzcashTitle || "";
+    }
+
+    if ($("jcNumber")) {
+      $("jcNumber").value =
+        settings.jazzcashNumber || "";
+    }
+
+    if ($("paymentInstructions")) {
+      $("paymentInstructions").value =
+        settings.instructions || "";
+    }
+
+  } catch (error) {
+    console.error("Payment settings loading error:", error);
+    showMessage(
+      "paymentSettingsStatus",
+      error.message || "Could not load payment settings.",
+      true
+    );
+  }
+}
+
+
+$("paymentSettingsForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!isAdmin()) return;
+
+  const button = $("savePaymentSettings");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Saving...";
+  }
+
+  try {
+    await savePremiumPaymentSettings({
+      easypaisaTitle: $("epAccountTitle")?.value.trim() || "",
+      easypaisaNumber: $("epNumber")?.value.trim() || "",
+      jazzcashTitle: $("jcAccountTitle")?.value.trim() || "",
+      jazzcashNumber: $("jcNumber")?.value.trim() || "",
+      instructions: $("paymentInstructions")?.value.trim() || ""
+    });
+
+    showMessage(
+      "paymentSettingsStatus",
+      "Payment settings saved successfully."
+    );
+
+    await loadStudentPremiumPage();
+
+  } catch (error) {
+    console.error("Payment settings saving error:", error);
+
+    showMessage(
+      "paymentSettingsStatus",
+      error.message || "Could not save payment settings.",
+      true
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Save Payment Settings";
+    }
+  }
+});
+
+
+/* =========================================================
+   STUDENT — SUBMIT PREMIUM PAYMENT
+========================================================= */
+
+$("premiumPaymentForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!currentUser) {
+    showMessage(
+      "premiumPaymentStatus",
+      "Please login with Google first.",
+      true
+    );
+    return;
+  }
+
+  const button = $("premiumPaymentForm")
+    .querySelector('[type="submit"]');
+
+  const transactionInput =
+    $("premiumTransactionId") ||
+    $("paymentTransactionId") ||
+    $("transactionId") ||
+    $("premiumTransaction") ||
+    $("premiumPaymentTransaction") ||
+    $("premiumPaymentForm").querySelector(
+      '[name="transactionId"], [name="transactionID"]'
+    );
+
+  const packageId = $("selectedPremiumPackage")?.value || "";
+  const paymentMethod = $("premiumPaymentMethod")?.value || "";
+  const transactionId = transactionInput?.value.trim() || "";
+
+  if (!packageId || !paymentMethod || !transactionId) {
+    showMessage(
+      "premiumPaymentStatus",
+      "Please select a plan, payment method and enter transaction ID.",
+      true
+    );
+    return;
+  }
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Submitting...";
+  }
+
+  try {
+    await submitPremiumPayment({
+      packageId,
+      paymentMethod,
+      transactionId
+    });
+
+    $("premiumPaymentForm").reset();
+    $("premiumPaymentForm").hidden = true;
+
+    showMessage(
+      "premiumPaymentStatus",
+      "Payment request submitted. Your request is pending admin verification."
+    );
+
+  } catch (error) {
+    console.error("Payment submission error:", error);
+
+    showMessage(
+      "premiumPaymentStatus",
+      error.message || "Payment request could not be submitted.",
+      true
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Submit Payment Request";
+    }
+  }
+});
+
 /* =========================================================
    ADMIN TAB NAVIGATION
 ========================================================= */
