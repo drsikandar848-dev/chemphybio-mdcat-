@@ -2851,6 +2851,7 @@ function showAnnouncementSplash() {
    Uploads selected Gallery images and saves content.
 ========================================================= */
 
+
 $("adminContentForm")?.addEventListener("submit", async event => {
   event.preventDefault();
 
@@ -2873,6 +2874,33 @@ $("adminContentForm")?.addEventListener("submit", async event => {
     const adFile =
       $("contentAdFile")?.files?.[0];
 
+    const teamSikandarFile =
+      $("teamSikandarPhoto")?.files?.[0];
+
+    const teamShakeelFile =
+      $("teamShakeelPhoto")?.files?.[0];
+
+    const teamAkhtarFile =
+      $("teamAkhtarPhoto")?.files?.[0];
+
+    // Validate all selected files (maximum 5 MB each)
+    const selectedFiles = [
+      adminPhotoFile,
+      posterFile,
+      adFile,
+      teamSikandarFile,
+      teamShakeelFile,
+      teamAkhtarFile
+    ].filter(Boolean);
+
+    for (const file of selectedFiles) {
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error(
+          file.name + " exceeds the 5 MB limit."
+        );
+      }
+    }
+
     if (adminPhotoFile) {
       showMessage("adminPhotoUploadStatus", "Uploading admin photo...");
     }
@@ -2883,6 +2911,18 @@ $("adminContentForm")?.addEventListener("submit", async event => {
 
     if (adFile) {
       showMessage("adUploadStatus", "Uploading advertisement...");
+    }
+
+    if (teamSikandarFile) {
+      showMessage("teamSikandarPhotoStatus", "Uploading photo...");
+    }
+
+    if (teamShakeelFile) {
+      showMessage("teamShakeelPhotoStatus", "Uploading photo...");
+    }
+
+    if (teamAkhtarFile) {
+      showMessage("teamAkhtarPhotoStatus", "Uploading photo...");
     }
 
     const adminPhoto = adminPhotoFile
@@ -2907,6 +2947,31 @@ $("adminContentForm")?.addEventListener("submit", async event => {
 
     if (adFile) {
       showMessage("adUploadStatus", "Advertisement uploaded.");
+    }
+
+    // Upload team photos only when a new file is selected
+    const teamSikandarPhoto = teamSikandarFile
+      ? await uploadImageToCloudinary(teamSikandarFile)
+      : siteContent.teamSikandarPhoto || "";
+
+    if (teamSikandarFile) {
+      showMessage("teamSikandarPhotoStatus", "Photo uploaded.");
+    }
+
+    const teamShakeelPhoto = teamShakeelFile
+      ? await uploadImageToCloudinary(teamShakeelFile)
+      : siteContent.teamShakeelPhoto || "";
+
+    if (teamShakeelFile) {
+      showMessage("teamShakeelPhotoStatus", "Photo uploaded.");
+    }
+
+    const teamAkhtarPhoto = teamAkhtarFile
+      ? await uploadImageToCloudinary(teamAkhtarFile)
+      : siteContent.teamAkhtarPhoto || "";
+
+    if (teamAkhtarFile) {
+      showMessage("teamAkhtarPhotoStatus", "Photo uploaded.");
     }
 
     const contentData = {
@@ -2938,6 +3003,11 @@ $("adminContentForm")?.addEventListener("submit", async event => {
 
       adImage,
 
+      // Team photo URLs
+      teamSikandarPhoto,
+      teamShakeelPhoto,
+      teamAkhtarPhoto,
+
       updatedAt: serverTimestamp()
     };
 
@@ -2954,15 +3024,24 @@ $("adminContentForm")?.addEventListener("submit", async event => {
 
     await loadSiteContent();
 
-    showMessage("adminStatus", "Website content saved successfully.");
+    showMessage(
+      "adminStatus",
+      "Website content and team photos saved successfully."
+    );
 
   } catch (error) {
     console.error("Content saving error:", error);
-    showMessage("adminStatus", error.message || "Content upload failed.", true);
+
+    showMessage(
+      "adminStatus",
+      error.message || "Content upload failed.",
+      true
+    );
+
   } finally {
     if (submitButton) {
       submitButton.disabled = false;
-      submitButton.textContent = "Save Content";
+      submitButton.textContent = "Publish Website Content";
     }
   }
 });
