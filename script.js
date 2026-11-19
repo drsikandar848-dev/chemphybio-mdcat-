@@ -2669,6 +2669,7 @@ async function uploadImageToCloudinary(file) {
    LOAD WEBSITE CONTENT
 ========================================================= */
 
+
 async function loadSiteContent() {
   try {
     const contentRef = doc(
@@ -2687,16 +2688,59 @@ async function loadSiteContent() {
       $("adminPublicName").textContent =
         siteContent.adminName || "CHEMPHYBIO MDCAT";
     }
-if ($("adminPublicPhoto")) {
-  const adminPhoto = siteContent.adminPhoto;
 
-  if (adminPhoto) {
-    $("adminPublicPhoto").src = adminPhoto;
-    $("adminPublicPhoto").hidden = false;
-  } else {
-    $("adminPublicPhoto").hidden = true;
-  }
-}
+    if ($("adminPublicPhoto")) {
+      const adminPhoto = siteContent.adminPhoto;
+
+      if (adminPhoto) {
+        $("adminPublicPhoto").src = adminPhoto;
+        $("adminPublicPhoto").hidden = false;
+      } else {
+        $("adminPublicPhoto").hidden = true;
+      }
+    }
+
+    // TEAM PHOTOS — PUBLIC DISPLAY
+    const teamPhotos = [
+      {
+        imageId: "teamSikandarPublicPhoto",
+        initialsId: "teamSikandarInitials",
+        url: siteContent.teamSikandarPhoto
+      },
+      {
+        imageId: "teamShakeelPublicPhoto",
+        initialsId: "teamShakeelInitials",
+        url: siteContent.teamShakeelPhoto
+      },
+      {
+        imageId: "teamAkhtarPublicPhoto",
+        initialsId: "teamAkhtarInitials",
+        url: siteContent.teamAkhtarPhoto
+      }
+    ];
+
+    teamPhotos.forEach(member => {
+      const image = $(member.imageId);
+      const initials = $(member.initialsId);
+
+      if (member.url && image) {
+        image.src = member.url;
+        image.hidden = false;
+
+        if (initials) {
+          initials.hidden = true;
+        }
+      } else {
+        if (image) {
+          image.hidden = true;
+          image.removeAttribute("src");
+        }
+
+        if (initials) {
+          initials.hidden = false;
+        }
+      }
+    });
 
     if ($("welcomeMessage")) {
       $("welcomeMessage").textContent =
@@ -2784,6 +2828,7 @@ if ($("adminPublicPhoto")) {
     console.error("Site content loading error:", error);
   }
 }
+
 
 /* =========================================================
    ANNOUNCEMENT SPLASH
